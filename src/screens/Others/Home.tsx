@@ -38,7 +38,7 @@ const cars = [
 const leaseData = [1, 2, 3, 4, 5];
 const { width } = Dimensions.get('window');
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}:any) => {
   const route = useRoute();
   console.log(route.name);
   
@@ -60,10 +60,12 @@ const HomeScreen = () => {
             <View>
               <Text style={styles.locationText}>HI, ROOHULLAH</Text>
             </View>
-            <Image
+            <TouchableOpacity onPress={()=> navigation.navigate("Profile")}>
+              <Image
               source={{ uri: 'https://i.pravatar.cc/150?img=3' }}
               style={styles.avatar}
             />
+            </TouchableOpacity>
           </View>
 
           <FlatList
@@ -118,13 +120,14 @@ const HomeScreen = () => {
               style={styles.searchInput}
               placeholder="Search vehicle..."
               placeholderTextColor="#888"
+              onPress={()=> navigation.navigate("searchCarCards")}
             />
           </View>
 
           {/* 🚘 Top Brands */}
           <View style={styles.sectionRow}>
             <Text style={styles.sectionTitle}>Top Brands</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={()=> navigation.navigate("brandCards")}>
               <Text style={styles.seeAll}>See All</Text>
             </TouchableOpacity>
           </View>
@@ -148,7 +151,7 @@ const HomeScreen = () => {
           {/* 🚗 Available Near You */}
           <View style={styles.sectionRow}>
             <Text style={styles.sectionTitle}>Available For You</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={()=> navigation.navigate("searchCarCards")}>
               <Text style={styles.seeAll}>See All</Text>
             </TouchableOpacity>
           </View>

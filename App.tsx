@@ -7,12 +7,12 @@ import { Text } from 'react-native';
 
 const App = () => {
   return (
-    <Provider store={store}>
+       <Provider store={store}>
       <PersistGate loading={<Text>Loading....</Text>} persistor={persistor}>
          <RootNavigator />
       </PersistGate>
-     
     </Provider>
+   
   );
 };
 // heyyyy

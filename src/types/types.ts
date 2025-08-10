@@ -6,4 +6,12 @@ export type RootStackParamList = {
   EditNameScreen: undefined;
   AgePickerScreen: undefined;
   GenderScreen: undefined;
+  brandCards: undefined;
+  searchCarCards: undefined;
+  passwordSecurity: undefined;
+  NotificationPreference: undefined;
+  faqs: undefined;
+  privacyPolicy: undefined;
+  report: undefined;
+  logout: undefined;
 };

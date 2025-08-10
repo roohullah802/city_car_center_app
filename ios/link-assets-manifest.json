@@ -1,0 +1,205 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assests/fonts/._TTHoves-Black.ttf",
+      "sha1": "06f2f7133d5e333eabe21c2e6f426f7da473d761"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-BlackItalic.ttf",
+      "sha1": "5a321de769db5e14a10e85aca7678fdebca2ab26"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-Bold.ttf",
+      "sha1": "01fb1c21f1338f676ad8e9a08e3b087d57eaf1c1"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-BoldItalic.ttf",
+      "sha1": "817626257c009c31312d1be5a9ebc59d17b00318"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-DemiBold.ttf",
+      "sha1": "9df069b543cbb325b7ab6eda74c9999092b9e7d7"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-DemiBoldItalic.ttf",
+      "sha1": "70ebf191562635ee92a911a5ecf58cc3c386d9a2"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-ExtraBold.ttf",
+      "sha1": "5939c76afc53cacee2d7ed526879952eb624d4e4"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-ExtraBoldItalic.ttf",
+      "sha1": "1206724e920b416aa7b7f4a25797caca606ea9d6"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-ExtraLight.ttf",
+      "sha1": "f26c060991e7ae09e330a65b90ba4dd94c15ea23"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-ExtraLightItalic.ttf",
+      "sha1": "7a3df301c38eb5756984c6f0d5ac27b6a6a58e83"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-Hairline.ttf",
+      "sha1": "3a30c4aa67d12ca0283cfef36356e6d85b2266bd"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-HairlineItalic.ttf",
+      "sha1": "df7fb05d08d5ed7540c4cc010c038ad2a6f11df5"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-Italic.ttf",
+      "sha1": "a9a01bc0387f8a762e80440ed03163af8c4f398d"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-Light.ttf",
+      "sha1": "af0f610060b6839214d09ca2bc00a5fc40661089"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-LightItalic.ttf",
+      "sha1": "061ac8cd3d13f4df4bd43cdf067173ee846c6fe8"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-Medium.ttf",
+      "sha1": "019614ea0aeb41ff2c71cf7ff3f6f6a1fa173191"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-MediumItalic.ttf",
+      "sha1": "36e7a3e684bb8fc6440510a6c5c5776c822a0eea"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-Regular.ttf",
+      "sha1": "e9ebbefb14bcef403cefbf8ce8f7e74d2e2084b7"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-Thin.ttf",
+      "sha1": "0cb24dcd2621d80ba91cbeea549789cd44eabf56"
+    },
+    {
+      "path": "src/assests/fonts/._TTHoves-ThinItalic.ttf",
+      "sha1": "37ee16eea066cda54ef577ee419d65853655b7a5"
+    },
+    {
+      "path": "src/assests/fonts/BebasNeue Bold.otf",
+      "sha1": "d17be829986eb8c6958551a63a51cd07a15a9cd4"
+    },
+    {
+      "path": "src/assests/fonts/BebasNeue Book.otf",
+      "sha1": "7ab386330992f48783979819811e64ba6a783799"
+    },
+    {
+      "path": "src/assests/fonts/BebasNeue Light.otf",
+      "sha1": "b45773a95d4d16661e8c98f91e98575de52bf75b"
+    },
+    {
+      "path": "src/assests/fonts/BebasNeue Regular.otf",
+      "sha1": "7a34b5b7df1b24bff15c652204a791302c0001b2"
+    },
+    {
+      "path": "src/assests/fonts/BebasNeue Thin.otf",
+      "sha1": "9acf6d628eadd2ac3ddada861548982829a86b8c"
+    },
+    {
+      "path": "src/assests/fonts/digital-7 (italic).ttf",
+      "sha1": "ba2f68370fa15d2b855d2bf6851d21b13b70dc87"
+    },
+    {
+      "path": "src/assests/fonts/digital-7 (mono italic).ttf",
+      "sha1": "b44189e1acc6432ffff0a905711354067d5d5f46"
+    },
+    {
+      "path": "src/assests/fonts/digital-7 (mono).ttf",
+      "sha1": "dabe381cb194d25d64f7f32d8925c1509b95ec08"
+    },
+    {
+      "path": "src/assests/fonts/digital-7.ttf",
+      "sha1": "7e1cf55ecbeaaa82465624ffb32b54e85453325c"
+    },
+    {
+      "path": "src/assests/fonts/readme.txt",
+      "sha1": "5ad0eceb913a915dc86e2a68b79e4b62a8a1e5e7"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-Black.ttf",
+      "sha1": "13acb954173b352a10d002ce610c7f7e18ae8571"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-BlackItalic.ttf",
+      "sha1": "7379d55500eb3363a6e2d5bb77500baf982cdc18"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-Bold.ttf",
+      "sha1": "3d35cc53cb9c99f262af4e34c1b5822c181f9654"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-BoldItalic.ttf",
+      "sha1": "c36195819d9c441d3ad66ea9e8352e2560f94c10"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-DemiBold.ttf",
+      "sha1": "ea136ce0b387e62bbe7d94703391bcb5980f12c3"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-DemiBoldItalic.ttf",
+      "sha1": "9fb0f79c4d32fde973b599f8f9b911f8a55bfed5"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-ExtraBold.ttf",
+      "sha1": "dc9d9f1047414a7877659b50e76dc3b1d035836d"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-ExtraBoldItalic.ttf",
+      "sha1": "8bcf3de888ce9200580f197a63b30c1b6ae8e7cc"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-ExtraLight.ttf",
+      "sha1": "da6f2aceedf627b4584d3181b8cd7e9cc469e050"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-ExtraLightItalic.ttf",
+      "sha1": "3e1f2df29a1db0656facf8aa33fb49a2f8a021bd"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-Hairline.ttf",
+      "sha1": "4a311c02d3f270fdf8cbf1ddd3db2ec65fd46072"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-HairlineItalic.ttf",
+      "sha1": "a56a7a85b3404265ea70ae48ef9ddfb048a519f0"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-Italic.ttf",
+      "sha1": "88fb82fcef7dcef35a6d0d7cff40551edba76ff3"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-Light.ttf",
+      "sha1": "981193cad0a1e7d07b78200f310db15e62a24839"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-LightItalic.ttf",
+      "sha1": "7b87f3e9d6ad2ceceb8ca27b81950af281509a14"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-Medium.ttf",
+      "sha1": "37b6eda2726e1bd100c42e57d415e6eec17af788"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-MediumItalic.ttf",
+      "sha1": "60724c1a5a36d52d2dcbe03d268d822d0260aee8"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-Regular.ttf",
+      "sha1": "b72fbb0af1496081dc7bd75d62df5d624415eb23"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-Thin.ttf",
+      "sha1": "2b6535ccb5827d550c93906065df13d3ddbb1dfb"
+    },
+    {
+      "path": "src/assests/fonts/TTHoves-ThinItalic.ttf",
+      "sha1": "c4f7f7bb2b05142db86b323772bbf985a6e18a64"
+    }
+  ]
+}

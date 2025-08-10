@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,6 +17,7 @@ const { width } = Dimensions.get('window');
 const Settings: React.FC = ({navigation}: any) => {
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor={"white"} barStyle={"dark-content"} />
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.header}>Settings</Text>
 
@@ -38,22 +40,22 @@ const Settings: React.FC = ({navigation}: any) => {
         {/* Profile & Settings Section */}
         <Text style={styles.sectionTitle}>Profile & Settings</Text>
         <View style={styles.card}>
-          <SettingsRow icon="person-outline" label="My Profile" editable />
-          <SettingsRow icon="lock-closed-outline" label="Password & Security" editable />
-          <SettingsRow icon="notifications-outline" label="Notification Preferences" editable />
+          <SettingsRow icon="person-outline" label="My Profile" editable onPress={()=> navigation.navigate("Profile")} />
+          <SettingsRow icon="lock-closed-outline" label="Password & Security" editable onPress={()=> navigation.navigate("passwordSecurity")}  />
+          <SettingsRow icon="notifications-outline" label="Notification Preferences" editable onPress={()=> navigation.navigate("NotificationPreference")}  />
         </View>
 
         {/* Helpful Desk Section */}
         <Text style={styles.sectionTitle}>Helpful Desk</Text>
         <View style={styles.card}>
-          <SettingsRow icon="help-circle-outline" label="FAQs" />
-          <SettingsRow icon="document-text-outline" label="Terms & Privacy Policy" />
-          <SettingsRow icon="chatbubble-ellipses-outline" label="Report Issue" />
+          <SettingsRow icon="help-circle-outline" label="FAQs" onPress={()=> navigation.navigate("faqs")} />
+          <SettingsRow icon="document-text-outline" label="Terms & Privacy Policy" onPress={()=> navigation.navigate("privacyPolicy")} />
+          <SettingsRow icon="chatbubble-ellipses-outline" label="Report Issue" onPress={()=> navigation.navigate("report")} />
         </View>
 
         {/* Logout */}
         <View style={styles.card}>
-          <SettingsRow icon="log-out-outline" label="Logout" />
+          <SettingsRow icon="log-out-outline" label="Logout" onPress={()=> navigation.navigate("logout")} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -64,10 +66,11 @@ type SettingsRowProps = {
   icon: string;
   label: string;
   editable?: boolean;
+  onPress: ()=> void;
 };
 
-const SettingsRow: React.FC<SettingsRowProps> = ({ icon, label, editable }) => (
-  <TouchableOpacity style={styles.row}>
+const SettingsRow: React.FC<SettingsRowProps> = ({ icon, label, editable, onPress }) => (
+  <TouchableOpacity style={styles.row} onPress={onPress}>
     <View style={styles.rowLeft}>
       <Icon name={icon} size={22} color="#444" />
       <Text style={styles.rowLabel} numberOfLines={1} ellipsizeMode="tail">

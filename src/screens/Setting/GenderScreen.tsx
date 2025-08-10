@@ -18,7 +18,7 @@ const genderIcons: { [key in Gender]: string } = {
   Other: 'transgender-outline',
 };
 
-const GenderSelectionScreen: React.FC = ({navigation}:any) => {
+const GenderSelectionScreen = ({navigation}:any) => {
   const [selectedGender, setSelectedGender] = useState<Gender>('Male');
 
   const renderGenderOption = (gender: Gender) => {
