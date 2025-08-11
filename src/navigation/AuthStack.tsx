@@ -11,15 +11,16 @@ import GenderScreen from '../screens/Setting/GenderScreen';
 import TopBrandsScreen from '../screens/Others/BrandCards';
 import SearchCarCards from '../screens/Others/SearchCarCards';
 import PasswordSecurity from '../screens/Setting/PasswordSecurity';
-import NotificationPreference from '../screens/Setting/NotificationPreference';
 import Faqs from '../screens/Setting/Faqs';
 import PrivatePolicy from '../screens/Setting/PrivatePolicy';
 import Report from '../screens/Setting/Report';
-import Logout from '../screens/Auth/Logout';
+import ChangePasswordScreen from '../screens/Setting/ChangePassword';
+import ExtendLeaseScreen from '../screens/Lease/ExtendLease';
+import CarLeaseCard from '../screens/Others/CarLeaseDetails';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const AuthStack = () => {
+const AuthStack: React.FC = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Tabs">{() => <AppTabs />}</Stack.Screen>
@@ -55,24 +56,22 @@ const AuthStack = () => {
         {props => <PasswordSecurity {...props} />}
       </Stack.Screen>
 
-       <Stack.Screen name="NotificationPreference">
-        {props => <NotificationPreference {...props} />}
+      <Stack.Screen name="faqs" component={Faqs} />
+
+       <Stack.Screen name="privacyPolicy" component={PrivatePolicy} />
+
+      <Stack.Screen name="report" component={Report} />
+
+       <Stack.Screen name="changePassword">
+        {props => <ChangePasswordScreen {...props} />}
       </Stack.Screen>
 
-      <Stack.Screen name="faqs">
-        {props => <Faqs {...props} />}
+       <Stack.Screen name="extendLease">
+        {props => <ExtendLeaseScreen {...props} />}
       </Stack.Screen>
 
-       <Stack.Screen name="privacyPolicy">
-        {props => <PrivatePolicy {...props} />}
-      </Stack.Screen>
-
-      <Stack.Screen name="report">
-        {props => <Report {...props} />}
-      </Stack.Screen>
-
-      <Stack.Screen name="logout">
-        {props => <Logout {...props} />}
+       <Stack.Screen name="carDetails">
+        {props => <CarLeaseCard {...props} />}
       </Stack.Screen>
     </Stack.Navigator>
   );

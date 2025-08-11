@@ -6,6 +6,7 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { FONTS } from '../../fonts/fonts';
 
 
 type Gender = 'Male' | 'Female' | 'Other';
@@ -18,7 +19,7 @@ const genderIcons: { [key in Gender]: string } = {
   Other: 'transgender-outline',
 };
 
-const GenderSelectionScreen = ({navigation}:any) => {
+const GenderSelectionScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const [selectedGender, setSelectedGender] = useState<Gender>('Male');
 
   const renderGenderOption = (gender: Gender) => {
@@ -79,11 +80,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: hp('2%'),
     color: '#000',
+    fontFamily:FONTS.bold
   },
   subtitle: {
     fontSize: wp('3.5%'),
     color: '#8A8A8A',
     marginBottom: hp('4%'),
+    fontFamily:FONTS.demiBold
   },
   optionsContainer: {
     marginBottom: hp('5%'),
@@ -105,6 +108,7 @@ const styles = StyleSheet.create({
     fontSize: wp('4%'),
     color: '#2E3A59',
     fontWeight: '500',
+    fontFamily:FONTS.demiBold
   },
   selectedText: {
     color: '#fff',
@@ -119,6 +123,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: wp('4.2%'),
     fontWeight: '600',
+    fontFamily:FONTS.demiBold
   },
   backButton: {
     position: 'relative',

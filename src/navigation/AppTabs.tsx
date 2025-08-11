@@ -11,7 +11,7 @@ type Obj = {
   name: string;
 };
 
-const AppTabs = () => {
+const AppTabs: React.FC = () => {
   const getTabIcons = (
     route: Obj,
     size: number,
@@ -48,7 +48,7 @@ const AppTabs = () => {
     >
       <Tab.Screen name="Home">{props => <Home {...props} />}</Tab.Screen>
 
-      <Tab.Screen name="Lease">{props => <AllLeases {...props} />}</Tab.Screen>
+      <Tab.Screen name="Lease">{props =>  <AllLeases {...props} />}</Tab.Screen>
 
       <Tab.Screen name="Settings">{props => <Setting {...props} />}</Tab.Screen>
     </Tab.Navigator>

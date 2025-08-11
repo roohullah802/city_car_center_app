@@ -2,16 +2,16 @@ import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
 interface Props {
-  image: any; // Can also be ImageSourcePropType
+  image: any;
 }
 
-const BrandCard: React.FC<Props> = ({ image }) => {
+const BrandCard: React.FC<Props> = React.memo(({ image }) => {
   return (
     <View style={styles.card}>
       <Image source={image} style={styles.image} resizeMode="contain" />
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   card: {

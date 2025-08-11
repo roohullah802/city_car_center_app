@@ -9,17 +9,18 @@ import {
   FlatList,
 } from 'react-native';
 import React from 'react';
+import { FONTS } from '../../fonts/fonts';
 
 
-const AllLeases = ({ navigation }: any) => {
-  const leases = [1, 2, 3,4,5]; // mock data
+const AllLeases: React.FC<{navigation: any}> = ({navigation}) => {
+  const leases = [1, 2, 3,4,5];
 
   return (
     <SafeAreaView style={styles.container}>
       {Platform.OS === 'ios' && (
         <View style={styles.statusBarBackground} />
       )}
-      <StatusBar backgroundColor="white" barStyle="dark-content" />
+      <StatusBar backgroundColor="transparent" barStyle="dark-content" />
 
       {leases.length > 0 ? (
         <View style={styles.contentContainer}>
@@ -35,7 +36,7 @@ const AllLeases = ({ navigation }: any) => {
               <View style={styles.leaseCard}>
                 <View style={styles.cardHeader}>
                   <Text style={styles.leaseTitle}>My Lease</Text>
-                  <TouchableOpacity style={styles.extendButton}>
+                  <TouchableOpacity style={styles.extendButton} onPress={()=> navigation.navigate("extendLease")}>
                     <Text style={styles.extendText}>Extend Lease</Text>
                   </TouchableOpacity>
                 </View>
@@ -88,20 +89,22 @@ const styles = StyleSheet.create({
   },
   topText: {
     fontSize: 24,
-    fontWeight: 'bold',
     marginBottom: 4,
+    fontFamily:FONTS.bold
+
   },
   topDescription: {
     color: 'gray',
     fontSize: 14,
     marginBottom: 10,
+    fontFamily:FONTS.demiBold
   },
   leaseCard: {
     width: '100%',
     backgroundColor: '#25262A',
     borderRadius: 15,
-    padding: 16,
-    marginBottom: 20,
+    padding: 13,
+    marginBottom: 15,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -110,27 +113,30 @@ const styles = StyleSheet.create({
   leaseTitle: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 12,
+    fontFamily:FONTS.demiBold
   },
   leaseModel: {
     color: '#ccc',
-    fontSize: 13,
+    fontSize: 12,
     marginTop: 16,
+    fontFamily:FONTS.demiBold
   },
   extendButton: {
     backgroundColor: '#fff',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     borderRadius: 20,
   },
   extendText: {
     fontWeight: '600',
-    fontSize: 12,
+    fontSize: 10,
+    fontFamily:FONTS.demiBold
   },
   timerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: 16,
+    marginTop: 8,
   },
   timerBlock: {
     flex:1,
@@ -138,16 +144,17 @@ const styles = StyleSheet.create({
   },
   ti: {
     color: '#fff',
-    fontSize: 32,
+    fontSize: 30,
     marginTop: 10,
     fontFamily: Platform.OS === 'ios' ? 'digital-7' : 'digital-7',
   },
   timerLabel: {
     flex:1,
     width:30,
-    fontSize: 13,
+    fontSize: 11,
     color: '#fff',
     marginTop: 4,
+    fontFamily:FONTS.demiBold
   },
   noLeaseContainer: {
     flex: 1,
@@ -159,5 +166,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'gray',
     textAlign: 'center',
+    fontFamily:FONTS.demiBold
   },
 });

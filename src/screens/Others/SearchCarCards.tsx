@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import BottomSheetFilterModal from './BottomSheetFilterModel';
 import { Modalize } from 'react-native-modalize';
+import { FONTS } from '../../fonts/fonts';
 
 const { width } = Dimensions.get('window');
 
@@ -45,25 +46,26 @@ const carData: Car[] = [
   },
 ];
 
-const SearchCarCards = ({ navigation }: any) => {
+const SearchCarCards:React.FC<{navigation: any}> = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const ref = useRef<Modalize>(null);
   const onApply = () => {
     ref.current?.open();
   };
 
-  const openFilterModal = ()=>{
+  const openFilterModal = () => {
     ref.current?.open();
-  }
+  };
 
-  const filteredCars = carData.filter(car =>
-    car.name.toLowerCase().includes(searchText.toLowerCase()),
-  );
-
+  const filteredCars = useMemo(() => {
+    return carData.filter(car =>
+      car.name.toLowerCase().includes(searchText.toLowerCase()),
+    );
+  }, [searchText]);
   const renderCarCard = ({ item }: { item: Car }) => (
     <View style={styles.card}>
-    <StatusBar backgroundColor={"white"} barStyle={"dark-content"} />
-        
+      <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
+
       <Image source={item.image} style={styles.image} resizeMode="contain" />
       <View style={styles.details}>
         <Text style={styles.name}>{item.name}</Text>
@@ -124,7 +126,7 @@ const SearchCarCards = ({ navigation }: any) => {
           </Text>
         </View>
       )}
-      <BottomSheetFilterModal ref={ref} onApply={onApply}  />
+      <BottomSheetFilterModal ref={ref} onApply={onApply} />
     </SafeAreaView>
   );
 };
@@ -145,6 +147,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginVertical: 10,
     color: '#111',
+    fontFamily:FONTS.bold
   },
   searchContainer: {
     flexDirection: 'row',
@@ -160,6 +163,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     fontSize: 16,
     color: '#333',
+    fontFamily:FONTS.demiBold
   },
   card: {
     backgroundColor: '#f9f9f9',
@@ -184,6 +188,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 6,
     color: '#000',
+    fontFamily:FONTS.demiBold
   },
   bottomRow: {
     flexDirection: 'row',
@@ -199,16 +204,19 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 14,
     color: '#555',
+    fontFamily:FONTS.demiBold
   },
   price: {
     fontSize: 15,
     fontWeight: '600',
     color: '#333',
+    fontFamily:FONTS.demiBold
   },
   noData: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    fontFamily:FONTS.demiBold
   },
 });
 

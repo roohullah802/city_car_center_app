@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,17 +7,23 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
-  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import LogoutModal from '../Auth/Logout';
+import { FONTS } from '../../fonts/fonts';
 
 const { width } = Dimensions.get('window');
 
-const Settings: React.FC = ({navigation}: any) => {
+const Settings: React.FC<{navigation: any}> = ({navigation}) => {
+  const [isVisible, setIsVisible] = useState<boolean>(false);
+
+  const handleVisible = ()=>{
+    setIsVisible(prev => !prev)
+  }
+    
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={"white"} barStyle={"dark-content"} />
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.header}>Settings</Text>
 
@@ -42,7 +48,6 @@ const Settings: React.FC = ({navigation}: any) => {
         <View style={styles.card}>
           <SettingsRow icon="person-outline" label="My Profile" editable onPress={()=> navigation.navigate("Profile")} />
           <SettingsRow icon="lock-closed-outline" label="Password & Security" editable onPress={()=> navigation.navigate("passwordSecurity")}  />
-          <SettingsRow icon="notifications-outline" label="Notification Preferences" editable onPress={()=> navigation.navigate("NotificationPreference")}  />
         </View>
 
         {/* Helpful Desk Section */}
@@ -55,9 +60,10 @@ const Settings: React.FC = ({navigation}: any) => {
 
         {/* Logout */}
         <View style={styles.card}>
-          <SettingsRow icon="log-out-outline" label="Logout" onPress={()=> navigation.navigate("logout")} />
+          <SettingsRow icon="log-out-outline" label="Logout" onPress={handleVisible} />
         </View>
       </ScrollView>
+      <LogoutModal visible={isVisible} onClose={()=> setIsVisible(false)} />
     </SafeAreaView>
   );
 };
@@ -95,6 +101,7 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: width * 0.06,
+    fontFamily:FONTS.bold,
     fontWeight: 'bold',
     marginVertical: width * 0.04,
     color: '#111827',
@@ -124,21 +131,25 @@ const styles = StyleSheet.create({
     fontSize: width * 0.045,
     fontWeight: '600',
     color: '#111827',
+    fontFamily:FONTS.bold
   },
   email: {
     fontSize: width * 0.035,
     color: '#6B7280',
+    fontFamily:FONTS.demiBold
   },
   editBtn: {
     fontSize: width * 0.035,
     color: '#2563EB',
     fontWeight: '500',
+    fontFamily:FONTS.demiBold
   },
   sectionTitle: {
     fontSize: width * 0.036,
     color: '#9CA3AF',
     marginBottom: width * 0.02,
     marginTop: width * 0.04,
+    fontFamily:FONTS.demiBold
   },
   card: {
     backgroundColor: '#fff',
@@ -170,10 +181,12 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginLeft: width * 0.03,
     flexShrink: 1,
+    fontFamily:FONTS.demiBold
   },
   editText: {
     fontSize: width * 0.035,
     color: '#2563EB',
     fontWeight: '500',
+    fontFamily:FONTS.demiBold
   },
 });

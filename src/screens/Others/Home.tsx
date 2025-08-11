@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,8 @@ import {
   Platform,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useRoute } from '@react-navigation/native';
+import { useIsFocused, useRoute } from '@react-navigation/native';
+import { FONTS } from '../../fonts/fonts';
 
 const brands = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -38,19 +39,74 @@ const cars = [
 const leaseData = [1, 2, 3, 4, 5];
 const { width } = Dimensions.get('window');
 
-const HomeScreen = ({navigation}:any) => {
+const HomeScreen: React.FC<{navigation: any}> = ({ navigation }) => {
   const route = useRoute();
-  console.log(route.name);
-  
+  const isFocused = useIsFocused();
+
+  const leaseDataCallBack = useCallback(() => {
+    return (
+      <View style={styles.leaseCard}>
+        <View style={styles.view}>
+          <Text style={styles.leaseTitle}>My Lease</Text>
+          <TouchableOpacity style={styles.extendButton} onPress={()=> navigation.navigate("extendLease")}>
+            <Text style={styles.extendText}>Extend Lease</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.leaseModel}>Porsche 2019 - 911 Carrera S</Text>
+        {/* <Text style={styles.timer}>my timer</Text> */}
+        <View style={styles.timerContainer}>
+          {[
+            { value: '00', label: 'days' },
+            { value: '22', label: 'Hours' },
+            { value: '33', label: 'Mins' },
+            { value: '44', label: 'Secs' },
+          ].map((item, index) => (
+            <View key={index} style={styles.timerBlock}>
+              <Text style={styles.ti}>{item.value}</Text>
+              <Text style={styles.timerLabel}>{item.label}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    )
+  },[navigation]);
+
+  const brandsCallBack = useCallback(() => {
+    return (
+      <View style={styles.brandCard}>
+        <Image
+          style={styles.brandImage}
+          source={require('../../assests/bmwlogo.jpeg')}
+        />
+      </View>
+    );
+  }, []);
+
+  const carsCallBack = useCallback((item: any)=>{
+    return(
+     <TouchableOpacity onPress={()=> navigation.navigate("carDetails")}>
+       <View style={styles.carCard}>
+                <View style={styles.carImageSetup}>
+                  <Image source={item.image} style={styles.carThumb} />
+                </View>
+                <Text style={styles.carName}>{item.name}</Text>
+                <View style={styles.ratingContainer}>
+                  <Text style={styles.carRating}>⭐ {item.rating}</Text>
+                  <Text style={styles.carPrice}>{item.price}/day</Text>
+                </View>
+              </View>
+     </TouchableOpacity>
+    )
+  },[navigation])
+
   return (
     <ScrollView style={styles.container}>
       {Platform.OS === 'ios' && route.name === 'Home' && (
         <View style={{ height: 44, backgroundColor: 'black' }} />
       )}
-      <StatusBar
-        backgroundColor={route.name === 'Home' ? 'black' : 'white'}
-        barStyle={route.name === 'Home' ? 'light-content' : 'dark-content'}
-      />
+      {isFocused && (
+        <StatusBar backgroundColor="black" barStyle="light-content" />
+      )}
 
       <StatusBar backgroundColor={'black'} barStyle="light-content" />
       {/*  Top Black Header */}
@@ -60,44 +116,18 @@ const HomeScreen = ({navigation}:any) => {
             <View>
               <Text style={styles.locationText}>HI, ROOHULLAH</Text>
             </View>
-            <TouchableOpacity onPress={()=> navigation.navigate("Profile")}>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
               <Image
-              source={{ uri: 'https://i.pravatar.cc/150?img=3' }}
-              style={styles.avatar}
-            />
+                source={{ uri: 'https://i.pravatar.cc/150?img=3' }}
+                style={styles.avatar}
+              />
             </TouchableOpacity>
           </View>
 
           <FlatList
             data={leaseData}
             keyExtractor={item => item.toString()}
-            renderItem={() => (
-              <View style={styles.leaseCard}>
-                <View style={styles.view}>
-                  <Text style={styles.leaseTitle}>My Lease</Text>
-                  <TouchableOpacity style={styles.extendButton}>
-                    <Text style={styles.extendText}>Extend Lease</Text>
-                  </TouchableOpacity>
-                </View>
-                <Text style={styles.leaseModel}>
-                  Porsche 2019 - 911 Carrera S
-                </Text>
-                {/* <Text style={styles.timer}>my timer</Text> */}
-                <View style={styles.timerContainer}>
-                  {[
-                    { value: '00', label: 'day' },
-                    { value: '22', label: 'hr' },
-                    { value: '33', label: 'min' },
-                    { value: '44', label: 'sec' },
-                  ].map((item, index) => (
-                    <View key={index} style={styles.timerBlock}>
-                      <Text style={styles.ti}>{item.value}</Text>
-                      <Text style={styles.timerLabel}>{item.label}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            )}
+            renderItem={leaseDataCallBack}
             horizontal={true}
             ItemSeparatorComponent={() => <View style={{ width: 20 }} />}
           />
@@ -120,14 +150,14 @@ const HomeScreen = ({navigation}:any) => {
               style={styles.searchInput}
               placeholder="Search vehicle..."
               placeholderTextColor="#888"
-              onPress={()=> navigation.navigate("searchCarCards")}
+              onPress={() => navigation.navigate('searchCarCards')}
             />
           </View>
 
           {/* 🚘 Top Brands */}
           <View style={styles.sectionRow}>
             <Text style={styles.sectionTitle}>Top Brands</Text>
-            <TouchableOpacity onPress={()=> navigation.navigate("brandCards")}>
+            <TouchableOpacity onPress={() => navigation.navigate('brandCards')}>
               <Text style={styles.seeAll}>See All</Text>
             </TouchableOpacity>
           </View>
@@ -136,14 +166,7 @@ const HomeScreen = ({navigation}:any) => {
             horizontal={true}
             data={brands.slice(0, 10)}
             keyExtractor={item => item.toString()}
-            renderItem={() => (
-              <View style={styles.brandCard}>
-                <Image
-                  style={styles.brandImage}
-                  source={require('../../assests/bmwlogo.jpeg')}
-                />
-              </View>
-            )}
+            renderItem={brandsCallBack}
             ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
             showsHorizontalScrollIndicator={false}
           />
@@ -151,7 +174,9 @@ const HomeScreen = ({navigation}:any) => {
           {/* 🚗 Available Near You */}
           <View style={styles.sectionRow}>
             <Text style={styles.sectionTitle}>Available For You</Text>
-            <TouchableOpacity onPress={()=> navigation.navigate("searchCarCards")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('searchCarCards')}
+            >
               <Text style={styles.seeAll}>See All</Text>
             </TouchableOpacity>
           </View>
@@ -159,18 +184,7 @@ const HomeScreen = ({navigation}:any) => {
             horizontal={true}
             data={cars.slice(0, 10)}
             keyExtractor={item => item.name.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.carCard}>
-                <View style={styles.carImageSetup}>
-                  <Image source={item.image} style={styles.carThumb} />
-                </View>
-                <Text style={styles.carName}>{item.name}</Text>
-                <View style={styles.ratingContainer}>
-                  <Text style={styles.carRating}>⭐ {item.rating}</Text>
-                  <Text style={styles.carPrice}>{item.price}/day</Text>
-                </View>
-              </View>
-            )}
+            renderItem={({ item }) => carsCallBack(item)}
             showsHorizontalScrollIndicator={false}
           />
         </View>
@@ -210,6 +224,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginTop: 3,
+    fontFamily:FONTS.demiBold
   },
   avatar: {
     width: 36,
@@ -220,43 +235,32 @@ const styles = StyleSheet.create({
     width: width - 40,
     backgroundColor: '#25262A',
     borderRadius: 15,
-    padding: 15,
+    padding: 13,
     marginTop: 20,
-    marginBottom: 40,
+    marginBottom: 60,
   },
   leaseTitle: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 12,
+    fontFamily:FONTS.demiBold
   },
   leaseModel: {
     color: '#ccc',
-    fontSize: 13,
-    marginTop: 20,
-  },
-  timer: {
-    color: '#fff',
-    fontSize: 18,
-    marginTop: 10,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-    fontFamily: 'digital-7 (italic)',
-  },
-  carImage: {
-    width: '100%',
-    marginTop: 10,
-    resizeMode: 'contain',
+    fontSize: 12,
+    marginTop: 15,
+    fontFamily:FONTS.demiBold
   },
   extendButton: {
     alignSelf: 'flex-end',
     backgroundColor: '#fff',
-    paddingVertical: 6,
+    paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 20,
   },
   extendText: {
     fontWeight: '600',
-    fontSize: 12,
+    fontSize: 10,
   },
   mainSection: {
     backgroundColor: '#fff',
@@ -286,11 +290,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
+   fontFamily:FONTS.bold
   },
   seeAll: {
     width: 80,
     fontSize: 14,
     color: '#007bff',
+    fontFamily:FONTS.demiBold
   },
   brandCard: {
     justifyContent: 'center',
@@ -327,9 +333,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   carName: {
-    fontWeight: '600',
-    fontSize: 14,
-    marginTop: 10,
+    fontSize: 13,
+    marginTop: 9,
+    fontFamily:FONTS.demiBold,
+    color:"#575757ff"
   },
   carPrice: {
     width: 80,
@@ -351,9 +358,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
+    paddingVertical: 3,
+    borderRadius: 50,
     boxShadow: '0px 1px 5px 0px #ccc',
+    backgroundColor: 'white',
+    marginTop: -40,
   },
 
   searchIcon: {
@@ -376,12 +385,12 @@ const styles = StyleSheet.create({
   },
   ti: {
     color: 'white',
-    fontSize: 35,
-    marginTop: 10,
-    fontFamily: 'digital-7 (italic)',
+    fontSize: 30,
+    marginTop: 8,
+    fontFamily: 'BebasNeue Regular',
   },
   timerLabel: {
-    fontSize: 13,
+    fontSize: 11,
     color: '#fff',
     marginTop: 4,
     marginLeft: 5,

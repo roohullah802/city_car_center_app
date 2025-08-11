@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import BrandCard from '../../components/BrandCard';
 import Icon from 'react-native-vector-icons/Ionicons';
-
+import { FONTS } from '../../fonts/fonts';
 
 const brandData: { name: string; image: ImageSourcePropType }[] = [
   { name: 'BMW', image: require('../../assests/bmwlogo.jpeg') },
@@ -22,31 +22,39 @@ const brandData: { name: string; image: ImageSourcePropType }[] = [
   { name: 'Toyota', image: require('../../assests/bmwlogo.jpeg') },
   { name: 'Subaru', image: require('../../assests/bmwlogo.jpeg') },
   { name: 'Audi', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Jeep', image: require('../../assests/bmwlogo.jpeg')  },
+  { name: 'Jeep', image: require('../../assests/bmwlogo.jpeg') },
   { name: 'Porsche', image: require('../../assests/bmwlogo.jpeg') },
   { name: 'Ferrari', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Lamborghini', image:require('../../assests/bmwlogo.jpeg') },
+  { name: 'Lamborghini', image: require('../../assests/bmwlogo.jpeg') },
   { name: 'Nissan', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Bugatti', image:require('../../assests/bmwlogo.jpeg')  },
-  { name: 'Kia', image:require('../../assests/bmwlogo.jpeg') },
+  { name: 'Bugatti', image: require('../../assests/bmwlogo.jpeg') },
+  { name: 'Kia', image: require('../../assests/bmwlogo.jpeg') },
   { name: 'Mercedes', image: require('../../assests/bmwlogo.jpeg') },
   { name: 'Volkswagen', image: require('../../assests/bmwlogo.jpeg') },
 ];
 
-const TopBrandsScreen = ({navigation}:any) => {
+const TopBrandsScreen: React.FC<{navigation: any}> = ({ navigation }) => {
   const [search, setSearch] = useState('');
 
-  const filteredBrands = brandData.filter((brand) =>
-    brand.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Filter only when search changes
+  const filteredBrands = useMemo(() => {
+    return brandData.filter((brand) =>
+      brand.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search]);
+
+  // Stable renderItem so FlatList doesn't re-render unnecessarily
+  const renderBrand = useCallback(({ item }: { item: typeof brandData[0] }) => {
+    return <BrandCard image={item.image} />;
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-    <StatusBar backgroundColor={"white"} barStyle={"dark-content"} />
-        
+      <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={()=> navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>Top Brands</Text>
@@ -65,41 +73,45 @@ const TopBrandsScreen = ({navigation}:any) => {
       </View>
 
       {/* Grid */}
-     {brandData.length > 0 ? ( <FlatList
-        data={filteredBrands}
-        numColumns={4}
-        keyExtractor={(item) => item.name}
-        contentContainerStyle={styles.grid}
-        renderItem={({ item }) => <BrandCard image={item.image} />}
-        showsVerticalScrollIndicator={false}
-      />) : (
+      {filteredBrands.length > 0 ? (
+        <FlatList
+          data={filteredBrands}
+          numColumns={4}
+          keyExtractor={(item) => item.name}
+          contentContainerStyle={styles.grid}
+          renderItem={renderBrand}
+          showsVerticalScrollIndicator={false}
+        />
+      ) : (
         <View style={styles.noData}>
-            <Icon name="car-sport" size={30} color="#000" />
-            <Text style={{width: 150}}>No Results Found</Text>
-            <Text style={{fontSize:12, color:"gray", width:300}}>`We currently have no Search Results for “{search}”. Please try with different search text`</Text>
+          <Icon name="car-sport" size={30} color="#000" />
+          <Text style={{ width: 150 }}>No Results Found</Text>
+          <Text
+            style={{
+              fontSize: 12,
+              color: 'gray',
+              width: 300,
+              textAlign: 'center',
+            }}
+          >
+            We currently have no Search Results for “{search}”. Please try with
+            different search text.
+          </Text>
         </View>
-      ) }
+      )}
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-  },
+  container: { flex: 1, backgroundColor: '#fff', paddingHorizontal: 16 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 16,
     gap: 12,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#0F1E2D',
-  },
+  title: { fontSize: 22, fontWeight: 'bold', color: '#0F1E2D', fontFamily:FONTS.bold },
   searchBox: {
     flexDirection: 'row',
     backgroundColor: '#F2F2F2',
@@ -109,23 +121,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     height: 44,
   },
-  searchIcon: {
-    marginRight: 8,
-  },
-  input: {
-    flex: 1,
-    fontSize: 14,
-    color: '#333',
-  },
-  grid: {
-    paddingBottom: 16,
-    justifyContent: 'center',
-  },
-  noData:{
-    flex:1,
-    justifyContent: "center",
-    alignItems:"center"
-  }
+  searchIcon: { marginRight: 8 },
+  input: { flex: 1, fontSize: 14, color: '#333', fontFamily:FONTS.demiBold },
+  grid: { paddingBottom: 16, justifyContent: 'center' },
+  noData: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });
 
 export default TopBrandsScreen;

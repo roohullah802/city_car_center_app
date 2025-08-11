@@ -11,9 +11,10 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RFValue } from 'react-native-responsive-fontsize';
+import { FONTS } from '../../fonts/fonts';
 const { width } = Dimensions.get('window');
 
-const ProfileScreen = ({ navigation }: any) => {
+const ProfileScreen: React.FC<{navigation: any}> = ({ navigation }) => {
   
 
   const imagePickerHandler = async () => {
@@ -144,12 +145,14 @@ const styles = StyleSheet.create({
     color: '#072A3F',
     textAlign: 'center',
     marginTop: 40,
+    fontFamily:FONTS.bold
   },
   subtitle: {
     fontSize: RFValue(14),
     color: '#666',
     textAlign: 'center',
     marginBottom: 20,
+    fontFamily:FONTS.demiBold
   },
   avatarWrapper: {
     alignSelf: 'center',
@@ -178,6 +181,7 @@ const styles = StyleSheet.create({
     fontSize: RFValue(13),
     color: '#555',
     marginBottom: 6,
+    fontFamily:FONTS.demiBold
   },
   valueRow: {
     flexDirection: 'row',
@@ -192,6 +196,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: RFValue(14),
     color: '#000',
+    fontFamily:FONTS.demiBold
   },
   saveButton: {
     backgroundColor: '#000',
@@ -204,6 +209,7 @@ const styles = StyleSheet.create({
     fontSize: RFValue(16),
     textAlign: 'center',
     fontWeight: '600',
+    fontFamily:FONTS.bold
   },
 });
 

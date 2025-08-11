@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,29 +6,48 @@ import {
   Modal,
   TouchableOpacity,
   Dimensions,
+  TextInput,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { FONTS } from '../../fonts/fonts';
 
 const { width } = Dimensions.get('window');
 
-interface LogoutModalProps {
+interface Enable2FAModalProps {
   visible: boolean;
   onClose: () => void;
+  onEnable: (password: string) => void;
+  twoFactorEnabled: boolean;
 }
 
-const LogoutModal: React.FC<LogoutModalProps> = ({
+const Enable2FAModal: React.FC<Enable2FAModalProps> = ({
   visible,
   onClose,
+  onEnable,
+  twoFactorEnabled
 }) => {
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
+  const toggleShowPassword = useCallback(
+    () => setShowPassword(prev => !prev),
+    []
+  );
+
+  const isEnableDisabled = useMemo(() => password.trim().length < 6, [password]);
+
+  const handleEnable = useCallback(() => {
+    if (!isEnableDisabled) {
+      onEnable(password);
+    }
+  }, [password, isEnableDisabled, onEnable]);
 
   return (
     <Modal
       animationType="slide"
       transparent
       visible={visible}
-      onRequestClose={onClose}
+      onRequestClose={onClose} 
     >
       <View style={styles.overlay}>
         <View style={styles.modalBox}>
@@ -38,16 +57,41 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
           </View>
 
           {/* Title */}
-          <Text style={styles.title}>Log Out</Text>
+          <Text style={styles.title}>Enable 2FA</Text>
           <Text style={styles.subtitle}>
-            Are you sure you want to log out? You’ll need to sign in again to
-            access your account.
+            Confirm your password to enable two-factor authentication.
           </Text>
+
+          {/* Password Input */}
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={toggleShowPassword}>
+              <Icon
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={20}
+                color="#999"
+              />
+            </TouchableOpacity>
+          </View>
 
           {/* Buttons */}
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={[styles.enableBtn]}>
-              <Text style={styles.enableText}>{'Logout'}</Text>
+            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.enableBtn, isEnableDisabled && { opacity: 0.5 }]}
+              onPress={handleEnable}
+              disabled={isEnableDisabled}
+            >
+              <Text style={styles.enableText}>{twoFactorEnabled ? "Enable" : "Disable"}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -79,6 +123,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: width * 0.05,
+    fontWeight: 'bold',
     color: '#0F1E2D',
     marginBottom: width * 0.02,
     fontFamily:FONTS.bold
@@ -114,6 +159,18 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: width * 0.04,
   },
+  cancelBtn: {
+    flex: 1,
+    paddingVertical: width * 0.035,
+    borderRadius: 8,
+    backgroundColor: '#F2F2F2',
+    alignItems: 'center',
+  },
+  cancelText: {
+    color: '#000',
+    fontWeight: '500',
+    fontFamily:FONTS.demiBold
+  },
   enableBtn: {
     flex: 1,
     paddingVertical: width * 0.035,
@@ -128,4 +185,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LogoutModal;
+export default Enable2FAModal;

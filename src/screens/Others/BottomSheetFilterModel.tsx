@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { Modalize } from 'react-native-modalize';
 import Slider from '@react-native-community/slider';
+import { FONTS } from '../../fonts/fonts';
 
 
 interface FilterModalProps {
@@ -127,17 +128,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700',
+    fontFamily:FONTS.bold
   },
   clearText: {
     width: 100,
     color: '#007AFF',
     fontSize: 14,
+    fontFamily:FONTS.demiBold
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
     marginTop: 10,
+    fontFamily:FONTS.demiBold
   },
   brandContainer: {
     flexDirection: 'row',
@@ -157,10 +161,12 @@ const styles = StyleSheet.create({
   brandText: {
     fontSize: 14,
     color: '#333',
+    fontFamily:FONTS.demiBold
   },
   brandTextSelected: {
     color: '#fff',
     fontWeight: '600',
+    fontFamily:FONTS.demiBold
   },
   sliderRow: {
     flexDirection: 'row',
@@ -170,12 +176,14 @@ const styles = StyleSheet.create({
   sliderValue: {
     fontSize: 12,
     color: '#555',
+    fontFamily:FONTS.demiBold
   },
   sliderCenterLabel: {
     textAlign: 'center',
     fontSize: 12,
     marginBottom: 20,
     color: 'gray',
+    fontFamily:FONTS.demiBold
   },
   searchButton: {
     backgroundColor: '#000',
@@ -189,6 +197,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     fontWeight: '600',
+    fontFamily:FONTS.demiBold
   },
 });
 

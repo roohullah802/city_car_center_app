@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import AuthStack from './AuthStack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-const RootNavigator = () => {
+const RootNavigator: React.FC = () => {
   return (
     <GestureHandlerRootView>
  <NavigationContainer>

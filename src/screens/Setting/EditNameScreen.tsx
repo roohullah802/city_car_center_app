@@ -13,9 +13,10 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { FONTS } from '../../fonts/fonts';
 
 
-const EditNameScreen = ({navigation}: any) => {
+const EditNameScreen: React.FC<{navigation: any}> = ({navigation}) => {
   const insets = useSafeAreaInsets();
 
   return (
@@ -66,11 +67,13 @@ const styles = StyleSheet.create({
     fontSize: wp('5.5%'),
     fontWeight: 'bold',
     marginBottom: hp('0.5%'),
+    fontFamily:FONTS.demiBold
   },
   subtitle: {
     fontSize: wp('3.5%'),
     color: '#888',
     marginBottom: hp('3%'),
+    fontFamily:FONTS.demiBold
   },
   inputBox: {
     backgroundColor: '#f9f9f9',
@@ -84,7 +87,8 @@ const styles = StyleSheet.create({
   textInput: {
     fontSize: wp('4.5%'),
     fontWeight: '600',
-    color: '#003087', // Dark blue color
+    color: '#003087',
+    fontFamily:FONTS.demiBold
   },
   saveButton: {
     marginTop: 'auto',
@@ -97,6 +101,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: wp('4.5%'),
     fontWeight: '500',
+    fontFamily:FONTS.demiBold
   },
    backButton: {
     marginBottom:70,

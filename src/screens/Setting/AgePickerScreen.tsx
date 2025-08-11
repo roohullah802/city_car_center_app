@@ -12,13 +12,14 @@ import {
   Platform
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { FONTS } from '../../fonts/fonts';
 
 
 
 const { width } = Dimensions.get('window');
 const ITEM_WIDTH = 220;
 
-const SinglePageProfile = ({navigation}:any) => {
+const SinglePageProfile: React.FC<{navigation: any}> = ({navigation}) => {
   const [selectedAge, setSelectedAge] = useState<number>(21);
   const ages = Array.from({ length: 100 }, (_, i) => i + 1);
   const listRef = useRef<FlatList>(null);
@@ -95,9 +96,9 @@ const styles = StyleSheet.create({
   },
   questionText: {
     fontSize: width * 0.06,
-    fontWeight: 'bold',
     textAlign: 'center',
     marginVertical: 16,
+    fontFamily:FONTS.bold
   },
   listContent: {
     paddingHorizontal: width * 0.15,
@@ -136,6 +137,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    fontFamily:FONTS.demiBold
   },
    backButton: {
       marginBottom:70,

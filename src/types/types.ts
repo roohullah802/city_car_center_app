@@ -14,4 +14,7 @@ export type RootStackParamList = {
   privacyPolicy: undefined;
   report: undefined;
   logout: undefined;
+  changePassword: undefined;
+  extendLease: undefined;
+  carDetails: undefined;
 };
