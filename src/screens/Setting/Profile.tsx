@@ -12,14 +12,13 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
+
 const { width } = Dimensions.get('window');
 
-const ProfileScreen: React.FC<{navigation: any}> = ({ navigation }) => {
-  
-
+const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const imagePickerHandler = async () => {
-  
-}
+    // Placeholder for future image picker logic
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -28,7 +27,7 @@ const ProfileScreen: React.FC<{navigation: any}> = ({ navigation }) => {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="chevron-back" size={24} color="#000" />
+        <Icon name="chevron-back" size={RFValue(22)} color="#000" />
       </TouchableOpacity>
 
       <Text style={styles.title}>My Profile</Text>
@@ -40,8 +39,8 @@ const ProfileScreen: React.FC<{navigation: any}> = ({ navigation }) => {
           source={{ uri: 'https://i.imgur.com/4sX3gEo.png' }}
           style={styles.avatar}
         />
-        <TouchableOpacity style={styles.cameraIcon}>
-          <Icon name="camera" size={14} color="#fff" />
+        <TouchableOpacity style={styles.cameraIcon} onPress={imagePickerHandler}>
+          <Icon name="camera" size={RFValue(14)} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -90,7 +89,7 @@ const LabelAndValue = ({
     <Text style={styles.label}>{label}</Text>
     <TouchableOpacity style={styles.valueRow} onPress={onPress}>
       <Text style={styles.value}>{value}</Text>
-      <Icon name="chevron-forward" size={18} color="#000" />
+      <Icon name="chevron-forward" size={RFValue(18)} color="#000" />
     </TouchableOpacity>
   </View>
 );
@@ -109,34 +108,30 @@ const FileItem = ({
     <TouchableOpacity style={styles.valueRow} onPress={onPress}>
       <Icon
         name="document-text-outline"
-        size={18}
+        size={RFValue(18)}
         color="red"
         style={{ marginRight: 8 }}
       />
       <Text style={styles.value} numberOfLines={1} ellipsizeMode="tail">
         {fileName}
       </Text>
-      <Icon
-        name="chevron-forward"
-        size={18}
-        color="#000"
-        style={{ marginLeft: 8 }}
-      />
+      <Icon name="chevron-forward" size={RFValue(18)} color="#000" style={{ marginLeft: 8 }} />
     </TouchableOpacity>
   </View>
 );
 
+// Responsive Styles
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    paddingBottom: 40,
+    padding: width * 0.05,
+    paddingBottom: RFValue(40),
     backgroundColor: '#fff',
     flexGrow: 1,
   },
   backButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 20,
-    left: 20,
+    top: Platform.OS === 'ios' ? RFValue(50) : RFValue(20),
+    left: RFValue(20),
     zIndex: 2,
   },
   title: {
@@ -144,19 +139,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#072A3F',
     textAlign: 'center',
-    marginTop: 40,
-    fontFamily:FONTS.bold
+    marginTop: RFValue(40),
+    fontFamily: FONTS.bold,
   },
   subtitle: {
-    fontSize: RFValue(14),
+    fontSize: RFValue(13),
     color: '#666',
     textAlign: 'center',
-    marginBottom: 20,
-    fontFamily:FONTS.demiBold
+    marginBottom: RFValue(20),
+    fontFamily: FONTS.demiBold,
   },
   avatarWrapper: {
     alignSelf: 'center',
-    marginTop: 10,
+    marginTop: RFValue(10),
   },
   avatar: {
     width: width * 0.3,
@@ -168,25 +163,25 @@ const styles = StyleSheet.create({
     bottom: 5,
     right: 5,
     backgroundColor: '#000',
-    padding: 6,
+    padding: RFValue(6),
     borderRadius: 20,
   },
   section: {
-    marginTop: 30,
+    marginTop: RFValue(30),
   },
   item: {
-    marginBottom: 20,
+    marginBottom: RFValue(20),
   },
   label: {
-    fontSize: RFValue(13),
+    fontSize: RFValue(12),
     color: '#555',
-    marginBottom: 6,
-    fontFamily:FONTS.demiBold
+    marginBottom: RFValue(6),
+    fontFamily: FONTS.demiBold,
   },
   valueRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
+    padding: RFValue(14),
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#ddd',
@@ -194,22 +189,22 @@ const styles = StyleSheet.create({
   },
   value: {
     flex: 1,
-    fontSize: RFValue(14),
+    fontSize: RFValue(13),
     color: '#000',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   saveButton: {
     backgroundColor: '#000',
-    paddingVertical: 16,
+    paddingVertical: RFValue(13),
     borderRadius: 12,
-    marginTop: 30,
+    marginTop: RFValue(30),
   },
   saveButtonText: {
     color: '#fff',
-    fontSize: RFValue(16),
+    fontSize: RFValue(14),
     textAlign: 'center',
     fontWeight: '600',
-    fontFamily:FONTS.bold
+    fontFamily: FONTS.bold,
   },
 });
 

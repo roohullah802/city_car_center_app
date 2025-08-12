@@ -1,13 +1,19 @@
 import React from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View, Dimensions } from 'react-native';
 
 interface Props {
   image: any;
+  size?: number;
 }
 
-const BrandCard: React.FC<Props> = React.memo(({ image }) => {
+const { width } = Dimensions.get('window');
+const NUM_COLUMNS = 4;
+const CARD_MARGIN = 8;
+const CARD_SIZE = (width - CARD_MARGIN * 2 * NUM_COLUMNS - 32) / NUM_COLUMNS;
+
+const BrandCard: React.FC<Props> = React.memo(({ image, size = CARD_SIZE }) => {
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { width: size, height: size, margin: CARD_MARGIN }]}>
       <Image source={image} style={styles.image} resizeMode="contain" />
     </View>
   );
@@ -15,13 +21,10 @@ const BrandCard: React.FC<Props> = React.memo(({ image }) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: '23%',
-    aspectRatio: 1,
     borderRadius: 12,
     backgroundColor: '#F6F8F8',
     justifyContent: 'center',
     alignItems: 'center',
-    margin: '1%',
   },
   image: {
     width: '60%',

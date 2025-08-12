@@ -16,17 +16,17 @@ const { width } = Dimensions.get('window');
 
 const PasswordSecurityScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [isModelVisible, setIsModelVisible] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const toggleTwoFactor = useCallback(() => {
-    setTwoFactorEnabled(prev => !prev);
-    setIsModelVisible(!isModelVisible)
-  }, [isModelVisible]);
+    if (!twoFactorEnabled) {
+      setIsModalVisible(true);
+    } else {
+      setTwoFactorEnabled(false);
+    }
+  }, [twoFactorEnabled]);
 
-  const saveDisabled = useMemo(() => {
-    // If you add actual logic, like tracking if something changed
-    return false;
-  }, []);
+  const saveDisabled = useMemo(() => false, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -40,11 +40,14 @@ const PasswordSecurityScreen: React.FC<{ navigation: any }> = ({ navigation }) =
 
       {/* Subheader */}
       <Text style={styles.subheader}>
-        Help protect your account from unauthorised access
+        Help protect your account from unauthorized access
       </Text>
 
       {/* Change Password Row */}
-      <TouchableOpacity style={styles.row} onPress={()=> navigation.navigate("changePassword")}>
+      <TouchableOpacity
+        style={styles.row}
+        onPress={() => navigation.navigate('changePassword')}
+      >
         <View style={styles.rowLeft}>
           <Icon name="lock-closed-outline" size={20} color="#000" />
           <Text style={styles.rowText}>Change Password</Text>
@@ -52,7 +55,7 @@ const PasswordSecurityScreen: React.FC<{ navigation: any }> = ({ navigation }) =
         <Icon name="chevron-forward" size={20} color="#999" />
       </TouchableOpacity>
 
-      {/* Two-factor authentication */}
+      {/* Two-factor authentication Row */}
       <View style={styles.row}>
         <View style={styles.rowLeft}>
           <Text style={styles.rowText}>Two-factor authentication</Text>
@@ -80,15 +83,16 @@ const PasswordSecurityScreen: React.FC<{ navigation: any }> = ({ navigation }) =
         <Text style={styles.saveButtonText}>Save change</Text>
       </TouchableOpacity>
 
+      {/* Modal to enable 2FA */}
       <Enable2FAModal
-      visible={isModelVisible}
-      twoFactorEnabled={twoFactorEnabled}
-      onClose={()=> setIsModelVisible(false)}
-      onEnable={(password)=>{
-        console.log('password, ', password);
-        setIsModelVisible(false)
-        
-      }}
+        visible={isModalVisible}
+        twoFactorEnabled={twoFactorEnabled}
+        onClose={() => setIsModalVisible(false)}
+        onEnable={(password) => {
+          console.log('Password:', password);
+          setTwoFactorEnabled(true);
+          setIsModalVisible(false);
+        }}
       />
     </SafeAreaView>
   );
@@ -98,7 +102,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingHorizontal: width * 0.05, // responsive horizontal padding
+    paddingHorizontal: width * 0.05,
   },
   header: {
     flexDirection: 'row',
@@ -110,13 +114,13 @@ const styles = StyleSheet.create({
     fontSize: width * 0.055,
     fontWeight: 'bold',
     color: '#0F1E2D',
-    fontFamily:FONTS.bold
+    fontFamily: FONTS.bold,
   },
   subheader: {
     fontSize: width * 0.038,
     color: '#6B6B6B',
     marginBottom: width * 0.06,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   row: {
     flexDirection: 'row',
@@ -134,18 +138,18 @@ const styles = StyleSheet.create({
   rowText: {
     fontSize: width * 0.042,
     color: '#000',
-    fontFamily:FONTS.bold
+    fontFamily: FONTS.bold,
   },
   helperText: {
     fontSize: width * 0.035,
     color: '#6B6B6B',
     marginTop: width * 0.03,
     marginBottom: 'auto',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   saveButton: {
     backgroundColor: '#000',
-    paddingVertical: width * 0.04,
+    paddingVertical: width * 0.03,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: width * 0.05,
@@ -154,7 +158,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: width * 0.042,
     fontWeight: '600',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
 });
 

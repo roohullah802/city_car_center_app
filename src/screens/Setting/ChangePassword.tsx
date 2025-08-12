@@ -15,9 +15,7 @@ import { FONTS } from '../../fonts/fonts';
 
 const { width } = Dimensions.get('window');
 
-const ChangePasswordScreen: React.FC<{ navigation: any }> = ({
-  navigation,
-}) => {
+const ChangePasswordScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -47,6 +45,7 @@ const ChangePasswordScreen: React.FC<{ navigation: any }> = ({
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'android' ? 80 : 0} // adjust if you have header
         style={{ flex: 1 }}
       >
         {/* Header */}
@@ -146,17 +145,19 @@ const styles = StyleSheet.create({
     fontSize: width * 0.055,
     fontWeight: 'bold',
     color: '#0F1E2D',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   subtitle: {
     fontSize: width * 0.038,
     color: '#6B6B6B',
     marginBottom: width * 0.06,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   inputGroup: {
-    gap: width * 0.04,
     marginBottom: 'auto',
+    maxWidth: 600,
+    alignSelf: 'center',
+    width: '100%',
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -168,12 +169,13 @@ const styles = StyleSheet.create({
     height: width * 0.13,
     backgroundColor: '#F6F8F8',
     justifyContent: 'space-between',
+    marginBottom: width * 0.04, // replaced gap
   },
   input: {
     flex: 1,
     fontSize: width * 0.042,
     color: '#000',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   button: {
     backgroundColor: '#000',
@@ -181,12 +183,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: width * 0.05,
+    maxWidth: 600,
+    alignSelf: 'center',
+    width: '100%',
   },
   buttonText: {
     color: '#fff',
     fontSize: width * 0.042,
     fontWeight: '600',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
 });
 

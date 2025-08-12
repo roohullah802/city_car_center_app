@@ -46,9 +46,10 @@ const carData: Car[] = [
   },
 ];
 
-const SearchCarCards:React.FC<{navigation: any}> = ({ navigation }) => {
+const SearchCarCards: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const ref = useRef<Modalize>(null);
+
   const onApply = () => {
     ref.current?.open();
   };
@@ -62,6 +63,7 @@ const SearchCarCards:React.FC<{navigation: any}> = ({ navigation }) => {
       car.name.toLowerCase().includes(searchText.toLowerCase()),
     );
   }, [searchText]);
+
   const renderCarCard = ({ item }: { item: Car }) => (
     <View style={styles.card}>
       <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
@@ -85,10 +87,7 @@ const SearchCarCards:React.FC<{navigation: any}> = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Icon name="arrow-back" size={24} color="#000" />
       </TouchableOpacity>
 
@@ -108,7 +107,7 @@ const SearchCarCards:React.FC<{navigation: any}> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {carData.length > 0 ? (
+      {filteredCars.length > 0 ? (
         <FlatList
           data={filteredCars}
           keyExtractor={item => item.id}
@@ -119,13 +118,13 @@ const SearchCarCards:React.FC<{navigation: any}> = ({ navigation }) => {
       ) : (
         <View style={styles.noData}>
           <Icon name="car-sport" size={30} color="#000" />
-          <Text style={{ width: 150 }}>No Results Found</Text>
-          <Text style={{ fontSize: 12, color: 'gray', width: 300 }}>
-            `We currently have no Search Results for “{searchText}”. Please try
-            with different search text`
+          <Text style={{ width: 150, marginTop: 10 }}>No Results Found</Text>
+          <Text style={{ fontSize: 12, color: 'gray', width: 300, textAlign: 'center' }}>
+            We currently have no Search Results for “{searchText}”. Please try with different search text.
           </Text>
         </View>
       )}
+
       <BottomSheetFilterModal ref={ref} onApply={onApply} />
     </SafeAreaView>
   );
@@ -147,7 +146,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginVertical: 10,
     color: '#111',
-    fontFamily:FONTS.bold
+    fontFamily: FONTS.bold,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -163,7 +162,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     fontSize: 16,
     color: '#333',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   card: {
     backgroundColor: '#f9f9f9',
@@ -188,7 +187,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 6,
     color: '#000',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   bottomRow: {
     flexDirection: 'row',
@@ -204,19 +203,20 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 14,
     color: '#555',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   price: {
     fontSize: 15,
     fontWeight: '600',
     color: '#333',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   noData: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
+    marginTop: 40,
   },
 });
 

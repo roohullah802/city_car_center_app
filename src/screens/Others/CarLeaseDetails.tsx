@@ -13,9 +13,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { FONTS } from '../../fonts/fonts';
+import { RFValue } from 'react-native-responsive-fontsize';
+import { FONTS } from '../../fonts/fonts'; // Ensure this path is correct
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const carImages = [
   { id: 1, image: require('../../assests/car1.jpg') },
@@ -31,26 +32,25 @@ type RateOption = {
   type: string;
 };
 
-
 const CarLeaseDetails: React.FC<{ navigation: any }> = ({ navigation }) => {
-   const rateOptions: RateOption[] = useMemo(() => [
-    { label: 'Max Power', value: 44.40, type:"hp" },
-    { label: '0-60 mph',  value: 295.00, type: "sec" },
-    { label: 'Top Speed',  value: 880.60, type:"mph" },
+  const rateOptions: RateOption[] = useMemo(() => [
+    { label: 'Max Power', value: 44.4, type: 'hp' },
+    { label: '0-60 mph', value: 295.0, type: 'sec' },
+    { label: 'Top Speed', value: 880.6, type: 'mph' },
   ], []);
+
   const [activeImage, setActiveImage] = useState<number>(0);
 
-  const carImagesCallBack = useCallback((item: any) => {
-    return (
-      <View style={styles.carWrapper}>
-        <Image source={item.image} style={styles.carImage} resizeMode="cover" />
-      </View>
-    );
-  }, []);
+  const renderCarImage = useCallback(({ item }: { item: any }) => (
+    <View style={styles.carWrapper}>
+      <Image source={item.image} style={styles.carImage} resizeMode="cover" />
+    </View>
+  ), []);
 
   return (
-    <ScrollView style={styles.container}>
-      <SafeAreaView style={styles.subContainer}>
+    <ScrollView contentContainerStyle={styles.scrollContent}>
+      <SafeAreaView style={styles.container}>
+        {/* Back Button */}
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
@@ -58,163 +58,115 @@ const CarLeaseDetails: React.FC<{ navigation: any }> = ({ navigation }) => {
           <Icon name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
 
-        <View style={styles.title}>
-          <Text style={styles.titleText}> Mercedes-Benz EQC 300kW </Text>
+        {/* Title */}
+        <Text style={styles.titleText}>Mercedes-Benz EQC 300kW</Text>
+
+        {/* Status Boxes */}
+        <View style={styles.statusRow}>
+          <View style={styles.statusBox}>
+            <View style={styles.statusDot} />
+            <Text style={styles.statusText}>Available</Text>
+          </View>
+          <View style={styles.statusBox}>
+            <Text style={styles.statusText}>Fully featured</Text>
+          </View>
         </View>
 
-        <View style={{ flexDirection: 'row', gap: 4 }}>
-          <View style={styles.box}>
-            <View style={styles.dot}></View>
-            <Text style={{ fontSize: 8, width: 60, fontFamily:FONTS.demiBold }}>Available</Text>
-          </View>
-          <View style={styles.secondBox}>
-            <Text style={{ fontSize: 8, width: 80,fontFamily:FONTS.demiBold }}>Fully featured</Text>
-          </View>
-        </View>
-
-        {/* Car Images FlatList */}
+        {/* Image Carousel */}
         <FlatList
           data={carImages}
           horizontal
-          pagingEnabled={true}
+          pagingEnabled
           showsHorizontalScrollIndicator={false}
           keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) => carImagesCallBack(item)}
-          onScroll={e => {
+          renderItem={renderCarImage}
+          onScroll={(e) => {
             const x = e.nativeEvent.contentOffset.x;
-            setActiveImage(Number((Number(x) / width).toFixed(0)));
+            setActiveImage(Math.round(x / width));
           }}
         />
-        <View
-          style={{
-            flexDirection: 'row',
-            gap: 4,
-            alignSelf: 'center',
-            marginTop: -30,
-            backgroundColor: 'white',
-            paddingLeft: 11,
-            paddingRight: 11,
-            paddingTop: 4,
-            paddingBottom: 4,
-            borderRadius: 10,
-          }}
-        >
-          {carImages.map((_, index) => {
-            return (
-              <View>
-                <View
-                  style={[
-                    styles.secondDot,
-                    activeImage === index ? { width: 25 } : { width: 7 },
-                  ]}
-                ></View>
-              </View>
-            );
-          })}
-        </View>
-        <View style={styles.reviewCon}>
-          <Text style={styles.review}>
-            ⭐ 5.0{' '}
-            {<Text style={{ color: 'gray', fontSize: 8,fontFamily:FONTS.demiBold }}>(100+ Reviews)</Text>}
-          </Text>
+
+        {/* Image Dots */}
+        <View style={styles.dotsContainer}>
+          {carImages.map((_, i) => (
+            <View
+              key={i}
+              style={[
+                styles.dot,
+                activeImage === i ? styles.activeDot : styles.inactiveDot,
+              ]}
+            />
+          ))}
         </View>
 
-        <View style={styles.carInfo}>
-          <Text style={{fontFamily:FONTS.demiBold}}>Car Info</Text>
-          <View style={styles.carInfoDataCon}>
-            <View style={{ gap: 10 }}>
-              <View style={styles.carInfoData}>
-                <Icon name="person" size={16} />
-                <Text
-                  style={{
-                    fontSize: 10,
-                    color:"#5e5e5eff",
-                    width: '100%',
-                    marginTop: -3,
-                    fontFamily:FONTS.demiBold
-                  }}
-                >
-                  2 Passengers
-                </Text>
-              </View>
+        {/* Rating */}
+        <Text style={styles.ratingText}>
+          ⭐ 5.0 <Text style={styles.ratingSub}> (100+ Reviews)</Text>
+        </Text>
 
-              <View style={styles.carInfoData}>
-                <Icon name="snow" size={16} />
-                <Text
-                  style={{
-                    fontSize: 10,
-                    color:"#5e5e5eff",
-                    width: '100%',
-                    marginTop: -3,
-                    fontFamily:FONTS.demiBold
-                  }}
-                >
-                  Air Conditioning
-                </Text>
-              </View>
+        {/* Car Info */}
+        <Text style={styles.sectionTitle}>Car Info</Text>
+        <View style={styles.infoGrid}>
+          <View style={styles.infoColumn}>
+            <View style={styles.infoItem}>
+              <Icon name="person" size={16} />
+              <Text style={styles.infoText}>2 Passengers</Text>
             </View>
-
-            <View style={{ gap: 10 }}>
-              <View style={styles.carInfoData}>
-                <MaterialCommunityIcons name="car-door" size={16} />
-                <Text
-                  style={{
-                    fontSize: 10,
-                    color:"#5e5e5eff",
-                    width: '100%',
-                    marginTop: -3,
-                    fontFamily:FONTS.demiBold
-                  }}
-                >
-                  2 Doors
-                </Text>
-              </View>
-
-              <View style={styles.carInfoData}>
-                <MaterialCommunityIcons name="gas-station" size={16} />
-                <Text
-                  style={{
-                    fontSize: 10,
-                    width: '100%',
-                    color: "#5e5e5eff",
-                    marginTop: -3,
-                    fontFamily:FONTS.demiBold
-                  }}
-                >
-                  Fuel Info
-                </Text>
-              </View>
+            <View style={styles.infoItem}>
+              <Icon name="snow" size={16} />
+              <Text style={styles.infoText}>Air Conditioning</Text>
             </View>
           </View>
-          <View style={{flexDirection: "row", gap: 5, marginTop: 10}}>
-            <MaterialCommunityIcons name="car-shift-pattern" size={16} />
-            <Text style={{fontSize:10, color:"#5e5e5eff", fontFamily:FONTS.demiBold}}>Manual</Text>
+          <View style={styles.infoColumn}>
+            <View style={styles.infoItem}>
+              <MaterialCommunityIcons name="car-door" size={16} />
+              <Text style={styles.infoText}>2 Doors</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <MaterialCommunityIcons name="gas-station" size={16} />
+              <Text style={styles.infoText}>Fuel Info</Text>
+            </View>
           </View>
         </View>
-
-
-        <View style={styles.carSpecs}>
-          <Text style={{fontFamily:FONTS.demiBold}}>Car Specs</Text>
-          <View style={styles.rateOptions}>
-                    {rateOptions.map((option) => {
-                      return (
-                        <View style={styles.rateCard}>
-                           <Text style={styles.rateLabel}>
-                            {option.label}
-                          </Text>
-                          <Text style={styles.rateValue}>{option.value.toFixed(2)}{<Text style={{fontSize: 8, color: "gray", fontFamily:FONTS.demiBold}}>{option.type}</Text>}</Text>
-                        </View>
-                      );
-                    })}
-                  </View>
+        <View style={styles.infoItem}>
+          <MaterialCommunityIcons name="car-shift-pattern" size={16} />
+          <Text style={styles.infoText}>Manual</Text>
         </View>
 
-
-        <View>
-          <Text style={{fontFamily:FONTS.demiBold}}>
-            Price & Lease Info:12345
-          </Text>
+        {/* Car Specs */}
+        <Text style={styles.sectionTitle}>Car Specs</Text>
+        <View style={styles.specRow}>
+          {rateOptions.map((option, idx) => (
+            <View key={idx} style={styles.specCard}>
+              <Text style={styles.specLabel}>{option.label}</Text>
+              <Text style={styles.specValue}>
+                {option.value.toFixed(2)} <Text style={styles.specUnit}>{option.type}</Text>
+              </Text>
+            </View>
+          ))}
         </View>
+
+        {/* Price Info */}
+        <Text style={styles.sectionTitle}>Price & Lease Info</Text>
+        <View style={styles.priceRow}>
+          <Text style={styles.priceLabel}>Weekly Rate:</Text>
+          <Text style={styles.priceValue}>$0/week</Text>
+        </View>
+        <View style={styles.line} />
+        <View style={styles.priceRow}>
+          <Text style={styles.priceLabel}>Tax:</Text>
+          <Text style={styles.priceValue}>$8.4 flat (7 days)</Text>
+        </View>
+        <View style={styles.line} />
+        <View style={styles.priceRow}>
+          <Text style={styles.priceLabel}>Lease Duration:</Text>
+          <Text style={styles.priceValue}>7 Days (Default)</Text>
+        </View>
+
+        {/* Lease Button */}
+        <TouchableOpacity style={styles.leaseButton} onPress={() => navigation.navigate('dateAndTime')}>
+          <Text style={styles.leaseButtonText}>Lease this car</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     </ScrollView>
   );
@@ -223,131 +175,181 @@ const CarLeaseDetails: React.FC<{ navigation: any }> = ({ navigation }) => {
 export default CarLeaseDetails;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: width,
-    height: height + 500,
+  scrollContent: {
+    paddingBottom: 40,
+    alignItems: 'center',
   },
-  subContainer: {
-    width: width - 30,
-    alignSelf: 'center',
+  container: {
+    width: '100%',
+    maxWidth: 700,
+    paddingHorizontal: 16,
   },
   backButton: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 50 : 20,
+    left: 10,
     zIndex: 2,
   },
-  title: {
-    marginTop: 50,
-  },
   titleText: {
-    fontSize: 15,
-    fontFamily:FONTS.bold
+    fontSize: RFValue(16),
+    fontFamily: FONTS.bold,
+    marginTop: 60,
+    marginBottom: 10,
   },
-  box: {
-    width: 90,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+  statusRow: {
     flexDirection: 'row',
-    gap: 5,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 6,
-    marginTop: 5,
-    paddingLeft: 10,
-    marginLeft: 5,
+    gap: 10,
+    marginBottom: 10,
   },
-  secondBox: {
-    width: 90,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+  statusBox: {
     flexDirection: 'row',
-    gap: 5,
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    height: 22,
     borderWidth: 1,
-    borderColor: 'black',
     borderRadius: 6,
-    marginTop: 5,
-    paddingLeft: 10,
-    marginLeft: 5,
+    borderColor: '#000',
   },
-  dot: {
+  statusDot: {
     width: 6,
     height: 6,
+    borderRadius: 3,
     backgroundColor: 'green',
-    borderRadius: 10,
+    marginRight: 5,
+  },
+  statusText: {
+    fontSize: RFValue(8),
+    fontFamily: FONTS.demiBold,
   },
   carWrapper: {
-    width: width - 38,
+    width: width * 0.90,
     height: 200,
-    marginTop: 15,
     borderRadius: 10,
-    marginRight: 10,
     overflow: 'hidden',
+    marginRight: 8,
     marginBottom: 5,
   },
   carImage: {
     width: '100%',
     height: '100%',
   },
-  secondDot: {
-    width: 4,
-    height: 6,
-    backgroundColor: 'black',
-    borderRadius: 20,
+  dotsContainer: {
+    flexDirection: 'row',
     alignSelf: 'center',
+    marginTop: -25,
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
-  review: {
-    fontSize: 10,
-    fontFamily:FONTS.demiBold
+  dot: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#000',
+    marginHorizontal: 3,
   },
-  reviewCon: {
-    marginTop: 18,
+  activeDot: {
+    width: 25,
   },
-  carInfo: {
+  inactiveDot: {
+    width: 7,
+  },
+  ratingText: {
+    fontSize: RFValue(10),
+    fontFamily: FONTS.demiBold,
+    marginTop: 10,
+  },
+  ratingSub: {
+    fontSize: RFValue(8),
+    color: 'gray',
+    fontFamily: FONTS.demiBold,
+  },
+  sectionTitle: {
+    fontFamily: FONTS.bold,
+    fontSize: RFValue(12),
     marginTop: 20,
+    marginBottom: 10,
   },
-  carInfoDataCon: {
-    flexDirection: 'row',
-    gap: 20,
-    width: 100,
-    marginTop: 20,
-  },
-  carInfoData: {
-    flexDirection: 'row',
-    gap: 5,
-  },
-  carSpecs:{
-    marginTop: 20
-  },
-   rateOptions: {
+  infoGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 30,
-    marginTop: 20
+    gap: 20,
   },
-   rateCard: {
-    width: (width - 60) / 3,
+  infoColumn: {
+    gap: 10,
+    flex: 1,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 8,
+  },
+  infoText: {
+    fontSize: RFValue(10),
+    color: '#5e5e5e',
+    fontFamily: FONTS.demiBold,
+  },
+  specRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  specCard: {
+    width: '30%',
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 10,
     paddingVertical: 12,
-    paddingHorizontal: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
-    rateLabel: {
-    width:"100%",
-    fontSize: 8,
+  specLabel: {
+    fontSize: RFValue(8),
     color: 'gray',
+    marginBottom: 6,
     textAlign: 'center',
-    marginBottom: 8,
   },
-    rateValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    fontFamily:FONTS.demiBold
+  specValue: {
+    fontSize: RFValue(14),
+    fontFamily: FONTS.demiBold,
+    textAlign: 'center',
+  },
+  specUnit: {
+    fontSize: RFValue(8),
+    color: 'gray',
+    fontFamily: FONTS.demiBold,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  priceLabel: {
+    fontSize: RFValue(10),
+    fontFamily: FONTS.demiBold,
+    color: 'gray',
+  },
+  priceValue: {
+    fontSize: RFValue(10),
+    fontFamily: FONTS.demiBold,
+    color: 'gray',
+  },
+  line: {
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#ccc',
+    marginVertical: 8,
+  },
+  leaseButton: {
+    backgroundColor: '#000',
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 20,
+  },
+  leaseButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: RFValue(14),
+    fontFamily: FONTS.demiBold,
   },
 });

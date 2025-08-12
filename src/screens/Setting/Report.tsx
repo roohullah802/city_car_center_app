@@ -8,8 +8,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import { FONTS } from '../../fonts/fonts';
+import { RFValue } from 'react-native-responsive-fontsize';
+
+const { width } = Dimensions.get('window');
 
 const ReportIssueScreen: React.FC = () => {
   const [issue, setIssue] = useState<string>('');
@@ -23,7 +27,6 @@ const ReportIssueScreen: React.FC = () => {
       return;
     }
 
-    // Simulate sending report
     Alert.alert('Report Sent', 'Thank you for your feedback!');
     setIssue('');
     setEmail('');
@@ -32,9 +35,9 @@ const ReportIssueScreen: React.FC = () => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.select({ ios: 'padding', android: undefined })}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.header}>Report Issue</Text>
         <Text style={styles.subHeader}>Describe your problem in detail and send to us.</Text>
 
@@ -71,63 +74,61 @@ const ReportIssueScreen: React.FC = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
   content: {
-    paddingHorizontal: 20,
-    paddingTop: 40,
-    paddingBottom: 30,
+    paddingHorizontal: width * 0.05,
+    paddingTop: RFValue(40),
+    paddingBottom: RFValue(30),
   },
   header: {
-    fontSize: 24,
+    fontSize: RFValue(22),
     fontWeight: '600',
-    marginBottom: 8,
-    fontFamily:FONTS.bold
+    marginBottom: RFValue(8),
+    fontFamily: FONTS.bold,
   },
   subHeader: {
-    fontSize: 14,
+    fontSize: RFValue(13),
     color: '#666',
-    marginBottom: 20,
-    fontFamily:FONTS.demiBold
+    marginBottom: RFValue(20),
+    fontFamily: FONTS.demiBold,
   },
   textArea: {
-    height: 140,
+    height: RFValue(140),
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 10,
-    padding: 15,
-    fontSize: 14,
-    marginBottom: 16,
-    fontFamily:FONTS.demiBold
+    padding: RFValue(14),
+    fontSize: RFValue(13),
+    marginBottom: RFValue(16),
+    fontFamily: FONTS.demiBold,
+    textAlignVertical: 'top',
   },
   input: {
-    height: 50,
+    height: RFValue(50),
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 10,
-    paddingHorizontal: 15,
-    fontSize: 14,
-    marginBottom: 24,
-    fontFamily:FONTS.demiBold
+    paddingHorizontal: RFValue(14),
+    fontSize: RFValue(13),
+    marginBottom: RFValue(24),
+    fontFamily: FONTS.demiBold,
   },
   button: {
-    height: 50,
+    height: RFValue(50),
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 1,
-    fontFamily:FONTS.demiBold
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: RFValue(14),
     fontWeight: '500',
-    fontFamily:FONTS.demiBold
-
+    fontFamily: FONTS.demiBold,
   },
 });
 

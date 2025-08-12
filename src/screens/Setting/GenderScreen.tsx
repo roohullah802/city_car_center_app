@@ -8,7 +8,6 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { FONTS } from '../../fonts/fonts';
 
-
 type Gender = 'Male' | 'Female' | 'Other';
 
 const genders: Gender[] = ['Male', 'Female', 'Other'];
@@ -19,18 +18,18 @@ const genderIcons: { [key in Gender]: string } = {
   Other: 'transgender-outline',
 };
 
-const GenderSelectionScreen: React.FC<{navigation: any}> = ({navigation}) => {
+const GenderSelectionScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [selectedGender, setSelectedGender] = useState<Gender>('Male');
 
   const renderGenderOption = (gender: Gender) => {
     const isSelected = selectedGender === gender;
-    
 
     return (
       <TouchableOpacity
         key={gender}
         style={[styles.option, isSelected && styles.selectedOption]}
         onPress={() => setSelectedGender(gender)}
+        activeOpacity={0.7}
       >
         <Ionicons
           name={genderIcons[gender]}
@@ -47,20 +46,31 @@ const GenderSelectionScreen: React.FC<{navigation: any}> = ({navigation}) => {
 
   return (
     <View style={styles.container}>
+      {/* Back Button */}
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.goBack()}
+        activeOpacity={0.7}
       >
         <Icon name="chevron-back" size={24} color="#000" />
       </TouchableOpacity>
+
+      {/* Title and Subtitle */}
       <Text style={styles.title}>What is your Gender?</Text>
       <Text style={styles.subtitle}>Select your preferred gender</Text>
 
-      <View style={styles.optionsContainer}>
-        {genders.map(renderGenderOption)}
-      </View>
+      {/* Gender Options */}
+      <View style={styles.optionsContainer}>{genders.map(renderGenderOption)}</View>
 
-      <TouchableOpacity style={styles.saveButton}>
+      {/* Save Button */}
+      <TouchableOpacity
+        style={styles.saveButton}
+        onPress={() => {
+          console.log('Selected gender:', selectedGender);
+          navigation.goBack();
+        }}
+        activeOpacity={0.8}
+      >
         <Text style={styles.saveButtonText}>Save change</Text>
       </TouchableOpacity>
     </View>
@@ -74,19 +84,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
   },
+  backButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 20,
+    left: wp('6%'),
+    zIndex: 2,
+  },
   title: {
-    marginTop:-40,
+    marginTop: -40,
     fontSize: wp('5.5%'),
     fontWeight: '600',
     marginBottom: hp('2%'),
     color: '#000',
-    fontFamily:FONTS.bold
+    fontFamily: FONTS.bold,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: wp('3.5%'),
     color: '#8A8A8A',
     marginBottom: hp('4%'),
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
+    textAlign: 'center',
   },
   optionsContainer: {
     marginBottom: hp('5%'),
@@ -108,7 +126,7 @@ const styles = StyleSheet.create({
     fontSize: wp('4%'),
     color: '#2E3A59',
     fontWeight: '500',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   selectedText: {
     color: '#fff',
@@ -123,12 +141,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: wp('4.2%'),
     fontWeight: '600',
-    fontFamily:FONTS.demiBold
-  },
-  backButton: {
-    position: 'relative',
-    top: Platform.OS === 'ios' ? 50 : -80,
-    zIndex: 2,
+    fontFamily: FONTS.demiBold,
   },
 });
 

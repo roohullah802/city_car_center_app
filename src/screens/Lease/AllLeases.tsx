@@ -90,14 +90,13 @@ const styles = StyleSheet.create({
   topText: {
     fontSize: 24,
     marginBottom: 4,
-    fontFamily:FONTS.bold
-
+    fontFamily: FONTS.bold,
   },
   topDescription: {
     color: 'gray',
     fontSize: 14,
     marginBottom: 10,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   leaseCard: {
     width: '100%',
@@ -114,13 +113,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 12,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   leaseModel: {
     color: '#ccc',
     fontSize: 12,
     marginTop: 16,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   extendButton: {
     backgroundColor: '#fff',
@@ -131,30 +130,31 @@ const styles = StyleSheet.create({
   extendText: {
     fontWeight: '600',
     fontSize: 10,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   timerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: 8,
+    paddingHorizontal: 10,
   },
   timerBlock: {
-    flex:1,
+    flex: 1,
     alignItems: 'center',
   },
   ti: {
     color: '#fff',
     fontSize: 30,
     marginTop: 10,
-    fontFamily: Platform.OS === 'ios' ? 'digital-7' : 'digital-7',
+    fontFamily: "BebasNeue Regular",
   },
   timerLabel: {
-    flex:1,
-    width:30,
+    width: 30,
     fontSize: 11,
     color: '#fff',
     marginTop: 4,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
+    textAlign: 'center',
   },
   noLeaseContainer: {
     flex: 1,
@@ -166,6 +166,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'gray',
     textAlign: 'center',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
 });
+

@@ -11,23 +11,23 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LogoutModal from '../Auth/Logout';
+import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
 
 const { width } = Dimensions.get('window');
 
-const Settings: React.FC<{navigation: any}> = ({navigation}) => {
+const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
-  const handleVisible = ()=>{
-    setIsVisible(prev => !prev)
-  }
-    
+  const handleVisible = () => setIsVisible(prev => !prev);
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {/* Header */}
         <Text style={styles.header}>Settings</Text>
 
-        {/* User Info */}
+        {/* Profile Card */}
         <View style={styles.profileCard}>
           <Image
             source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
@@ -38,24 +38,24 @@ const Settings: React.FC<{navigation: any}> = ({navigation}) => {
             <Text style={styles.name}>Faizan Farooq</Text>
             <Text style={styles.email}>Faizann@example.com</Text>
           </View>
-          <TouchableOpacity onPress={()=> navigation.navigate("Profile")}>
+          <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
             <Text style={styles.editBtn}>Edit</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Profile & Settings Section */}
+        {/* Profile & Settings */}
         <Text style={styles.sectionTitle}>Profile & Settings</Text>
         <View style={styles.card}>
-          <SettingsRow icon="person-outline" label="My Profile" editable onPress={()=> navigation.navigate("Profile")} />
-          <SettingsRow icon="lock-closed-outline" label="Password & Security" editable onPress={()=> navigation.navigate("passwordSecurity")}  />
+          <SettingsRow icon="person-outline" label="My Profile" editable onPress={() => navigation.navigate("Profile")} />
+          <SettingsRow icon="lock-closed-outline" label="Password & Security" editable onPress={() => navigation.navigate("passwordSecurity")} />
         </View>
 
-        {/* Helpful Desk Section */}
+        {/* Helpful Desk */}
         <Text style={styles.sectionTitle}>Helpful Desk</Text>
         <View style={styles.card}>
-          <SettingsRow icon="help-circle-outline" label="FAQs" onPress={()=> navigation.navigate("faqs")} />
-          <SettingsRow icon="document-text-outline" label="Terms & Privacy Policy" onPress={()=> navigation.navigate("privacyPolicy")} />
-          <SettingsRow icon="chatbubble-ellipses-outline" label="Report Issue" onPress={()=> navigation.navigate("report")} />
+          <SettingsRow icon="help-circle-outline" label="FAQs" onPress={() => navigation.navigate("faqs")} />
+          <SettingsRow icon="document-text-outline" label="Terms & Privacy Policy" onPress={() => navigation.navigate("privacyPolicy")} />
+          <SettingsRow icon="chatbubble-ellipses-outline" label="Report Issue" onPress={() => navigation.navigate("report")} />
         </View>
 
         {/* Logout */}
@@ -63,7 +63,8 @@ const Settings: React.FC<{navigation: any}> = ({navigation}) => {
           <SettingsRow icon="log-out-outline" label="Logout" onPress={handleVisible} />
         </View>
       </ScrollView>
-      <LogoutModal visible={isVisible} onClose={()=> setIsVisible(false)} />
+
+      <LogoutModal visible={isVisible} onClose={() => setIsVisible(false)} />
     </SafeAreaView>
   );
 };
@@ -72,7 +73,7 @@ type SettingsRowProps = {
   icon: string;
   label: string;
   editable?: boolean;
-  onPress: ()=> void;
+  onPress: () => void;
 };
 
 const SettingsRow: React.FC<SettingsRowProps> = ({ icon, label, editable, onPress }) => (
@@ -97,73 +98,73 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-    paddingHorizontal: width * 0.04,
+    paddingHorizontal: width * 0.05,
+  },
+  scrollContent: {
+    paddingBottom: RFValue(40),
   },
   header: {
-    fontSize: width * 0.06,
-    fontFamily:FONTS.bold,
-    fontWeight: 'bold',
-    marginVertical: width * 0.04,
+    fontSize: RFValue(20),
+    fontFamily: FONTS.bold,
     color: '#111827',
+    marginVertical: RFValue(16),
   },
   profileCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: width * 0.04,
+    padding: RFValue(14),
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: width * 0.06,
+    marginBottom: RFValue(20),
     shadowColor: '#000',
     shadowOpacity: 0.03,
     shadowRadius: 10,
     elevation: 3,
   },
   avatar: {
-    width: width * 0.14,
-    height: width * 0.14,
-    borderRadius: width * 0.07,
-    marginRight: width * 0.03,
+    width: RFValue(56),
+    height: RFValue(56),
+    borderRadius: RFValue(28),
+    marginRight: RFValue(12),
   },
   profileDetails: {
     flex: 1,
   },
   name: {
-    fontSize: width * 0.045,
-    fontWeight: '600',
+    fontSize: RFValue(14),
+    fontFamily: FONTS.bold,
     color: '#111827',
-    fontFamily:FONTS.bold
   },
   email: {
-    fontSize: width * 0.035,
+    fontSize: RFValue(12),
     color: '#6B7280',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   editBtn: {
-    fontSize: width * 0.035,
+    fontSize: RFValue(12),
     color: '#2563EB',
-    fontWeight: '500',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   sectionTitle: {
-    fontSize: width * 0.036,
+    fontSize: RFValue(12),
     color: '#9CA3AF',
-    marginBottom: width * 0.02,
-    marginTop: width * 0.04,
-    fontFamily:FONTS.demiBold
+    marginBottom: RFValue(6),
+    marginTop: RFValue(12),
+    fontFamily: FONTS.demiBold,
   },
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    paddingVertical: width * 0.01,
-    marginBottom: width * 0.04,
+    paddingVertical: 1,
+    marginBottom: RFValue(14),
     shadowColor: '#000',
     shadowOpacity: 0.02,
     shadowRadius: 8,
     elevation: 1,
   },
   row: {
-    paddingHorizontal: width * 0.04,
-    paddingVertical: width * 0.045,
+    paddingHorizontal: RFValue(14),
+    paddingVertical: RFValue(14),
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -176,17 +177,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rowLabel: {
-    width: width * 0.6,
-    fontSize: width * 0.042,
+    fontSize: RFValue(13),
     color: '#111827',
-    marginLeft: width * 0.03,
+    marginLeft: RFValue(12),
     flexShrink: 1,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   editText: {
-    fontSize: width * 0.035,
+    fontSize: RFValue(12),
     color: '#2563EB',
-    fontWeight: '500',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
 });

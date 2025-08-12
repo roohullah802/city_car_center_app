@@ -17,6 +17,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useIsFocused, useRoute } from '@react-navigation/native';
 import { FONTS } from '../../fonts/fonts';
 
+const { width } = Dimensions.get('window');
+
 const brands = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const cars = [
@@ -37,9 +39,8 @@ const cars = [
 ];
 
 const leaseData = [1, 2, 3, 4, 5];
-const { width } = Dimensions.get('window');
 
-const HomeScreen: React.FC<{navigation: any}> = ({ navigation }) => {
+const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const route = useRoute();
   const isFocused = useIsFocused();
 
@@ -48,7 +49,10 @@ const HomeScreen: React.FC<{navigation: any}> = ({ navigation }) => {
       <View style={styles.leaseCard}>
         <View style={styles.view}>
           <Text style={styles.leaseTitle}>My Lease</Text>
-          <TouchableOpacity style={styles.extendButton} onPress={()=> navigation.navigate("extendLease")}>
+          <TouchableOpacity
+            style={styles.extendButton}
+            onPress={() => navigation.navigate('extendLease')}
+          >
             <Text style={styles.extendText}>Extend Lease</Text>
           </TouchableOpacity>
         </View>
@@ -68,8 +72,8 @@ const HomeScreen: React.FC<{navigation: any}> = ({ navigation }) => {
           ))}
         </View>
       </View>
-    )
-  },[navigation]);
+    );
+  }, [navigation]);
 
   const brandsCallBack = useCallback(() => {
     return (
@@ -82,22 +86,25 @@ const HomeScreen: React.FC<{navigation: any}> = ({ navigation }) => {
     );
   }, []);
 
-  const carsCallBack = useCallback((item: any)=>{
-    return(
-     <TouchableOpacity onPress={()=> navigation.navigate("carDetails")}>
-       <View style={styles.carCard}>
-                <View style={styles.carImageSetup}>
-                  <Image source={item.image} style={styles.carThumb} />
-                </View>
-                <Text style={styles.carName}>{item.name}</Text>
-                <View style={styles.ratingContainer}>
-                  <Text style={styles.carRating}>⭐ {item.rating}</Text>
-                  <Text style={styles.carPrice}>{item.price}/day</Text>
-                </View>
-              </View>
-     </TouchableOpacity>
-    )
-  },[navigation])
+  const carsCallBack = useCallback(
+    (item: any) => {
+      return (
+        <TouchableOpacity onPress={() => navigation.navigate('carDetails')}>
+          <View style={styles.carCard}>
+            <View style={styles.carImageSetup}>
+              <Image source={item.image} style={styles.carThumb} />
+            </View>
+            <Text style={styles.carName}>{item.name}</Text>
+            <View style={styles.ratingContainer}>
+              <Text style={styles.carRating}>⭐ {item.rating}</Text>
+              <Text style={styles.carPrice}>{item.price}/day</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      );
+    },
+    [navigation]
+  );
 
   return (
     <ScrollView style={styles.container}>
@@ -109,7 +116,7 @@ const HomeScreen: React.FC<{navigation: any}> = ({ navigation }) => {
       )}
 
       <StatusBar backgroundColor={'black'} barStyle="light-content" />
-      {/*  Top Black Header */}
+
       <SafeAreaView>
         <View style={styles.topSection}>
           <View style={styles.headerRow}>
@@ -126,74 +133,68 @@ const HomeScreen: React.FC<{navigation: any}> = ({ navigation }) => {
 
           <FlatList
             data={leaseData}
-            keyExtractor={item => item.toString()}
+            keyExtractor={(item) => item.toString()}
             renderItem={leaseDataCallBack}
             horizontal={true}
             ItemSeparatorComponent={() => <View style={{ width: 20 }} />}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 10 }}
           />
         </View>
       </SafeAreaView>
 
-      {/*  White Main Content */}
-      <SafeAreaView>
-        <View style={styles.mainSection}>
-          {/*  Search Bar */}
-
-          <View style={styles.searchContainer}>
-            <Ionicons
-              name="search"
-              size={20}
-              color={'#888'}
-              style={styles.searchIcon}
-            />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search vehicle..."
-              placeholderTextColor="#888"
-              onPress={() => navigation.navigate('searchCarCards')}
-            />
-          </View>
-
-          {/* 🚘 Top Brands */}
-          <View style={styles.sectionRow}>
-            <Text style={styles.sectionTitle}>Top Brands</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('brandCards')}>
-              <Text style={styles.seeAll}>See All</Text>
-            </TouchableOpacity>
-          </View>
-
-          <FlatList
-            horizontal={true}
-            data={brands.slice(0, 10)}
-            keyExtractor={item => item.toString()}
-            renderItem={brandsCallBack}
-            ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
-            showsHorizontalScrollIndicator={false}
+      <SafeAreaView style={styles.mainSection}>
+        <View style={styles.searchContainer}>
+          <Ionicons
+            name="search"
+            size={20}
+            color={'#888'}
+            style={styles.searchIcon}
           />
-
-          {/* 🚗 Available Near You */}
-          <View style={styles.sectionRow}>
-            <Text style={styles.sectionTitle}>Available For You</Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('searchCarCards')}
-            >
-              <Text style={styles.seeAll}>See All</Text>
-            </TouchableOpacity>
-          </View>
-          <FlatList
-            horizontal={true}
-            data={cars.slice(0, 10)}
-            keyExtractor={item => item.name.toString()}
-            renderItem={({ item }) => carsCallBack(item)}
-            showsHorizontalScrollIndicator={false}
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search vehicle..."
+            placeholderTextColor="#888"
+            onFocus={() => navigation.navigate('searchCarCards')}
           />
         </View>
+
+        <View style={styles.sectionRow}>
+          <Text style={styles.sectionTitle}>Top Brands</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('brandCards')}>
+            <Text style={styles.seeAll}>See All</Text>
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          horizontal={true}
+          data={brands.slice(0, 10)}
+          keyExtractor={(item) => item.toString()}
+          renderItem={brandsCallBack}
+          ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 10 }}
+        />
+
+        <View style={styles.sectionRow}>
+          <Text style={styles.sectionTitle}>Available For You</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('searchCarCards')}>
+            <Text style={styles.seeAll}>See All</Text>
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          horizontal={true}
+          data={cars.slice(0, 10)}
+          keyExtractor={(item) => item.name.toString()}
+          renderItem={({ item }) => carsCallBack(item)}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 10 }}
+        />
       </SafeAreaView>
     </ScrollView>
   );
 };
-
-export default HomeScreen;
 
 const styles = StyleSheet.create({
   view: {
@@ -207,24 +208,19 @@ const styles = StyleSheet.create({
   topSection: {
     backgroundColor: '#000',
     paddingHorizontal: 20,
-    paddingTop: 30,
-    paddingBottom: 4,
+    paddingTop: Platform.OS === 'ios' ? 40 : 30,
+    paddingBottom: 8,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  locationLabel: {
-    color: '#888',
-    fontSize: 12,
-  },
   locationText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-    marginTop: 3,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   avatar: {
     width: 36,
@@ -232,7 +228,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   leaseCard: {
-    width: width - 40,
+    maxWidth: width * 0.95,
     backgroundColor: '#25262A',
     borderRadius: 15,
     padding: 13,
@@ -243,13 +239,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 12,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   leaseModel: {
     color: '#ccc',
     fontSize: 12,
     marginTop: 15,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   extendButton: {
     alignSelf: 'flex-end',
@@ -270,16 +266,26 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
   },
-  searchBar: {
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 50,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
     backgroundColor: 'white',
-    borderRadius: 20,
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    fontSize: 14,
+    marginTop: -40,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
     color: '#000',
-    position: 'relative',
-    bottom: 40,
-    boxShadow: '0px 0px 5px 0.5px #ccc',
+    fontSize: 14,
   },
   sectionRow: {
     flexDirection: 'row',
@@ -290,13 +296,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-   fontFamily:FONTS.bold
+    fontFamily: FONTS.bold,
   },
   seeAll: {
-    width: 80,
     fontSize: 14,
     color: '#007bff',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   brandCard: {
     justifyContent: 'center',
@@ -310,76 +315,54 @@ const styles = StyleSheet.create({
   brandImage: {
     width: 70,
     height: 70,
-    resizeMode: 'cover',
+    resizeMode: 'contain',
   },
   carCard: {
     backgroundColor: '#f8f8f8',
     borderRadius: 12,
     padding: 10,
     marginRight: 15,
-    width: 250,
+    width: width * 0.7,
     marginBottom: 20,
   },
   carThumb: {
     width: '100%',
-    height: 140,
-    resizeMode: 'cover',
+    aspectRatio: 16 / 9,
     borderRadius: 8,
+    resizeMode: 'cover',
   },
   carImageSetup: {
     width: '100%',
-    height: 140,
-    backgroundColor: 'black',
     borderRadius: 10,
+    overflow: 'hidden',
   },
   carName: {
     fontSize: 13,
     marginTop: 9,
-    fontFamily:FONTS.demiBold,
-    color:"#575757ff"
+    fontFamily: FONTS.demiBold,
+    color: '#575757ff',
   },
   carPrice: {
-    width: 80,
     fontSize: 13,
     color: '#333',
     marginTop: 4,
+    fontFamily:FONTS.demiBold
   },
   carRating: {
-    width: 80,
     fontSize: 12,
     color: '#888',
     marginTop: 2,
+    fontFamily:FONTS.demiBold
   },
   ratingContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 3,
-    borderRadius: 50,
-    boxShadow: '0px 1px 5px 0px #ccc',
-    backgroundColor: 'white',
-    marginTop: -40,
-  },
-
-  searchIcon: {
-    marginRight: 8,
-  },
-
-  searchInput: {
-    flex: 1,
-    color: '#fff',
-    fontSize: 13,
   },
   timerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
   },
-
   timerBlock: {
     marginHorizontal: 15,
   },
@@ -396,3 +379,5 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
 });
+
+export default HomeScreen;

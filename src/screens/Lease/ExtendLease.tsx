@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
-  Dimensions,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -32,14 +31,12 @@ const ExtendLeaseScreen: React.FC<{navigation: any}> = ({navigation}) => {
 
   const handleSelectRate = useCallback((option: RateOption) => {
     setSelectedRate(option);
-    // Optional: Update manualDays based on rate if needed
   }, []);
 
   const handleManualInput = useCallback((text: string) => {
-    // Only allow numeric input
     const numericValue = text.replace(/[^0-9]/g, '');
     setManualDays(numericValue);
-    setSelectedRate(null); // Clear selection if manually typed
+    setSelectedRate(null);
   }, []);
 
   const handleContinue = useCallback(() => {
@@ -48,7 +45,6 @@ const ExtendLeaseScreen: React.FC<{navigation: any}> = ({navigation}) => {
       console.log('Selected rate:', selectedRate);
     }
     console.log('Manual days entered:', days);
-    // Handle form submission here
   }, [selectedRate, manualDays]);
 
   return (
@@ -57,13 +53,15 @@ const ExtendLeaseScreen: React.FC<{navigation: any}> = ({navigation}) => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.content}>
-        <TouchableOpacity
+        <View style={styles.headerCon}>
+          <TouchableOpacity
                 style={styles.backButton}
                 onPress={() => navigation.goBack()}
               >
-                <Icon name="chevron-back" size={24} color="#000" />
+                <Icon name="arrow-back" size={24} color="#000" />
               </TouchableOpacity>
         <Text style={styles.header}>Extend Lease</Text>
+        </View>
         <Text style={styles.subHeader}>
           Choose how much days you want to extend the lease of the car
         </Text>
@@ -110,7 +108,6 @@ const ExtendLeaseScreen: React.FC<{navigation: any}> = ({navigation}) => {
   );
 };
 
-const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -121,27 +118,37 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
   },
+  headerCon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingTop: Platform.OS === 'ios' ? 50 : 10,
+    marginBottom: 20,
+  },
+  backButton: {
+    marginRight: 10,
+  },
   header: {
-    fontSize: 22,
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 20,
     fontWeight: '700',
-    marginBottom: 6,
     color: '#002A32',
-    marginTop: 50,
-    fontFamily:FONTS.bold
-
+    fontFamily: FONTS.bold,
   },
   subHeader: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#444',
-    marginBottom: 20,
-    fontFamily:FONTS.demiBold
+    marginBottom: 25,
+    marginTop: 10,
+    fontFamily: FONTS.demiBold,
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 10,
     color: '#111',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   rateOptions: {
     flexDirection: 'row',
@@ -149,7 +156,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   rateCard: {
-    width: (width - 60) / 3,
+    flex: 1,
+    marginHorizontal: 5,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 10,
@@ -167,13 +175,13 @@ const styles = StyleSheet.create({
     color: '#555',
     textAlign: 'center',
     marginBottom: 4,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   rateValue: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -189,7 +197,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#000',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   daySuffix: {
     fontSize: 16,
@@ -202,19 +210,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 10,
+    opacity: 1,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '500',
-    fontFamily:FONTS.demiBold
-  },
-    backButton: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 20,
-    left: 20,
-    zIndex: 2,
+    fontFamily: FONTS.demiBold,
   },
 });
+
 
 export default ExtendLeaseScreen;

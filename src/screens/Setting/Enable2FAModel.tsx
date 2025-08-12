@@ -24,21 +24,19 @@ const Enable2FAModal: React.FC<Enable2FAModalProps> = ({
   visible,
   onClose,
   onEnable,
-  twoFactorEnabled
+  twoFactorEnabled,
 }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const toggleShowPassword = useCallback(
-    () => setShowPassword(prev => !prev),
-    []
-  );
+  const toggleShowPassword = useCallback(() => setShowPassword(prev => !prev), []);
 
   const isEnableDisabled = useMemo(() => password.trim().length < 6, [password]);
 
   const handleEnable = useCallback(() => {
     if (!isEnableDisabled) {
       onEnable(password);
+      setPassword('');
     }
   }, [password, isEnableDisabled, onEnable]);
 
@@ -47,7 +45,7 @@ const Enable2FAModal: React.FC<Enable2FAModalProps> = ({
       animationType="slide"
       transparent
       visible={visible}
-      onRequestClose={onClose} 
+      onRequestClose={onClose}
     >
       <View style={styles.overlay}>
         <View style={styles.modalBox}>
@@ -59,7 +57,7 @@ const Enable2FAModal: React.FC<Enable2FAModalProps> = ({
           {/* Title */}
           <Text style={styles.title}>Enable 2FA</Text>
           <Text style={styles.subtitle}>
-            Confirm your password to enable two-factor authentication.
+            Confirm your password to {twoFactorEnabled ? 'disable' : 'enable'} two-factor authentication.
           </Text>
 
           {/* Password Input */}
@@ -70,8 +68,11 @@ const Enable2FAModal: React.FC<Enable2FAModalProps> = ({
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              textContentType="password"
             />
-            <TouchableOpacity onPress={toggleShowPassword}>
+            <TouchableOpacity onPress={toggleShowPassword} accessibilityLabel={showPassword ? "Hide password" : "Show password"}>
               <Icon
                 name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                 size={20}
@@ -91,7 +92,7 @@ const Enable2FAModal: React.FC<Enable2FAModalProps> = ({
               onPress={handleEnable}
               disabled={isEnableDisabled}
             >
-              <Text style={styles.enableText}>{twoFactorEnabled ? "Enable" : "Disable"}</Text>
+              <Text style={styles.enableText}>{twoFactorEnabled ? 'Disable' : 'Enable'}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -126,14 +127,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#0F1E2D',
     marginBottom: width * 0.02,
-    fontFamily:FONTS.bold
+    fontFamily: FONTS.bold,
   },
   subtitle: {
     fontSize: width * 0.038,
     color: '#6B6B6B',
     textAlign: 'center',
     marginBottom: width * 0.06,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
   cancelText: {
     color: '#000',
     fontWeight: '500',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   enableBtn: {
     flex: 1,
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
   enableText: {
     color: '#fff',
     fontWeight: '500',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
 });
 

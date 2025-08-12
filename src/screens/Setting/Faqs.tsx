@@ -14,6 +14,7 @@ interface FAQItem {
 }
 
 const FAQScreen: React.FC = () => {
+  
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
 
   const faqData: FAQItem[] = useMemo(
@@ -47,18 +48,23 @@ const FAQScreen: React.FC = () => {
     []
   );
 
+ 
   const handleToggle = useCallback((index: number) => {
     setExpandedIndex(prev => (prev === index ? null : index));
   }, []);
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>
       <Text style={styles.header}>FAQs</Text>
       <Text style={styles.subHeader}>Frequently Asked Questions (FAQs)</Text>
 
       {faqData.map((item, index) => (
         <View key={index} style={styles.card}>
-          <TouchableOpacity onPress={() => handleToggle(index)} style={styles.questionRow}>
+          <TouchableOpacity
+            onPress={() => handleToggle(index)}
+            style={styles.questionRow}
+            activeOpacity={0.7}
+          >
             <Text style={styles.question}>{item.question}</Text>
             <Text style={styles.toggle}>{expandedIndex === index ? '−' : '+'}</Text>
           </TouchableOpacity>
@@ -81,20 +87,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 30,
     marginBottom: 4,
-    fontFamily:FONTS.bold
+    fontFamily: FONTS.bold,
   },
   subHeader: {
     fontSize: 14,
     color: '#666',
     marginBottom: 20,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   card: {
     backgroundColor: '#f9f9f9',
     borderRadius: 10,
     padding: 16,
     marginBottom: 12,
-    elevation: 1,
+    elevation: 1, // Android shadow
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
   },
   questionRow: {
     flexDirection: 'row',
@@ -105,7 +115,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     flex: 1,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   toggle: {
     fontSize: 20,
@@ -116,7 +126,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 14,
     color: '#555',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
 });
 

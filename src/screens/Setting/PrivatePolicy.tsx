@@ -4,8 +4,12 @@ import {
   Text,
   ScrollView,
   StyleSheet,
+  Dimensions,
 } from 'react-native';
+import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
+
+const { width } = Dimensions.get('window');
 
 const TermsPrivacyScreen: React.FC = () => {
   const terms = useMemo(
@@ -45,7 +49,11 @@ const TermsPrivacyScreen: React.FC = () => {
   );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.header}>Terms & Privacy Policy</Text>
       <Text style={styles.subHeader}>Last updated: June 23, 2025</Text>
 
@@ -59,44 +67,44 @@ const TermsPrivacyScreen: React.FC = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
   contentContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 30,
-    paddingBottom: 40,
+    paddingHorizontal: width * 0.05,
+    paddingTop: RFValue(30),
+    paddingBottom: RFValue(40),
   },
   header: {
-    fontSize: 24,
+    fontSize: RFValue(24),
     fontWeight: '600',
-    marginBottom: 4,
-    fontFamily:FONTS.bold
+    marginBottom: RFValue(6),
+    fontFamily: FONTS.bold,
+    color: '#000',
   },
   subHeader: {
-    fontSize: 13,
+    fontSize: RFValue(13),
     color: '#888',
-    marginBottom: 20,
-    fontFamily:FONTS.demiBold
+    marginBottom: RFValue(20),
+    fontFamily: FONTS.demiBold,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: RFValue(22),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: RFValue(18),
     fontWeight: '900',
-    marginBottom: 4,
+    marginBottom: RFValue(6),
     color: '#111',
-    fontFamily:FONTS.bold
+    fontFamily: FONTS.bold,
   },
   sectionContent: {
-    fontSize: 13,
-    color: '#707070ff',
-    lineHeight: 20,
-    fontFamily:FONTS.demiBold
+    fontSize: RFValue(13),
+    color: '#707070',
+    lineHeight: RFValue(20),
+    fontFamily: FONTS.demiBold,
   },
 });
 

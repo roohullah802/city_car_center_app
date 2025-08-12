@@ -14,6 +14,7 @@ import BrandCard from '../../components/BrandCard';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { FONTS } from '../../fonts/fonts';
 
+
 const brandData: { name: string; image: ImageSourcePropType }[] = [
   { name: 'BMW', image: require('../../assests/bmwlogo.jpeg') },
   { name: 'Tesla', image: require('../../assests/bmwlogo.jpeg') },
@@ -33,7 +34,7 @@ const brandData: { name: string; image: ImageSourcePropType }[] = [
   { name: 'Volkswagen', image: require('../../assests/bmwlogo.jpeg') },
 ];
 
-const TopBrandsScreen: React.FC<{navigation: any}> = ({ navigation }) => {
+const TopBrandsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [search, setSearch] = useState('');
 
   // Filter only when search changes
@@ -44,9 +45,12 @@ const TopBrandsScreen: React.FC<{navigation: any}> = ({ navigation }) => {
   }, [search]);
 
   // Stable renderItem so FlatList doesn't re-render unnecessarily
-  const renderBrand = useCallback(({ item }: { item: typeof brandData[0] }) => {
-    return <BrandCard image={item.image} />;
-  }, []);
+  const renderBrand = useCallback(
+    ({ item }: { item: typeof brandData[0] }) => {
+      return <BrandCard image={item.image} />;
+    },
+    []
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -69,6 +73,7 @@ const TopBrandsScreen: React.FC<{navigation: any}> = ({ navigation }) => {
           onChangeText={setSearch}
           style={styles.input}
           placeholderTextColor="#999"
+          clearButtonMode="while-editing"
         />
       </View>
 
@@ -85,15 +90,8 @@ const TopBrandsScreen: React.FC<{navigation: any}> = ({ navigation }) => {
       ) : (
         <View style={styles.noData}>
           <Icon name="car-sport" size={30} color="#000" />
-          <Text style={{ width: 150 }}>No Results Found</Text>
-          <Text
-            style={{
-              fontSize: 12,
-              color: 'gray',
-              width: 300,
-              textAlign: 'center',
-            }}
-          >
+          <Text style={styles.noDataText}>No Results Found</Text>
+          <Text style={styles.noDataSubText}>
             We currently have no Search Results for “{search}”. Please try with
             different search text.
           </Text>
@@ -103,6 +101,7 @@ const TopBrandsScreen: React.FC<{navigation: any}> = ({ navigation }) => {
   );
 };
 
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', paddingHorizontal: 16 },
   header: {
@@ -111,7 +110,12 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     gap: 12,
   },
-  title: { fontSize: 22, fontWeight: 'bold', color: '#0F1E2D', fontFamily:FONTS.bold },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#0F1E2D',
+    fontFamily: FONTS.bold,
+  },
   searchBox: {
     flexDirection: 'row',
     backgroundColor: '#F2F2F2',
@@ -122,9 +126,38 @@ const styles = StyleSheet.create({
     height: 44,
   },
   searchIcon: { marginRight: 8 },
-  input: { flex: 1, fontSize: 14, color: '#333', fontFamily:FONTS.demiBold },
-  grid: { paddingBottom: 16, justifyContent: 'center' },
-  noData: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  input: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
+    fontFamily: FONTS.demiBold,
+  },
+  grid: {
+    justifyContent: 'center',
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  noData: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  noDataText: {
+    marginTop: 12,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000',
+  },
+  noDataSubText: {
+    fontSize: 12,
+    color: 'gray',
+    marginTop: 8,
+    textAlign: 'center',
+    maxWidth: 300,
+  },
 });
 
 export default TopBrandsScreen;
