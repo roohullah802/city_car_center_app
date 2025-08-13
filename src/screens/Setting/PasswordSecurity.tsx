@@ -88,8 +88,7 @@ const PasswordSecurityScreen: React.FC<{ navigation: any }> = ({ navigation }) =
         visible={isModalVisible}
         twoFactorEnabled={twoFactorEnabled}
         onClose={() => setIsModalVisible(false)}
-        onEnable={(password) => {
-          console.log('Password:', password);
+        onEnable={() => {
           setTwoFactorEnabled(true);
           setIsModalVisible(false);
         }}

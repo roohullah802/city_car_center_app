@@ -18,4 +18,5 @@ export type RootStackParamList = {
   extendLease: undefined;
   carDetails: undefined;
   dateAndTime: undefined;
+  leaseDetails: undefined;
 };

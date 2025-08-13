@@ -22,21 +22,23 @@ const SinglePageProfile: React.FC<{ navigation: any }> = ({ navigation }) => {
   const ages = Array.from({ length: 100 }, (_, i) => i + 1);
   const listRef = useRef<FlatList>(null);
 
-  // Scroll to initial age on mount
+  
   useEffect(() => {
     if (listRef.current) {
-      // Index of the selectedAge - 1 (0-based)
       listRef.current.scrollToIndex({ index: selectedAge - 1, animated: false });
     }
   }, [selectedAge]);
 
   const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = e.nativeEvent.contentOffset.x;
-    // Adding padding offset for correct index calculation
-    const adjustOffset = offsetX + width * 0.15;
-    const index = Math.round(adjustOffset / ITEM_WIDTH);
+    
 
+    const adjustOffset = offsetX + width * 0.15;
+    
+    const index = Math.round(adjustOffset / ITEM_WIDTH);
+  
     const age = ages[index];
+    
     if (age !== undefined) {
       setSelectedAge(age);
     }
@@ -92,6 +94,8 @@ const SinglePageProfile: React.FC<{ navigation: any }> = ({ navigation }) => {
   );
 };
 
+console.log(width)
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -131,7 +135,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   ageList: {
-    marginBottom: 24,
+    marginBottom: 15,
   },
   saveButton: {
     backgroundColor: '#000',

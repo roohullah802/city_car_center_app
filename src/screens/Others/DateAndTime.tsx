@@ -1,23 +1,19 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 const DateAndTimeScreen: React.FC<{navigation: any}> = () => {
-  const [pickUpDate, setPickUpDate] = useState(new Date(2025, 5, 16)); // June 16, 2025
+  const [pickUpDate, setPickUpDate] = useState(new Date(Date.now()));
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [withDriver, setWithDriver] = useState(false);
 
-  // Memoized Return Date = Pickup + 6 days
   const returnDate = useMemo(() => {
     const result = new Date(pickUpDate);
     result.setDate(pickUpDate.getDate() + 6);
     return result;
   }, [pickUpDate]);
 
-  const toggleDriver = useCallback(() => {
-    setWithDriver(prev => !prev);
-  }, []);
+
 
   const onChangeDate = useCallback((event: any, selectedDate?: Date) => {
     setShowDatePicker(Platform.OS === 'ios');
@@ -37,11 +33,6 @@ const DateAndTimeScreen: React.FC<{navigation: any}> = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Date and Time</Text>
-
-      <View style={styles.switchContainer}>
-        <Text style={styles.switchLabel}>Book with driver</Text>
-        <Switch value={withDriver} onValueChange={toggleDriver} />
-      </View>
 
       <TouchableOpacity style={styles.dateBox} onPress={() => setShowDatePicker(true)}>
         <Text style={styles.dateLabel}>Pick-up Date</Text>
@@ -85,16 +76,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     color: '#002B3F'
   },
-  switchContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20
-  },
-  switchLabel: {
-    fontSize: 16,
-    color: '#444'
-  },
+ 
   dateBox: {
     backgroundColor: '#f6f6f6',
     padding: 15,

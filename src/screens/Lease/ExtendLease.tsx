@@ -29,6 +29,7 @@ const ExtendLeaseScreen: React.FC<{navigation: any}> = ({navigation}) => {
     { label: 'Monthly Rate', subLabel: '(-15%)', value: 880.60, type: 'monthly' },
   ], []);
 
+  
   const handleSelectRate = useCallback((option: RateOption) => {
     setSelectedRate(option);
   }, []);

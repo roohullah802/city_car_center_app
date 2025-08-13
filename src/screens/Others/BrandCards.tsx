@@ -81,7 +81,7 @@ const TopBrandsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       {filteredBrands.length > 0 ? (
         <FlatList
           data={filteredBrands}
-          numColumns={4}
+          numColumns={4 }
           keyExtractor={(item) => item.name}
           contentContainerStyle={styles.grid}
           renderItem={renderBrand}

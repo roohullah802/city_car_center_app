@@ -7,33 +7,21 @@ import {
   View,
   TouchableOpacity,
   FlatList,
+  Pressable,
 } from 'react-native';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FONTS } from '../../fonts/fonts';
 
 
 const AllLeases: React.FC<{navigation: any}> = ({navigation}) => {
   const leases = [1, 2, 3,4,5];
 
-  return (
-    <SafeAreaView style={styles.container}>
-      {Platform.OS === 'ios' && (
-        <View style={styles.statusBarBackground} />
-      )}
-      <StatusBar backgroundColor="transparent" barStyle="dark-content" />
-
-      {leases.length > 0 ? (
-        <View style={styles.contentContainer}>
-          <Text style={styles.topText}>Car lease</Text>
-          <Text style={styles.topDescription}>
-            You have {leases.length} car{leases.length > 1 ? 's' : ''} at lease so far
-          </Text>
-
-          <FlatList
-            data={leases}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={() => (
-              <View style={styles.leaseCard}>
+  const leasesCallBack = useCallback(()=>{
+    return(
+      <Pressable onPress={()=> navigation.navigate("leaseDetails")} style={({pressed})=>[{
+          opacity: pressed ? 0.9 : 1
+      }]}>
+        <View style={styles.leaseCard}>
                 <View style={styles.cardHeader}>
                   <Text style={styles.leaseTitle}>My Lease</Text>
                   <TouchableOpacity style={styles.extendButton} onPress={()=> navigation.navigate("extendLease")}>
@@ -58,7 +46,28 @@ const AllLeases: React.FC<{navigation: any}> = ({navigation}) => {
                   ))}
                 </View>
               </View>
-            )}
+      </Pressable>
+    )
+  },[navigation])
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {Platform.OS === 'ios' && (
+        <View style={styles.statusBarBackground} />
+      )}
+      <StatusBar backgroundColor="transparent" barStyle="dark-content" />
+
+      {leases.length > 0 ? (
+        <View style={styles.contentContainer}>
+          <Text style={styles.topText}>Car lease</Text>
+          <Text style={styles.topDescription}>
+            You have {leases.length} car{leases.length > 1 ? 's' : ''} at lease so far
+          </Text>
+
+          <FlatList
+            data={leases}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={leasesCallBack}
             showsVerticalScrollIndicator={false}
           />
         </View>

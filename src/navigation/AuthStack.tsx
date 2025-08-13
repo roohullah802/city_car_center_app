@@ -18,6 +18,7 @@ import ChangePasswordScreen from '../screens/Setting/ChangePassword';
 import ExtendLeaseScreen from '../screens/Lease/ExtendLease';
 import CarLeaseCard from '../screens/Others/CarLeaseDetails';
 import DateAndTimeScreen from '../screens/Others/DateAndTime';
+import LeaseDetailsScreen from '../screens/Lease/LeaseDetails';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -77,6 +78,10 @@ const AuthStack: React.FC = () => {
 
       <Stack.Screen name="dateAndTime">
         {props => <DateAndTimeScreen {...props} />}
+      </Stack.Screen>
+
+      <Stack.Screen name="leaseDetails">
+        {props => <LeaseDetailsScreen {...props} />}
       </Stack.Screen>
     </Stack.Navigator>
   );

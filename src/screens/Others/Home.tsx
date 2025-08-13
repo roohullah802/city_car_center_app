@@ -12,6 +12,7 @@ import {
   Dimensions,
   SafeAreaView,
   Platform,
+  Pressable,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useIsFocused, useRoute } from '@react-navigation/native';
@@ -46,7 +47,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const leaseDataCallBack = useCallback(() => {
     return (
-      <View style={styles.leaseCard}>
+      <Pressable onPress={()=> navigation.navigate("leaseDetails")} style={({pressed})=>[{opacity: pressed ? 0.8 : 1}]}>
+        <View style={styles.leaseCard}>
         <View style={styles.view}>
           <Text style={styles.leaseTitle}>My Lease</Text>
           <TouchableOpacity
@@ -72,6 +74,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           ))}
         </View>
       </View>
+      </Pressable>
     );
   }, [navigation]);
 
@@ -89,7 +92,9 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const carsCallBack = useCallback(
     (item: any) => {
       return (
-        <TouchableOpacity onPress={() => navigation.navigate('carDetails')}>
+        <Pressable onPress={() => navigation.navigate('carDetails')} style={({pressed})=>[
+          {opacity: pressed ? 0.9 : 1}
+        ]}>
           <View style={styles.carCard}>
             <View style={styles.carImageSetup}>
               <Image source={item.image} style={styles.carThumb} />
@@ -100,7 +105,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               <Text style={styles.carPrice}>{item.price}/day</Text>
             </View>
           </View>
-        </TouchableOpacity>
+        </Pressable>
       );
     },
     [navigation]
@@ -270,7 +275,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 5,
     borderRadius: 50,
     shadowColor: '#000',
     shadowOpacity: 0.1,
