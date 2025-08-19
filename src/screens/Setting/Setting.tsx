@@ -13,11 +13,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import LogoutModal from '../Auth/Logout';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux.toolkit/store';
 
 const { width } = Dimensions.get('window');
 
 const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
+
+  const {isLoggedIn} = useSelector((state: RootState)=> state.user);
 
   const handleVisible = () => setIsVisible(prev => !prev);
 
@@ -38,7 +42,13 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Text style={styles.name}>Faizan Farooq</Text>
             <Text style={styles.email}>Faizann@example.com</Text>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+          <TouchableOpacity onPress={() => {
+            if (!isLoggedIn) {
+              navigation.navigate("Login")
+              return
+            }
+            navigation.navigate("Profile")
+          }}>
             <Text style={styles.editBtn}>Edit</Text>
           </TouchableOpacity>
         </View>
@@ -46,8 +56,20 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
         {/* Profile & Settings */}
         <Text style={styles.sectionTitle}>Profile & Settings</Text>
         <View style={styles.card}>
-          <SettingsRow icon="person-outline" label="My Profile" editable onPress={() => navigation.navigate("Profile")} />
-          <SettingsRow icon="lock-closed-outline" label="Password & Security" editable onPress={() => navigation.navigate("passwordSecurity")} />
+          <SettingsRow icon="person-outline" label="My Profile" editable onPress={() => {
+            if (!isLoggedIn) {
+              navigation.navigate("Login")
+              return
+            }
+            navigation.navigate("Profile")
+          }} />
+          <SettingsRow icon="lock-closed-outline" label="Password & Security" editable onPress={() => {
+            if (!isLoggedIn) {
+              navigation.navigate("Login")
+              return;
+            }
+            navigation.navigate("passwordSecurity")
+          }} />
         </View>
 
         {/* Helpful Desk */}
@@ -60,7 +82,13 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         {/* Logout */}
         <View style={styles.card}>
-          <SettingsRow icon="log-out-outline" label="Logout" onPress={handleVisible} />
+          <SettingsRow icon="log-out-outline" label="Logout" onPress={()=>{
+            if (!isLoggedIn) {
+              navigation.navigate("Login")
+              return;
+            }
+            handleVisible()
+          }} />
         </View>
       </ScrollView>
 

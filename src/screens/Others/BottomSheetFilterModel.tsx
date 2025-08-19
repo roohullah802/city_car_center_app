@@ -1,117 +1,124 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { Modalize } from 'react-native-modalize';
 import Slider from '@react-native-community/slider';
 import { FONTS } from '../../fonts/fonts';
+import { useGetBrandsQuery } from '../../redux.toolkit/rtk/apis';
+// import { InteractionManager } from 'react-native';
+
 
 
 interface FilterModalProps {
-  onApply: () => void;
+  onClose: () => void;
+  priceRange: [number, number];
+  setPriceRange: React.Dispatch<React.SetStateAction<[number, number]>>
+  setSelectedBrand: React.Dispatch<React.SetStateAction<string | null>>
+  selectedBrand: string | null;
+  
 }
 
-const brands = ['Mazda', 'Dodge', 'Ferrari', 'Nissan'];
 
-const BottomSheetFilterModal = forwardRef<Modalize, FilterModalProps>(
-  ({ onApply }, ref) => {
-    const [selectedBrand, setSelectedBrand] = React.useState<string | null>('Mazda');
-    const [priceRange, setPriceRange] = React.useState<[number, number]>([1, 500]);
-    const [location, setLocation] = React.useState<number>(30);
+const BottomSheetFilterModal = React.memo(forwardRef<Modalize, FilterModalProps>(
+  ({ onClose, setPriceRange, setSelectedBrand, selectedBrand, priceRange }, ref) => {
+    const [localPrice, setLocalPrice] = useState<[number, number]>(priceRange);
+    const [localBrand, setLocalBrand] = useState<string | null>(selectedBrand);
 
-    const clearFilter = ()=>{
-        setSelectedBrand("Mazda");
-        setPriceRange([1,50]);
-    }
+    const { data: Brands, isLoading } = useGetBrandsQuery(undefined);
+    
+    
+
+    useEffect(() => {
+      setLocalBrand(selectedBrand);
+      setLocalPrice(priceRange);
+    }, [selectedBrand, priceRange]);
+
+    const handleApplyFilters = useCallback(() => {
+      setSelectedBrand(localBrand);
+      setPriceRange(localPrice);
+      onClose();
+    }, [localBrand, localPrice,onClose, setPriceRange, setSelectedBrand]);
+
+    const clearFilter = () => {
+      setLocalBrand(null);
+      setSelectedBrand(null);
+      setPriceRange([1,1000]);
+      setLocalPrice([1, 1000]);
+    };
 
     return (
-      <Modalize
-        ref={ref}
-        adjustToContentHeight
-        handlePosition="inside"
-        modalStyle={styles.modal}
-        scrollViewProps={{ showsVerticalScrollIndicator: false }}
-      >
+      <Modalize ref={ref} adjustToContentHeight modalStyle={styles.modal}>
         <ScrollView style={{ paddingHorizontal: 20, paddingTop: 10 }}>
+          {/* Header */}
           <View style={styles.headerRow}>
             <Text style={styles.title}>Filters</Text>
-            <TouchableOpacity onPress={()=> clearFilter()}>
+            <TouchableOpacity onPress={clearFilter}>
               <Text style={styles.clearText}>Clear filter</Text>
             </TouchableOpacity>
           </View>
 
           {/* Brand */}
-          <Text style={styles.label}>Brand</Text>
-          <View style={styles.brandContainer}>
-            {brands.map((brand) => (
-              <TouchableOpacity
-                key={brand}
-                style={[
-                  styles.brandButton,
-                  selectedBrand === brand && styles.brandButtonSelected,
-                ]}
-                onPress={() => setSelectedBrand(brand)}
-              >
-                <Text
-                  style={[
-                    styles.brandText,
-                    selectedBrand === brand && styles.brandTextSelected,
-                  ]}
-                >
-                  {brand}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Price Range */}
           <Text style={styles.label}>Price Range</Text>
           <View style={styles.sliderRow}>
-            <Text style={styles.sliderValue}>${priceRange[0]}</Text>
-            <Text style={styles.sliderValue}>${priceRange[1]}</Text>
+            <Text style={styles.sliderValue}>${localPrice[0]}</Text>
+            <Text style={styles.sliderValue}>${localPrice[1]}</Text>
           </View>
           <Slider
             style={{ width: '100%' }}
             minimumValue={1}
             maximumValue={1000}
             step={1}
-            minimumTrackTintColor="#000"
-            maximumTrackTintColor="#ccc"
-            value={priceRange[1]}
-            onValueChange={(value) => setPriceRange([1, value])}
+            value={localPrice[1]}
+            onValueChange={(value) => setLocalPrice([1, value])}
           />
 
-          {/* Location */}
-          <Text style={[styles.label, { marginTop: 20 }]}>Location</Text>
-          <View style={styles.sliderRow}>
-            <Text style={styles.sliderValue}>1km</Text>
-            <Text style={styles.sliderValue}>100km</Text>
+
+         
+
+          {/* Price Slider */}
+           <Text style={styles.label}>Brand</Text>
+          <View style={styles.brandContainer}>
+            {isLoading ? (
+              <ActivityIndicator size="large" color="black" />
+            ) : (
+              Brands?.brands?.map(({ brand }: any) => (
+                <TouchableOpacity
+                  key={brand}
+                  style={[
+                    styles.brandButton,
+                    localBrand === brand && styles.brandButtonSelected,
+                  ]}
+                  onPress={() => setLocalBrand(brand)}
+                >
+                  <Text
+                    style={[
+                      styles.brandText,
+                      localBrand === brand && styles.brandTextSelected,
+                    ]}
+                  >
+                    {brand}
+                  </Text>
+                </TouchableOpacity>
+              ))
+            )}
           </View>
-          <Slider
-            style={{ width: '100%' }}
-            minimumValue={1}
-            maximumValue={100}
-            step={1}
-            minimumTrackTintColor="#000"
-            maximumTrackTintColor="#ccc"
-            value={location}
-            onValueChange={setLocation}
-          />
-          <Text style={styles.sliderCenterLabel}>{location}km</Text>
 
-          {/* Search Button */}
-          <TouchableOpacity style={styles.searchButton} onPress={onApply}>
-            <Text style={styles.searchButtonText}>Search</Text>
+          {/* Apply */}
+          <TouchableOpacity style={styles.searchButton} onPress={handleApplyFilters}>
+            <Text style={styles.searchButtonText}>Apply Filters</Text>
           </TouchableOpacity>
         </ScrollView>
       </Modalize>
     );
   }
-);
+));
+
 
 const styles = StyleSheet.create({
   modal: {

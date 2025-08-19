@@ -94,7 +94,6 @@ const SinglePageProfile: React.FC<{ navigation: any }> = ({ navigation }) => {
   );
 };
 
-console.log(width)
 
 const styles = StyleSheet.create({
   container: {

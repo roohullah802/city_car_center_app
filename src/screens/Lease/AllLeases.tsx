@@ -11,57 +11,75 @@ import {
 } from 'react-native';
 import React, { useCallback } from 'react';
 import { FONTS } from '../../fonts/fonts';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux.toolkit/store';
+import { useFocusEffect } from '@react-navigation/native';
 
+const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const leases = [1, 2, 3, 4, 5];
 
-const AllLeases: React.FC<{navigation: any}> = ({navigation}) => {
-  const leases = [1, 2, 3,4,5];
+  const { isLoggedIn } = useSelector((state: RootState) => state.user);
 
-  const leasesCallBack = useCallback(()=>{
-    return(
-      <Pressable onPress={()=> navigation.navigate("leaseDetails")} style={({pressed})=>[{
-          opacity: pressed ? 0.9 : 1
-      }]}>
+  const leasesCallBack = useCallback(() => {
+    return (
+      <Pressable
+        onPress={() => navigation.navigate('leaseDetails')}
+        style={({ pressed }) => [
+          {
+            opacity: pressed ? 0.9 : 1,
+          },
+        ]}
+      >
         <View style={styles.leaseCard}>
-                <View style={styles.cardHeader}>
-                  <Text style={styles.leaseTitle}>My Lease</Text>
-                  <TouchableOpacity style={styles.extendButton} onPress={()=> navigation.navigate("extendLease")}>
-                    <Text style={styles.extendText}>Extend Lease</Text>
-                  </TouchableOpacity>
-                </View>
-                <Text style={styles.leaseModel}>
-                  Porsche 2019 - 911 Carrera S
-                </Text>
+          <View style={styles.cardHeader}>
+            <Text style={styles.leaseTitle}>My Lease</Text>
+            <TouchableOpacity
+              style={styles.extendButton}
+              onPress={() => navigation.navigate('extendLease')}
+            >
+              <Text style={styles.extendText}>Extend Lease</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.leaseModel}>Porsche 2019 - 911 Carrera S</Text>
 
-                <View style={styles.timerContainer}>
-                  {[
-                    { value: '00', label: 'day' },
-                    { value: '22', label: 'hr' },
-                    { value: '33', label: 'min' },
-                    { value: '44', label: 'sec' },
-                  ].map((item, index) => (
-                    <View key={index} style={styles.timerBlock}>
-                      <Text style={styles.ti}>{item.value}</Text>
-                      <Text style={styles.timerLabel}>{item.label}</Text>
-                    </View>
-                  ))}
-                </View>
+          <View style={styles.timerContainer}>
+            {[
+              { value: '00', label: 'day' },
+              { value: '22', label: 'hr' },
+              { value: '33', label: 'min' },
+              { value: '44', label: 'sec' },
+            ].map((item, index) => (
+              <View key={index} style={styles.timerBlock}>
+                <Text style={styles.ti}>{item.value}</Text>
+                <Text style={styles.timerLabel}>{item.label}</Text>
               </View>
+            ))}
+          </View>
+        </View>
       </Pressable>
-    )
-  },[navigation])
+    );
+  }, [navigation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!isLoggedIn) {
+        navigation.navigate('Login');
+        return;
+      }
+    }, [navigation, isLoggedIn]),
+  );
 
   return (
     <SafeAreaView style={styles.container}>
-      {Platform.OS === 'ios' && (
-        <View style={styles.statusBarBackground} />
-      )}
+      {Platform.OS === 'ios' && <View style={styles.statusBarBackground} />}
       <StatusBar backgroundColor="transparent" barStyle="dark-content" />
 
       {leases.length > 0 ? (
         <View style={styles.contentContainer}>
           <Text style={styles.topText}>Car lease</Text>
           <Text style={styles.topDescription}>
-            You have {leases.length} car{leases.length > 1 ? 's' : ''} at lease so far
+            You have {leases.length} car{leases.length > 1 ? 's' : ''} at lease
+            so far
           </Text>
 
           <FlatList
@@ -155,7 +173,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 30,
     marginTop: 10,
-    fontFamily: "BebasNeue Regular",
+    fontFamily: 'BebasNeue Regular',
   },
   timerLabel: {
     width: 30,
@@ -178,4 +196,3 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.demiBold,
   },
 });
-

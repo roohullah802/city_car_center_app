@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,19 @@ import {
   Modal,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { FONTS } from '../../fonts/fonts';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../redux.toolkit/store';
+import Toast from 'react-native-toast-message';
+import { logout, setLoading } from '../../redux.toolkit/slices/userSlice';
+import axios from 'axios';
+import { BASE_AUTH_URL } from '@env';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../types/types';
 
 const { width } = Dimensions.get('window');
 
@@ -17,11 +27,55 @@ interface LogoutModalProps {
   onClose: () => void;
 }
 
-const LogoutModal: React.FC<LogoutModalProps> = ({
-  visible,
-  onClose,
-}) => {
+const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const dispatch = useDispatch<AppDispatch>();
+  const { isLoggedIn, isLoading } = useSelector(
+    (state: RootState) => state.user,
+  );
+  
 
+  const handleLogout = async () => {
+    try {
+      if (!isLoggedIn) {
+        Toast.show({
+          type: 'success',
+          text1: 'Please login first',
+        });
+        return;
+      }
+
+      dispatch(setLoading(true));
+      const response = await axios.post(
+        BASE_AUTH_URL + '/logout',
+        null,
+        {withCredentials: true},
+      );
+      const usr = response.data;
+      if (usr.success) {
+        Toast.show({
+          type: 'success',
+          text1: usr.message,
+        });
+        dispatch(logout());
+        onClose();
+        navigation.navigate("Login");
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: usr.message,
+        });
+      }
+    } catch (error: any) {
+      Toast.show({
+        type: 'success',
+        text1: error.response.data.message,
+      });
+      onClose();
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
   return (
     <Modal
@@ -46,8 +100,11 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
 
           {/* Buttons */}
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={[styles.enableBtn]}>
-              <Text style={styles.enableText}>{'Logout'}</Text>
+            <TouchableOpacity disabled={isLoading} style={[styles.enableBtn]} onPress={handleLogout}>
+              {isLoading ? (<ActivityIndicator size={"small"} color={"#fff"} />) : (
+                <Text style={styles.enableText}>{'Logout'}</Text>
+              ) }
+              
             </TouchableOpacity>
           </View>
         </View>
@@ -81,14 +138,14 @@ const styles = StyleSheet.create({
     fontSize: width * 0.05,
     color: '#0F1E2D',
     marginBottom: width * 0.02,
-    fontFamily:FONTS.bold
+    fontFamily: FONTS.bold,
   },
   subtitle: {
     fontSize: width * 0.038,
     color: '#6B6B6B',
     textAlign: 'center',
     marginBottom: width * 0.06,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -124,7 +181,7 @@ const styles = StyleSheet.create({
   enableText: {
     color: '#fff',
     fontWeight: '500',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
 });
 

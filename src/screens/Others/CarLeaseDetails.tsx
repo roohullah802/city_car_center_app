@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,16 +16,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts'; // Ensure this path is correct
+import { useGetCarDetailsQuery } from '../../redux.toolkit/rtk/apis';
 
 const { width } = Dimensions.get('window');
-
-const carImages = [
-  { id: 1, image: require('../../assests/car1.jpg') },
-  { id: 2, image: require('../../assests/car2.jpg') },
-  { id: 3, image: require('../../assests/car1.jpg') },
-  { id: 4, image: require('../../assests/car2.jpg') },
-  { id: 5, image: require('../../assests/car1.jpg') },
-];
 
 type RateOption = {
   label: string;
@@ -32,24 +26,57 @@ type RateOption = {
   type: string;
 };
 
-const CarLeaseDetails: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const rateOptions: RateOption[] = useMemo(() => [
-    { label: 'Max Power', value: 44.4, type: 'hp' },
-    { label: '0-60 mph', value: 295.0, type: 'sec' },
-    { label: 'Top Speed', value: 880.6, type: 'mph' },
-  ], []);
+const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
+  navigation,
+  route,
+}) => {
+  const { _id } = route.params;
 
   const [activeImage, setActiveImage] = useState<number>(0);
+  const { data: Details, isLoading, isError } = useGetCarDetailsQuery(_id, { skip: !_id });
+  const data = Details?.data;
+  const image = data?.images;
 
-  const renderCarImage = useCallback(({ item }: { item: any }) => (
-    <View style={styles.carWrapper}>
-      <Image source={item.image} style={styles.carImage} resizeMode="cover" />
-    </View>
-  ), []);
+  let images = [];
+
+  const rateOptions: RateOption[] = useMemo(
+    () => [
+      { label: 'Max Power', value: data?.maxPower, type: 'hp' },
+      { label: '0-60 mph', value: data?.mph, type: 'sec' },
+      { label: 'Top Speed', value: data?.topSpeed, type: 'mph' },
+    ],
+    [data?.maxPower, data?.mph, data?.topSpeed],  
+  );
+
+  try {
+    if (typeof image === 'string' && image !== 'undefined') {
+      images = JSON.parse(image);
+    } else {
+      console.warn('imagesString is not a valid JSON string:', image);
+    }
+  } catch (error) {
+    console.error('Failed to parse images JSON:', error);
+  }
+
+  const renderCarImage = useCallback(
+    ({ item }: { item: any }) => (
+      <View key={item?.public_id} style={styles.carWrapper}>
+        <Image
+          source={{ uri: item?.url }}
+          style={styles.carImage}
+          resizeMode="cover"
+        />
+      </View>
+    ),
+    [],
+  );
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
-      <SafeAreaView style={styles.container}>
+      {isLoading || isError ? (
+        <ActivityIndicator style={styles.indicator} size={"large"} color={"black"} />
+      ) : (
+        <SafeAreaView style={styles.container}>
         {/* Back Button */}
         <TouchableOpacity
           style={styles.backButton}
@@ -59,28 +86,33 @@ const CarLeaseDetails: React.FC<{ navigation: any }> = ({ navigation }) => {
         </TouchableOpacity>
 
         {/* Title */}
-        <Text style={styles.titleText}>Mercedes-Benz EQC 300kW</Text>
+        <Text style={styles.titleText}>{data?.modelName.charAt(0).toLocaleUpperCase() + data?.modelName?.slice(1)}</Text>
 
         {/* Status Boxes */}
         <View style={styles.statusRow}>
-          <View style={styles.statusBox}>
-            <View style={styles.statusDot} />
-            <Text style={styles.statusText}>Available</Text>
-          </View>
+          {data?.available ? (
+            <View style={styles.statusBox}>
+              <View style={styles.statusDot} />
+              <Text style={styles.statusText}>Available</Text>
+            </View>
+          ) : (
+            ''
+          )}
           <View style={styles.statusBox}>
             <Text style={styles.statusText}>Fully featured</Text>
           </View>
         </View>
 
         {/* Image Carousel */}
-        <FlatList
-          data={carImages}
+       
+         <FlatList
+          data={images}
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
-          keyExtractor={item => item.id.toString()}
-          renderItem={renderCarImage}
-          onScroll={(e) => {
+          keyExtractor={item => item?.public_id}
+          renderItem={item => renderCarImage(item)}
+          onScroll={e => {
             const x = e.nativeEvent.contentOffset.x;
             setActiveImage(Math.round(x / width));
           }}
@@ -88,7 +120,7 @@ const CarLeaseDetails: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         {/* Image Dots */}
         <View style={styles.dotsContainer}>
-          {carImages.map((_, i) => (
+          {images.map((_: any, i: any) => (
             <View
               key={i}
               style={[
@@ -101,7 +133,7 @@ const CarLeaseDetails: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         {/* Rating */}
         <Text style={styles.ratingText}>
-          ⭐ 5.0 <Text style={styles.ratingSub}> (100+ Reviews)</Text>
+          ⭐ {data?.totalReviews} <Text style={styles.ratingSub}>Reviews</Text>
         </Text>
 
         {/* Car Info */}
@@ -110,27 +142,31 @@ const CarLeaseDetails: React.FC<{ navigation: any }> = ({ navigation }) => {
           <View style={styles.infoColumn}>
             <View style={styles.infoItem}>
               <Icon name="person" size={16} />
-              <Text style={styles.infoText}>2 Passengers</Text>
+              <Text style={styles.infoText}>{data?.passengers} Passengers</Text>
             </View>
             <View style={styles.infoItem}>
               <Icon name="snow" size={16} />
-              <Text style={styles.infoText}>Air Conditioning</Text>
+              <Text style={styles.infoText}>
+                {data?.airCondition === 'true'
+                  ? 'Air Conditioning'
+                  : 'No air Condition'}
+              </Text>
             </View>
           </View>
           <View style={styles.infoColumn}>
             <View style={styles.infoItem}>
               <MaterialCommunityIcons name="car-door" size={16} />
-              <Text style={styles.infoText}>2 Doors</Text>
+              <Text style={styles.infoText}>{data?.doors} Doors</Text>
             </View>
             <View style={styles.infoItem}>
               <MaterialCommunityIcons name="gas-station" size={16} />
-              <Text style={styles.infoText}>Fuel Info</Text>
+              <Text style={styles.infoText}>Fuel Info: {data?.fuelType}</Text>
             </View>
           </View>
         </View>
         <View style={styles.infoItem}>
           <MaterialCommunityIcons name="car-shift-pattern" size={16} />
-          <Text style={styles.infoText}>Manual</Text>
+          <Text style={styles.infoText}>{data?.transmission}</Text>
         </View>
 
         {/* Car Specs */}
@@ -140,7 +176,8 @@ const CarLeaseDetails: React.FC<{ navigation: any }> = ({ navigation }) => {
             <View key={idx} style={styles.specCard}>
               <Text style={styles.specLabel}>{option.label}</Text>
               <Text style={styles.specValue}>
-                {option.value.toFixed(2)} <Text style={styles.specUnit}>{option.type}</Text>
+                {option.value}{' '}
+                <Text style={styles.specUnit}>{option.type}</Text>
               </Text>
             </View>
           ))}
@@ -150,12 +187,12 @@ const CarLeaseDetails: React.FC<{ navigation: any }> = ({ navigation }) => {
         <Text style={styles.sectionTitle}>Price & Lease Info</Text>
         <View style={styles.priceRow}>
           <Text style={styles.priceLabel}>Weekly Rate:</Text>
-          <Text style={styles.priceValue}>$0/week</Text>
+          <Text style={styles.priceValue}>${data?.weeklyRate}/week</Text>
         </View>
         <View style={styles.line} />
         <View style={styles.priceRow}>
           <Text style={styles.priceLabel}>Tax:</Text>
-          <Text style={styles.priceValue}>$8.4 flat (7 days)</Text>
+          <Text style={styles.priceValue}>${data?.tax} flat (7 days)</Text>
         </View>
         <View style={styles.line} />
         <View style={styles.priceRow}>
@@ -164,10 +201,14 @@ const CarLeaseDetails: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
 
         {/* Lease Button */}
-        <TouchableOpacity style={styles.leaseButton} onPress={() => navigation.navigate('dateAndTime')}>
+        <TouchableOpacity
+          style={styles.leaseButton}
+          onPress={() => navigation.navigate('dateAndTime')}
+        >
           <Text style={styles.leaseButtonText}>Lease this car</Text>
         </TouchableOpacity>
       </SafeAreaView>
+      )}
     </ScrollView>
   );
 };
@@ -222,7 +263,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.demiBold,
   },
   carWrapper: {
-    width: width * 0.90,
+    width: width * 0.9,
     height: 200,
     borderRadius: 10,
     overflow: 'hidden',
@@ -243,16 +284,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   dot: {
-    height: 6,
+    height: 4,
     borderRadius: 3,
     backgroundColor: '#000',
-    marginHorizontal: 3,
+    marginHorizontal: 2,
   },
   activeDot: {
-    width: 25,
+    width: 22,
   },
   inactiveDot: {
-    width: 7,
+    width: 5,
   },
   ratingText: {
     fontSize: RFValue(10),
@@ -352,4 +393,7 @@ const styles = StyleSheet.create({
     fontSize: RFValue(14),
     fontFamily: FONTS.demiBold,
   },
+  indicator:{
+    marginTop: 300,
+  }
 });

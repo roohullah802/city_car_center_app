@@ -13,31 +13,21 @@ import {
   SafeAreaView,
   Platform,
   Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useIsFocused, useRoute } from '@react-navigation/native';
 import { FONTS } from '../../fonts/fonts';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux.toolkit/store';
+import {
+  useGetBrandsQuery,
+  useGetCarsQuery,
+} from '../../redux.toolkit/rtk/apis';
 
 const { width } = Dimensions.get('window');
 
-const brands = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-const cars = [
-  {
-    id: 1,
-    name: 'Mercedes Car EQC 300kW',
-    price: '$300',
-    rating: 5.0,
-    image: require('../../assests/car1.jpg'),
-  },
-  {
-    id: 2,
-    name: 'Red Mazda',
-    price: '$280',
-    rating: 4.8,
-    image: require('../../assests/car2.jpg'),
-  },
-];
+// const brands = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const leaseData = [1, 2, 3, 4, 5];
 
@@ -45,45 +35,70 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const route = useRoute();
   const isFocused = useIsFocused();
 
+  const { isLoggedIn } = useSelector((state: RootState) => state.user);
+  const user = useSelector((state: RootState) => state.user);
+
+  const {
+    data: Cars,
+    isLoading: isLoadingCars,
+    isError: isErrorCars,
+    refetch: refetchCars,
+  } = useGetCarsQuery([]);
+  const {
+    data: Brands,
+    isLoading: isLoadingBrands,
+    isError: isErrorBrands,
+    refetch: refetchBrands,
+  } = useGetBrandsQuery([]);
+
   const leaseDataCallBack = useCallback(() => {
     return (
-      <Pressable onPress={()=> navigation.navigate("leaseDetails")} style={({pressed})=>[{opacity: pressed ? 0.8 : 1}]}>
+      <Pressable
+        onPress={() => {
+          if (!isLoggedIn) {
+            navigation.navigate('Login');
+            return;
+          }
+          navigation.navigate('leaseDetails');
+        }}
+        style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
+      >
         <View style={styles.leaseCard}>
-        <View style={styles.view}>
-          <Text style={styles.leaseTitle}>My Lease</Text>
-          <TouchableOpacity
-            style={styles.extendButton}
-            onPress={() => navigation.navigate('extendLease')}
-          >
-            <Text style={styles.extendText}>Extend Lease</Text>
-          </TouchableOpacity>
+          <View style={styles.view}>
+            <Text style={styles.leaseTitle}>My Lease</Text>
+            <TouchableOpacity
+              style={styles.extendButton}
+              onPress={() => navigation.navigate('extendLease')}
+            >
+              <Text style={styles.extendText}>Extend Lease</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.leaseModel}>Porsche 2019 - 911 Carrera S</Text>
+          {/* <Text style={styles.timer}>my timer</Text> */}
+          <View style={styles.timerContainer}>
+            {[
+              { value: '00', label: 'days' },
+              { value: '22', label: 'Hours' },
+              { value: '33', label: 'Mins' },
+              { value: '44', label: 'Secs' },
+            ].map((item, index) => (
+              <View key={index} style={styles.timerBlock}>
+                <Text style={styles.ti}>{item.value}</Text>
+                <Text style={styles.timerLabel}>{item.label}</Text>
+              </View>
+            ))}
+          </View>
         </View>
-        <Text style={styles.leaseModel}>Porsche 2019 - 911 Carrera S</Text>
-        {/* <Text style={styles.timer}>my timer</Text> */}
-        <View style={styles.timerContainer}>
-          {[
-            { value: '00', label: 'days' },
-            { value: '22', label: 'Hours' },
-            { value: '33', label: 'Mins' },
-            { value: '44', label: 'Secs' },
-          ].map((item, index) => (
-            <View key={index} style={styles.timerBlock}>
-              <Text style={styles.ti}>{item.value}</Text>
-              <Text style={styles.timerLabel}>{item.label}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
       </Pressable>
     );
-  }, [navigation]);
+  }, [navigation, isLoggedIn]);
 
-  const brandsCallBack = useCallback(() => {
+  const brandsCallBack = useCallback(({ item }: any) => {
     return (
       <View style={styles.brandCard}>
         <Image
           style={styles.brandImage}
-          source={require('../../assests/bmwlogo.jpeg')}
+          source={{ uri: item?.brandImage?.url }}
         />
       </View>
     );
@@ -92,24 +107,55 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const carsCallBack = useCallback(
     (item: any) => {
       return (
-        <Pressable onPress={() => navigation.navigate('carDetails')} style={({pressed})=>[
-          {opacity: pressed ? 0.9 : 1}
-        ]}>
+        <Pressable
+          onPress={() => navigation.navigate('carDetails', { _id: item?._id })}
+          style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
+        >
           <View style={styles.carCard}>
             <View style={styles.carImageSetup}>
-              <Image source={item.image} style={styles.carThumb} />
+              <Image
+                source={{ uri: item?.images?.[0]?.url }}
+                style={styles.carThumb}
+              />
             </View>
-            <Text style={styles.carName}>{item.name}</Text>
+            <Text style={styles.carName}>
+              {item?.modelName?.charAt(0).toLocaleUpperCase() +
+                item?.modelName?.slice(1)}
+            </Text>
             <View style={styles.ratingContainer}>
-              <Text style={styles.carRating}>⭐ {item.rating}</Text>
-              <Text style={styles.carPrice}>{item.price}/day</Text>
+              <Text style={styles.carRating}>
+                ⭐ {item?.reviews_data.length}
+              </Text>
+              <Text style={styles.carPrice}>{item?.price}/day</Text>
             </View>
           </View>
         </Pressable>
       );
     },
-    [navigation]
+    [navigation],
   );
+
+
+  if (isErrorCars || isErrorBrands) {
+    return (
+      <View style={styles.centered}>
+        <Ionicons name="alert-circle" size={40} color="red" />
+        <Text style={styles.errorTitle}>Something went wrong</Text>
+        <Text style={styles.message}>
+          We couldn’t load the car centers. Please try again.
+        </Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={async () => {
+            await refetchBrands();
+            await refetchCars();
+          }}
+        >
+          <Text style={styles.retryText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -126,19 +172,41 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.topSection}>
           <View style={styles.headerRow}>
             <View>
-              <Text style={styles.locationText}>HI, ROOHULLAH</Text>
+              <Text style={styles.locationText}>
+                {isLoggedIn && user?.userData?.name
+                  ? `HI, ${user?.userData?.name.toLocaleUpperCase()}`
+                  : 'Welcome to City Car Center'}
+              </Text>
             </View>
-            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-              <Image
-                source={{ uri: 'https://i.pravatar.cc/150?img=3' }}
-                style={styles.avatar}
-              />
+            <TouchableOpacity
+              onPress={() => {
+                if (!isLoggedIn) {
+                  navigation.navigate('Login');
+                  return;
+                }
+                navigation.navigate('Profile');
+              }}
+            >
+              {user?.profile ? (
+                <Image
+                  source={{ uri: 'https://i.pravatar.cc/150?img=3' }}
+                  style={styles.avatar}
+                />
+              ) : user?.userData?.name ? (
+                <Text style={styles.charAt}>
+                  {user?.userData?.name.charAt(0).toLocaleUpperCase()}
+                </Text>
+              ) : (
+                ''
+              )}
+              {/* {userData?.name ? (
+             ) : ("") } */}
             </TouchableOpacity>
           </View>
 
           <FlatList
             data={leaseData}
-            keyExtractor={(item) => item.toString()}
+            keyExtractor={item => item.toString()}
             renderItem={leaseDataCallBack}
             horizontal={true}
             ItemSeparatorComponent={() => <View style={{ width: 20 }} />}
@@ -171,31 +239,47 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <FlatList
-          horizontal={true}
-          data={brands.slice(0, 10)}
-          keyExtractor={(item) => item.toString()}
-          renderItem={brandsCallBack}
-          ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 10 }}
-        />
+        {isLoadingBrands ? (
+          <View style={styles.centered}>
+            <ActivityIndicator size="large" color="#000" />
+            <Text style={styles.message}>Loading city car centers...</Text>
+          </View>
+        ) : (
+          <FlatList
+            horizontal={true}
+            data={Brands?.brands}
+            keyExtractor={item => item.brand.toString()}
+            renderItem={item => brandsCallBack(item)}
+            ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 10 }}
+          />
+        )}
 
         <View style={styles.sectionRow}>
           <Text style={styles.sectionTitle}>Available For You</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('searchCarCards')}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('searchCarCards')}
+          >
             <Text style={styles.seeAll}>See All</Text>
           </TouchableOpacity>
         </View>
 
-        <FlatList
-          horizontal={true}
-          data={cars.slice(0, 10)}
-          keyExtractor={(item) => item.name.toString()}
-          renderItem={({ item }) => carsCallBack(item)}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 10 }}
-        />
+        {isLoadingCars ? (
+          <View style={styles.centered}>
+            <ActivityIndicator size="large" color="#000" />
+            <Text style={styles.message}>Loading city car centers...</Text>
+          </View>
+        ) : (
+          <FlatList
+            horizontal={true}
+            data={Cars?.data?.slice(0, 10)}
+            keyExtractor={item => item._id.toString()}
+            renderItem={({ item }) => carsCallBack(item)}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 10 }}
+          />
+        )}
       </SafeAreaView>
     </ScrollView>
   );
@@ -299,7 +383,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     fontFamily: FONTS.bold,
   },
@@ -351,13 +435,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#333',
     marginTop: 4,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   carRating: {
     fontSize: 12,
     color: '#888',
     marginTop: 2,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -382,6 +466,100 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginTop: 4,
     marginLeft: 5,
+  },
+  charAt: {
+    color: '#fff',
+    width: 40,
+    height: 40,
+    fontSize: 20,
+    borderWidth: 1,
+    borderColor: 'white',
+    borderRadius: 50,
+    textAlign: 'center',
+  },
+  indicator: {
+    marginTop: 30,
+  },
+  containerError: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+  },
+  screenTitle: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginVertical: 12,
+    color: '#111',
+    fontFamily: FONTS.bold,
+  },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  cardError: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    marginBottom: 16,
+    overflow: 'hidden',
+    elevation: 3,
+  },
+  infoContainer: {
+    padding: 12,
+  },
+  titleError: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111',
+    fontFamily: FONTS.demiBold,
+  },
+  location: {
+    fontSize: 14,
+    color: '#555',
+    marginTop: 4,
+    fontFamily: FONTS.medium,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  ratingTextError: {
+    marginLeft: 6,
+    fontSize: 14,
+    color: '#333',
+    fontFamily: FONTS.demiBold,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 10,
+    color: 'red',
+    fontFamily: FONTS.bold,
+  },
+  message: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 8,
+    fontFamily: FONTS.medium,
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: '#000',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+  },
+  retryText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: FONTS.demiBold,
   },
 });
 

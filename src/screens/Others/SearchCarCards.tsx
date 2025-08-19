@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -10,123 +10,199 @@ import {
   SafeAreaView,
   StatusBar,
   TouchableOpacity,
+  Pressable,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import BottomSheetFilterModal from './BottomSheetFilterModel';
 import { Modalize } from 'react-native-modalize';
 import { FONTS } from '../../fonts/fonts';
-
+import { useGetCarsQuery } from '../../redux.toolkit/rtk/apis';
 const { width } = Dimensions.get('window');
 
-interface Car {
-  id: string;
-  name: string;
-  price: number;
-  image: any;
-  rating: number;
-  reviews: string;
+interface ImageObject {
+  url: string;
+  public_id: string;
 }
 
-const carData: Car[] = [
-  {
-    id: '1',
-    name: 'Mercedes Car EQC 300kW',
-    price: 300,
-    image: require('../../assests/car1.jpg'),
-    rating: 5,
-    reviews: '100+ r',
-  },
-  {
-    id: '2',
-    name: 'Red Mazda 6 - Elite Estate',
-    price: 300,
-    image: require('../../assests/car2.jpg'),
-    rating: 5,
-    reviews: '100+ r',
-  },
-];
+interface Car {
+  modelName: string;
+  price: number;
+  pricePerDay: number;
+  images: ImageObject[];
+  brandImage: ImageObject;
+  totalReviews: number;
+  _id: string;
+}
 
 const SearchCarCards: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
-  const ref = useRef<Modalize>(null);
+  const [selectedBrand, setSelectedBrand] = React.useState<string | null>(
+    '',
+  );
+  const [priceRange, setPriceRange] = React.useState<[number, number]>([
+    1, 1000,
+  ]);
+  
 
-  const onApply = () => {
-    ref.current?.open();
+  const ref = useRef<Modalize>(null);
+  const { data: Cars, isLoading, isError, refetch } = useGetCarsQuery([]);
+
+  const filteredCars = useMemo(() => {
+    if (!Cars?.data) return [];
+    return Cars?.data?.filter((item: any) =>
+      item.modelName.toLowerCase().includes(searchText.toLowerCase()),
+    );
+  }, [searchText, Cars?.data]);
+
+  const modalFilteredCars = useMemo(() => {
+  if (!filteredCars) return [];
+
+  if (selectedBrand === null || selectedBrand === '') {
+    return filteredCars.filter((item: any)=> item.brand)
+  }
+
+
+  return filteredCars
+    .filter((item: any) =>
+      item.brand.toLowerCase().includes(selectedBrand?.toLowerCase())
+    )
+    .filter(
+      (item: any) =>
+        item.pricePerDay >= priceRange[0] &&
+        item.pricePerDay <= priceRange[1]
+    );
+}, [filteredCars, priceRange, selectedBrand]);
+
+
+  const onClose = () => {
+    ref.current?.close();
   };
 
   const openFilterModal = () => {
     ref.current?.open();
   };
 
-  const filteredCars = useMemo(() => {
-    return carData.filter(car =>
-      car.name.toLowerCase().includes(searchText.toLowerCase()),
-    );
-  }, [searchText]);
+  const renderCarCard = useCallback(
+    ({ item }: { item: Car }) => {
+      return (
+        <Pressable
+          style={({ pressed }) => [
+            {
+              opacity: pressed ? 0.9 : 1,
+            },
+          ]}
+          onPress={() => navigation.navigate('carDetails', { _id: item._id })}
+        >
+          <View style={styles.card}>
+            <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
 
-  const renderCarCard = ({ item }: { item: Car }) => (
-    <View style={styles.card}>
-      <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
-
-      <Image source={item.image} style={styles.image} resizeMode="contain" />
-      <View style={styles.details}>
-        <Text style={styles.name}>{item.name}</Text>
-        <View style={styles.bottomRow}>
-          <View style={styles.rating}>
-            <Icon name="star" size={16} color="#fbbf24" />
-            <Text style={styles.ratingText}>
-              {item.rating.toFixed(1)} ({item.reviews})
-            </Text>
+            <Image
+              source={{ uri: item?.images?.[0].url }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+            <View style={styles.details}>
+              <Text style={styles.name}>{item.modelName}</Text>
+              <View style={styles.bottomRow}>
+                <View style={styles.rating}>
+                  <Icon name="star" size={16} color="#fbbf24" />
+                  <Text style={styles.ratingText}>({item.totalReviews})</Text>
+                </View>
+                <Text style={styles.price}>${item.pricePerDay}/day</Text>
+              </View>
+            </View>
           </View>
-          <Text style={styles.price}>${item.price}/day</Text>
-        </View>
-      </View>
-    </View>
+        </Pressable>
+      );
+    },
+    [navigation],
   );
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Icon name="arrow-back" size={24} color="#000" />
-      </TouchableOpacity>
 
-      <Text style={styles.title}>Available Cars</Text>
+  
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#000" />
+        <Text style={styles.message}>Loading city car centers...</Text>
+      </View>
+    );
+  }
 
-      <View style={styles.searchContainer}>
-        <Icon name="search-outline" size={20} color="#999" />
-        <TextInput
-          placeholder="Search cars..."
-          value={searchText}
-          onChangeText={setSearchText}
-          placeholderTextColor="#999"
-          style={styles.searchInput}
-        />
-        <TouchableOpacity onPress={openFilterModal}>
-          <Icon name="options-outline" size={20} color="#999" />
+  if (isError) {
+    return (
+      <View style={styles.centered}>
+        <Icon name="alert-circle" size={40} color="red" />
+        <Text style={styles.errorTitle}>Something went wrong</Text>
+        <Text style={styles.message}>We couldn’t load the car centers. Please try again.</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+          <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
       </View>
+    );
+  }
 
-      {filteredCars.length > 0 ? (
-        <FlatList
-          data={filteredCars}
-          keyExtractor={item => item.id}
-          renderItem={renderCarCard}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
-      ) : (
-        <View style={styles.noData}>
-          <Icon name="car-sport" size={30} color="#000" />
-          <Text style={{ width: 150, marginTop: 10 }}>No Results Found</Text>
-          <Text style={{ fontSize: 12, color: 'gray', width: 300, textAlign: 'center' }}>
-            We currently have no Search Results for “{searchText}”. Please try with different search text.
-          </Text>
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    
+       <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={24} color="#000" />
+        </TouchableOpacity>
+
+        <Text style={styles.title}>Available Cars</Text>
+
+        <View style={styles.searchContainer}>
+          <Icon name="search-outline" size={20} color="#999" />
+          <TextInput
+            placeholder="Search cars..."
+            value={searchText}
+            onChangeText={setSearchText}
+            placeholderTextColor="#999"
+            style={styles.searchInput}
+          />
+          <TouchableOpacity onPress={openFilterModal}>
+            <Icon name="options-outline" size={20} color="#999" />
+          </TouchableOpacity>
         </View>
-      )}
 
-      <BottomSheetFilterModal ref={ref} onApply={onApply} />
-    </SafeAreaView>
+        {modalFilteredCars.length <= 0 ? (
+          <View style={styles.noData}>
+            <Icon name="car-sport" size={30} color="#000" />
+            <Text style={{ width: 150, marginTop: 10 }}>No Cars Found</Text>
+            <Text style={styles.error}>
+              We currently have no Search Results for “{searchText}”. Please try
+              with different search text.
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={modalFilteredCars}
+            keyExtractor={item => item._id.toString()}
+            renderItem={item => renderCarCard(item)}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        )}
+
+        <BottomSheetFilterModal
+        key={`modal-${selectedBrand}-${priceRange[1]}`}
+          setPriceRange={setPriceRange}
+          selectedBrand={selectedBrand}
+          setSelectedBrand={setSelectedBrand}
+          priceRange={priceRange}
+          ref={ref}
+          onClose={onClose}
+        />
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -176,7 +252,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: width * 0.4,
+    height: width * 0.5,
     borderRadius: 10,
   },
   details: {
@@ -217,6 +293,96 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     fontFamily: FONTS.demiBold,
     marginTop: 40,
+  },
+  error: {
+    fontSize: 12,
+    color: 'gray',
+    width: 300,
+    textAlign: 'center',
+  },
+  indicator:{
+    marginTop: 350
+  },
+    containerError: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+  },
+  screenTitle: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginVertical: 12,
+    color: '#111',
+    fontFamily: FONTS.bold,
+  },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  cardError: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    marginBottom: 16,
+    overflow: 'hidden',
+    elevation: 3,
+  },
+  infoContainer: {
+    padding: 12,
+  },
+  titleError: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111',
+    fontFamily: FONTS.demiBold,
+  },
+  location: {
+    fontSize: 14,
+    color: '#555',
+    marginTop: 4,
+    fontFamily: FONTS.medium,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  ratingTextError: {
+    marginLeft: 6,
+    fontSize: 14,
+    color: '#333',
+    fontFamily: FONTS.demiBold,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 10,
+    color: 'red',
+    fontFamily: FONTS.bold,
+  },
+  message: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 8,
+    fontFamily: FONTS.medium,
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: '#000',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+  },
+  retryText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: FONTS.demiBold,
   },
 });
 

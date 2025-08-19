@@ -1,6 +1,7 @@
 // src/redux/store.ts
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import userReducer from './slices/userSlice';
+import {Apis} from './rtk/apis'
 import {
   persistReducer,
   persistStore,
@@ -15,6 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const rootReducer = combineReducers({
   user: userReducer,
+  [Apis.reducerPath]: Apis.reducer
 });
 
 const persistConfig = {
@@ -27,12 +29,13 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
+  devTools: true,
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }),
+    }).concat(Apis.middleware),
 });
 
 export const persistor = persistStore(store);

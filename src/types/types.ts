@@ -19,4 +19,6 @@ export type RootStackParamList = {
   carDetails: undefined;
   dateAndTime: undefined;
   leaseDetails: undefined;
+  paymentDetails: undefined;
+  verifyEmail: undefined;
 };
