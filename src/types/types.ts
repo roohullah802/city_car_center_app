@@ -22,4 +22,5 @@ export type RootStackParamList = {
   paymentDetails: undefined;
   verifyEmail: undefined;
   carCardsByBrand: undefined;
+  forgotPassword: undefined;
 };

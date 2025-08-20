@@ -38,69 +38,66 @@ const Login = ({ navigation }: any) => {
   );
 
   const handleLogin = async () => {
-    
-  try {
-    if (isLoggedIn) {
-      Toast.show({
-        type: 'error',
-        text1: 'User already logged in',
-      });
-      return;
-    }
+    try {
+      if (isLoggedIn) {
+        Toast.show({
+          type: 'error',
+          text1: 'User already logged in',
+        });
+        return;
+      }
 
-    dispatch(setLoading(true));
+      dispatch(setLoading(true));
 
-    const user = await axios.post(`${BASE_AUTH_URL}/login`, {
-      email: email.trim(),
-      password: password.trim(),
-    }, {withCredentials: true});
-
-
-    if (user.data.success) {
-      Toast.show({
-        type: 'success',
-        text1: user.data.message,
-      });
-
-      navigation.navigate('Tabs', { screen: 'Lease' });
-      
-      
-      dispatch(
-        login({
-          name: user?.data?.user?.firstName,
-          id: user?.data?.user?.id,
-          email: user?.data?.user?.email,
-          token: user?.data?.user?.token
-        })
+      const user = await axios.post(
+        `${BASE_AUTH_URL}/login`,
+        {
+          email: email.trim(),
+          password: password.trim(),
+        },
+        { withCredentials: true },
       );
 
-      
-      await CookieManager.set('http://127.0.0.1:5000', {
-        name: 'token',
-        value: user?.data?.user?.token,
-        domain: '127.0.0.1',
-        path: '/api/user/auth/login',
-        version: '1',
-        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      });
+      if (user.data.success) {
+        Toast.show({
+          type: 'success',
+          text1: user.data.message,
+        });
 
-    } else {
+        navigation.navigate('Tabs', { screen: 'Lease' });
+
+        dispatch(
+          login({
+            name: user?.data?.user?.firstName,
+            id: user?.data?.user?.id,
+            email: user?.data?.user?.email,
+            token: user?.data?.user?.token,
+          }),
+        );
+
+        await CookieManager.set('http://127.0.0.1:5000', {
+          name: 'token',
+          value: user?.data?.user?.token,
+          domain: '127.0.0.1',
+          path: '/api/user/auth/login',
+          version: '1',
+          expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: user.data.message,
+        });
+      }
+    } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: user.data.message,
+        text1: error?.response?.data?.message || 'Login failed',
       });
+    } finally {
+      dispatch(setLoading(false));
     }
-
-  } catch (error: any) {
-    Toast.show({
-      type: 'error',
-      text1: error?.response?.data?.message || 'Login failed',
-    });
-  } finally {
-    dispatch(setLoading(false));
-  }
-};
-
+  };
 
   return (
     <KeyboardAvoidingView
@@ -164,12 +161,31 @@ const Login = ({ navigation }: any) => {
             </TouchableOpacity>
           </View>
 
+          <TouchableOpacity
+            style={{ alignSelf: 'flex-end', marginBottom: hp('2%') }}
+            onPress={() => navigation.navigate('forgotPassword')}
+          >
+            <Text
+              style={{
+                color: '#007BFF',
+                fontSize: RFValue(12),
+                fontFamily: FONTS.demiBold,
+              }}
+            >
+              Forgot Password?
+            </Text>
+          </TouchableOpacity>
+
           <View style={styles.rememberMeRow}>
             <CheckBox value={rememberMe} onValueChange={setRememberMe} />
             <Text style={styles.rememberMeText}>Remember me</Text>
           </View>
 
-          <TouchableOpacity disabled={isLoading} style={styles.signupBtn} onPress={handleLogin}>
+          <TouchableOpacity
+            disabled={isLoading}
+            style={styles.signupBtn}
+            onPress={handleLogin}
+          >
             {isLoading ? (
               <ActivityIndicator size={'small'} color={'#fff'} />
             ) : (

@@ -5,48 +5,55 @@ import {
   ScrollView,
   StyleSheet,
   Dimensions,
+  ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
+import { useGetPolicyQuery } from '../../redux.toolkit/rtk/apis';
+import Icon from 'react-native-vector-icons/Ionicons';
+
 
 const { width } = Dimensions.get('window');
 
 const TermsPrivacyScreen: React.FC = () => {
-  const terms = useMemo(
-    () => [
-      {
-        title: 'Acceptance of Terms',
-        content:
-          'By using our app, you agree to comply with and be bound by these terms. If you do not agree, please do not use the service.',
-      },
-      {
-        title: 'User Responsibilities',
-        content:
-          'You must provide accurate information and use the platform responsibly. Misuse, abuse, or unauthorized access may result in termination.',
-      },
-      {
-        title: 'Account Access & Security',
-        content:
-          'You are responsible for safeguarding your password. Two-factor authentication is recommended for additional security.',
-      },
-      {
-        title: 'Service Usage',
-        content:
-          'Our app facilitates connections between individuals with disabilities, carers, therapists, and support teams. Booking sessions, messaging, and emergency features must be used ethically and legally.',
-      },
-      {
-        title: 'Payments & Refunds',
-        content:
-          'Payments made for services (e.g., carer support or therapy) are subject to cancellation and refund policies displayed before booking.',
-      },
-      {
-        title: 'Termination of Services',
-        content:
-          'We reserve the right to suspend or terminate your access if you violate our terms or use the app inappropriately.',
-      },
-    ],
-    []
-  );
+
+  const {data: Policy, isLoading, isError, refetch} = useGetPolicyQuery([]);
+
+  const renderedPolicySections = useMemo(() => {
+  return Policy?.data.map((section: any, index: number) => (
+    <View key={index} style={styles.section}>
+      <Text style={styles.sectionTitle}>{section.title}</Text>
+      <Text style={styles.sectionContent}>{section.content}</Text>
+    </View>
+  ));
+}, [Policy?.data]);
+
+  
+
+  if (isLoading) {
+      return (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#000" />
+          <Text style={styles.message}>Loading city car centers...</Text>
+        </View>
+      );
+    }
+  
+    if (isError) {
+      return (
+        <View style={styles.centered}>
+          <Icon name="alert-circle" size={40} color="red" />
+          <Text style={styles.errorTitle}>Something went wrong</Text>
+          <Text style={styles.message}>
+            We couldn’t load the car centers. Please try again.
+          </Text>
+          <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+            <Text style={styles.retryText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
 
   return (
     <ScrollView
@@ -57,12 +64,7 @@ const TermsPrivacyScreen: React.FC = () => {
       <Text style={styles.header}>Terms & Privacy Policy</Text>
       <Text style={styles.subHeader}>Last updated: June 23, 2025</Text>
 
-      {terms.map((section, index) => (
-        <View key={index} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-          <Text style={styles.sectionContent}>{section.content}</Text>
-        </View>
-      ))}
+      {renderedPolicySections}
     </ScrollView>
   );
 };
@@ -104,6 +106,39 @@ const styles = StyleSheet.create({
     fontSize: RFValue(13),
     color: '#707070',
     lineHeight: RFValue(20),
+    fontFamily: FONTS.medium,
+  },
+    centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 10,
+    color: 'red',
+    fontFamily: FONTS.bold,
+  },
+  message: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 8,
+    fontFamily: FONTS.medium,
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: '#000',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+  },
+  retryText: {
+    color: '#fff',
+    fontSize: 14,
     fontFamily: FONTS.demiBold,
   },
 });

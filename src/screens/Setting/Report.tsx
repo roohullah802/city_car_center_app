@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     fontSize: RFValue(13),
     color: '#666',
     marginBottom: RFValue(20),
-    fontFamily: FONTS.demiBold,
+    fontFamily: FONTS.medium,
   },
   textArea: {
     height: RFValue(140),
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     padding: RFValue(14),
     fontSize: RFValue(13),
     marginBottom: RFValue(16),
-    fontFamily: FONTS.demiBold,
+    fontFamily: FONTS.medium,
     textAlignVertical: 'top',
   },
   input: {
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFValue(14),
     fontSize: RFValue(13),
     marginBottom: RFValue(24),
-    fontFamily: FONTS.demiBold,
+    fontFamily: FONTS.medium,
   },
   button: {
     height: RFValue(50),

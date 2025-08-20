@@ -24,14 +24,15 @@ export const Apis = createApi({
     }),
     getAllFaqs: builder.query({
       query:()=> '/all/faqs'
+    }),
+    getPolicy: builder.query({
+      query: ()=> '/all/policy'
     })
-
-
 
 
 
   }),
 });
 
-export const { useGetCarsQuery, useGetBrandsQuery, useGetCarDetailsQuery, usePostReportIssueMutation, useGetAllFaqsQuery } =
+export const { useGetCarsQuery, useGetBrandsQuery, useGetCarDetailsQuery, usePostReportIssueMutation, useGetAllFaqsQuery, useGetPolicyQuery } =
   Apis;

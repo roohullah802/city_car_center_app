@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -28,9 +28,25 @@ const FAQScreen: React.FC = () => {
   
   const handleToggle = useCallback((index: number) => {
     setExpandedIndex(prev => (prev === index ? null : index));
-    console.log(expandedIndex);
-    
-  }, [expandedIndex]);
+  }, []);
+
+
+  const renderedFaqs = useMemo(()=>{
+    return faqData?.map((item: any, index: number) => (
+        <View key={index} style={styles.card}>
+          <TouchableOpacity
+            onPress={() => handleToggle(index)}
+            style={styles.questionRow}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.question}>{item.question}</Text>
+            <Text style={styles.toggle}>{expandedIndex === index ? '−' : '+'}</Text>
+          </TouchableOpacity>
+
+          {expandedIndex === index && <Text style={styles.answer}>{item.answer}</Text>}
+        </View>
+      ))
+  },[expandedIndex, faqData, handleToggle])
 
    if (isLoading) {
       return (
@@ -61,20 +77,7 @@ const FAQScreen: React.FC = () => {
       <Text style={styles.header}>FAQs</Text>
       <Text style={styles.subHeader}>Frequently Asked Questions (FAQs)</Text>
 
-      {faqData.map((item: any, index: number) => (
-        <View key={index} style={styles.card}>
-          <TouchableOpacity
-            onPress={() => handleToggle(index)}
-            style={styles.questionRow}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.question}>{item.question}</Text>
-            <Text style={styles.toggle}>{expandedIndex === index ? '−' : '+'}</Text>
-          </TouchableOpacity>
-
-          {expandedIndex === index && <Text style={styles.answer}>{item.answer}</Text>}
-        </View>
-      ))}
+      {renderedFaqs}
     </ScrollView>
   );
 };
