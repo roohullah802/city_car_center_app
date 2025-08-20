@@ -33,30 +33,39 @@ const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
   const { _id } = route.params;
 
   const [activeImage, setActiveImage] = useState<number>(0);
-  const { data: Details, isLoading, isError } = useGetCarDetailsQuery(_id, { skip: !_id });
-  const data = Details?.data;
-  const image = data?.images;
-
-  let images = [];
-
+  const {
+    data: Details,
+    isLoading,
+    isError,
+    isFetching,
+    refetch
+  } = useGetCarDetailsQuery(_id, { skip: !_id });
+  const dataa = Details?.data;
+  const image = dataa?.images;
+  
   const rateOptions: RateOption[] = useMemo(
     () => [
-      { label: 'Max Power', value: data?.maxPower, type: 'hp' },
-      { label: '0-60 mph', value: data?.mph, type: 'sec' },
-      { label: 'Top Speed', value: data?.topSpeed, type: 'mph' },
+      { label: 'Max Power', value: dataa?.maxPower, type: 'hp' },
+      { label: '0-60 mph', value: dataa?.mph, type: 'sec' },
+      { label: 'Top Speed', value: dataa?.topSpeed, type: 'mph' },
     ],
-    [data?.maxPower, data?.mph, data?.topSpeed],  
+    [dataa?.maxPower, dataa?.mph, dataa?.topSpeed],
   );
 
-  try {
-    if (typeof image === 'string' && image !== 'undefined') {
-      images = JSON.parse(image);
-    } else {
-      console.warn('imagesString is not a valid JSON string:', image);
-    }
-  } catch (error) {
-    console.error('Failed to parse images JSON:', error);
+ let images: any[] = [];
+
+try {
+  if (Array.isArray(image)) {
+    images = image; // From MongoDB
+  } else if (typeof image === 'string' && image !== 'undefined') {
+    images = JSON.parse(image); // From Redis
+  } else {
+    console.warn('Image data format not recognized:', image);
   }
+} catch (error) {
+  console.error('Failed to parse image data:', error);
+}
+  
 
   const renderCarImage = useCallback(
     ({ item }: { item: any }) => (
@@ -71,12 +80,42 @@ const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
     [],
   );
 
+  if (isFetching) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#000" />
+        <Text style={styles.message}>Loading city car centers...</Text>
+      </View>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#000" />
+        <Text style={styles.message}>Loading city car centers...</Text>
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.centered}>
+        <Icon name="alert-circle" size={40} color="red" />
+        <Text style={styles.errorTitle}>Something went wrong</Text>
+        <Text style={styles.message}>
+          We couldn’t load the car centers. Please try again.
+        </Text>
+        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+          <Text style={styles.retryText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
-      {isLoading || isError ? (
-        <ActivityIndicator style={styles.indicator} size={"large"} color={"black"} />
-      ) : (
-        <SafeAreaView style={styles.container}>
+          <SafeAreaView style={styles.container}>
         {/* Back Button */}
         <TouchableOpacity
           style={styles.backButton}
@@ -86,11 +125,14 @@ const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
         </TouchableOpacity>
 
         {/* Title */}
-        <Text style={styles.titleText}>{data?.modelName.charAt(0).toLocaleUpperCase() + data?.modelName?.slice(1)}</Text>
+        <Text style={styles.titleText}>
+          {dataa?.modelName?.charAt(0).toLocaleUpperCase() +
+            dataa?.modelName?.slice(1)}
+        </Text>
 
         {/* Status Boxes */}
         <View style={styles.statusRow}>
-          {data?.available ? (
+          {dataa?.available ? (
             <View style={styles.statusBox}>
               <View style={styles.statusDot} />
               <Text style={styles.statusText}>Available</Text>
@@ -104,8 +146,8 @@ const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
         </View>
 
         {/* Image Carousel */}
-       
-         <FlatList
+
+        <FlatList
           data={images}
           horizontal
           pagingEnabled
@@ -133,7 +175,7 @@ const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
 
         {/* Rating */}
         <Text style={styles.ratingText}>
-          ⭐ {data?.totalReviews} <Text style={styles.ratingSub}>Reviews</Text>
+          ⭐ {dataa?.totalReviews} <Text style={styles.ratingSub}>Reviews</Text>
         </Text>
 
         {/* Car Info */}
@@ -142,12 +184,14 @@ const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
           <View style={styles.infoColumn}>
             <View style={styles.infoItem}>
               <Icon name="person" size={16} />
-              <Text style={styles.infoText}>{data?.passengers} Passengers</Text>
+              <Text style={styles.infoText}>
+                {dataa?.passengers} Passengers
+              </Text>
             </View>
             <View style={styles.infoItem}>
               <Icon name="snow" size={16} />
               <Text style={styles.infoText}>
-                {data?.airCondition === 'true'
+                {dataa?.airCondition === 'true'
                   ? 'Air Conditioning'
                   : 'No air Condition'}
               </Text>
@@ -156,17 +200,17 @@ const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
           <View style={styles.infoColumn}>
             <View style={styles.infoItem}>
               <MaterialCommunityIcons name="car-door" size={16} />
-              <Text style={styles.infoText}>{data?.doors} Doors</Text>
+              <Text style={styles.infoText}>{dataa?.doors} Doors</Text>
             </View>
             <View style={styles.infoItem}>
               <MaterialCommunityIcons name="gas-station" size={16} />
-              <Text style={styles.infoText}>Fuel Info: {data?.fuelType}</Text>
+              <Text style={styles.infoText}>Fuel Info: {dataa?.fuelType}</Text>
             </View>
           </View>
         </View>
         <View style={styles.infoItem}>
           <MaterialCommunityIcons name="car-shift-pattern" size={16} />
-          <Text style={styles.infoText}>{data?.transmission}</Text>
+          <Text style={styles.infoText}>{dataa?.transmission}</Text>
         </View>
 
         {/* Car Specs */}
@@ -187,12 +231,12 @@ const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
         <Text style={styles.sectionTitle}>Price & Lease Info</Text>
         <View style={styles.priceRow}>
           <Text style={styles.priceLabel}>Weekly Rate:</Text>
-          <Text style={styles.priceValue}>${data?.weeklyRate}/week</Text>
+          <Text style={styles.priceValue}>${dataa?.weeklyRate}/week</Text>
         </View>
         <View style={styles.line} />
         <View style={styles.priceRow}>
           <Text style={styles.priceLabel}>Tax:</Text>
-          <Text style={styles.priceValue}>${data?.tax} flat (7 days)</Text>
+          <Text style={styles.priceValue}>${dataa?.tax} flat (7 days)</Text>
         </View>
         <View style={styles.line} />
         <View style={styles.priceRow}>
@@ -208,7 +252,6 @@ const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
           <Text style={styles.leaseButtonText}>Lease this car</Text>
         </TouchableOpacity>
       </SafeAreaView>
-      )}
     </ScrollView>
   );
 };
@@ -393,7 +436,40 @@ const styles = StyleSheet.create({
     fontSize: RFValue(14),
     fontFamily: FONTS.demiBold,
   },
-  indicator:{
+  indicator: {
     marginTop: 300,
-  }
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 10,
+    color: 'red',
+    fontFamily: FONTS.bold,
+  },
+  message: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 8,
+    fontFamily: FONTS.medium,
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: '#000',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+  },
+  retryText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: FONTS.demiBold,
+  },
 });

@@ -5,52 +5,69 @@ import {
   StyleSheet,
   FlatList,
   TextInput,
-  ImageSourcePropType,
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import BrandCard from '../../components/BrandCard';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { FONTS } from '../../fonts/fonts';
+import { useGetBrandsQuery } from '../../redux.toolkit/rtk/apis';
 
-
-const brandData: { name: string; image: ImageSourcePropType }[] = [
-  { name: 'BMW', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Tesla', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Ford', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Mazda', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Toyota', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Subaru', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Audi', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Jeep', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Porsche', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Ferrari', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Lamborghini', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Nissan', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Bugatti', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Kia', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Mercedes', image: require('../../assests/bmwlogo.jpeg') },
-  { name: 'Volkswagen', image: require('../../assests/bmwlogo.jpeg') },
-];
 
 const TopBrandsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState<string>('');
+  const {data, isLoading, isError, refetch} = useGetBrandsQuery([]);
+  const brandData = data?.brands
+  console.log(brandData);
+  
+  
+  
 
-  // Filter only when search changes
+
   const filteredBrands = useMemo(() => {
-    return brandData.filter((brand) =>
-      brand.name.toLowerCase().includes(search.toLowerCase())
+    return brandData.filter((brand: any) =>
+      brand.brand.toLowerCase().includes(search.toLowerCase())
     );
-  }, [search]);
+  }, [search, brandData]);
 
-  // Stable renderItem so FlatList doesn't re-render unnecessarily
+  
   const renderBrand = useCallback(
     ({ item }: { item: typeof brandData[0] }) => {
-      return <BrandCard image={item.image} />;
+      return <BrandCard item={item} navigation={navigation} />;
     },
-    []
+    [navigation]
   );
+
+  if (isLoading) {
+      return (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#000" />
+          <Text style={styles.message}>Loading city car centers...</Text>
+        </View>
+      );
+    }
+
+   if (isError) {
+      return (
+        <View style={styles.centered}>
+          <Icon name="alert-circle" size={40} color="red" />
+          <Text style={styles.errorTitle}>Something went wrong</Text>
+          <Text style={styles.message}>
+            We couldn’t load the car centers. Please try again.
+          </Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={async () => {
+              await refetch();
+            }}
+          >
+            <Text style={styles.retryText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -78,25 +95,15 @@ const TopBrandsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       </View>
 
       {/* Grid */}
-      {filteredBrands.length > 0 ? (
         <FlatList
           data={filteredBrands}
-          numColumns={4 }
-          keyExtractor={(item) => item.name}
+          numColumns={4}
+          keyExtractor={(item) => item.brand}
           contentContainerStyle={styles.grid}
           renderItem={renderBrand}
           showsVerticalScrollIndicator={false}
         />
-      ) : (
-        <View style={styles.noData}>
-          <Icon name="car-sport" size={30} color="#000" />
-          <Text style={styles.noDataText}>No Results Found</Text>
-          <Text style={styles.noDataSubText}>
-            We currently have no Search Results for “{search}”. Please try with
-            different search text.
-          </Text>
-        </View>
-      )}
+      
     </SafeAreaView>
   );
 };
@@ -157,6 +164,62 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     maxWidth: 300,
+  },
+  titleError: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111',
+    fontFamily: FONTS.demiBold,
+  },
+  location: {
+    fontSize: 14,
+    color: '#555',
+    marginTop: 4,
+    fontFamily: FONTS.medium,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  ratingTextError: {
+    marginLeft: 6,
+    fontSize: 14,
+    color: '#333',
+    fontFamily: FONTS.demiBold,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 10,
+    color: 'red',
+    fontFamily: FONTS.bold,
+  },
+  message: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 8,
+    fontFamily: FONTS.medium,
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: '#000',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+  },
+  retryText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: FONTS.demiBold,
   },
 });
 

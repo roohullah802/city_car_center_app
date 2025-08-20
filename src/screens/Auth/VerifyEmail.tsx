@@ -37,9 +37,7 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
   const handleChange = useCallback(
     (text: string, index: number) => {
       if (/^\d$/.test(text)) {
-        console.log(text);
         const newCode = [...code];
-        console.log(newCode);
 
         newCode[index] = text;
         setCode(newCode);
@@ -71,7 +69,6 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
   }, []);
 
   const handleVerify = useCallback(async () => {
-    console.log(timeRef);
 
     const enteredCode = code.join('');
     try {

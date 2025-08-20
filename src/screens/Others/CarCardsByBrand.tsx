@@ -1,28 +1,21 @@
-import React, {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
   TextInput,
   FlatList,
-  Image,
   StyleSheet,
   Dimensions,
   SafeAreaView,
   StatusBar,
   TouchableOpacity,
-  Pressable,
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
+  Pressable,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import BottomSheetFilterModal from './BottomSheetFilterModel';
-import { Modalize } from 'react-native-modalize';
 import { FONTS } from '../../fonts/fonts';
 import { useGetCarsQuery } from '../../redux.toolkit/rtk/apis';
 const { width } = Dimensions.get('window');
@@ -31,6 +24,7 @@ interface ImageObject {
   url: string;
   public_id: string;
 }
+
 
 interface Car {
   modelName: string;
@@ -42,90 +36,56 @@ interface Car {
   _id: string;
 }
 
-const SearchCarCards: React.FC<{ navigation: any; route: any }> = ({
+
+const CarCardsByBrand: React.FC<{ navigation: any; route: any }> = ({
   navigation,
 }) => {
-  const [searchText, setSearchText] = useState('');
-  const [selectedBrand, setSelectedBrand] = React.useState<string | null>(null);
-  const [priceRange, setPriceRange] = React.useState<[number, number]>([
-    1, 1000,
-  ]);
+  const [searchText, setSearchText] = useState<string>('');
 
-
-  const ref = useRef<Modalize>(null);
   const { data: Cars, isLoading, isError, refetch } = useGetCarsQuery([]);
+  console.log(Cars);
+
+
+  const filteredCars = useMemo(()=>{
+    return Cars?.data.filter((item: any)=> item.modelName.toLowerCase().includes(searchText?.toLowerCase()))
+  },[Cars?.data, searchText]);
+
+   const renderCarCard = useCallback(
+      ({ item }: { item: Car }) => {
+        return (
+          <Pressable
+            style={({ pressed }) => [
+              {
+                opacity: pressed ? 0.9 : 1,
+              },
+            ]}
+            onPress={() => navigation.navigate('carDetails', { _id: item._id })}
+          >
+            <View style={styles.card}>
+              <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
   
-
-  const filteredCars = useMemo(() => {
-    if (!Cars?.data) return [];
-    return Cars?.data
-      ?.filter((item: any) =>
-        item.modelName.toLowerCase().includes(searchText.toLowerCase()),
-      );
-  }, [searchText, Cars?.data]);
-
-  const modalFilteredCars = useMemo(() => {
-    if (!filteredCars) return [];
-
-    if (selectedBrand === null || selectedBrand === '') {
-      return filteredCars.filter((item: any) => item?.brand);
-    }
-
-    return filteredCars
-      .filter((item: any) =>
-        item.brand.toLowerCase().includes(selectedBrand?.toLowerCase()),
-      )
-      .filter(
-        (item: any) =>
-          item.pricePerDay >= priceRange[0] &&
-          item.pricePerDay <= priceRange[1],
-      );
-  }, [filteredCars, priceRange, selectedBrand]);
-
-  const onClose = () => {
-    ref.current?.close();
-  };
-
-  const openFilterModal = () => {
-    ref.current?.open();
-  };
-
-  const renderCarCard = useCallback(
-    ({ item }: { item: Car }) => {
-      return (
-        <Pressable
-          style={({ pressed }) => [
-            {
-              opacity: pressed ? 0.9 : 1,
-            },
-          ]}
-          onPress={() => navigation.navigate('carDetails', { _id: item._id })}
-        >
-          <View style={styles.card}>
-            <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
-
-            <Image
-              source={{ uri: item?.images?.[0].url }}
-              style={styles.image}
-              resizeMode="cover"
-            />
-            <View style={styles.details}>
-              <Text style={styles.name}>{item.modelName}</Text>
-              <View style={styles.bottomRow}>
-                <View style={styles.rating}>
-                  <Icon name="star" size={16} color="#fbbf24" />
-                  <Text style={styles.ratingText}>({item.totalReviews})</Text>
+              <Image
+                source={{ uri: item?.images?.[0].url }}
+                style={styles.image}
+                resizeMode="cover"
+              />
+              <View style={styles.details}>
+                <Text style={styles.name}>{item.modelName}</Text>
+                <View style={styles.bottomRow}>
+                  <View style={styles.rating}>
+                    <Icon name="star" size={16} color="#fbbf24" />
+                    <Text style={styles.ratingText}>({item.totalReviews})</Text>
+                  </View>
+                  <Text style={styles.price}>${item.pricePerDay}/day</Text>
                 </View>
-                <Text style={styles.price}>${item.pricePerDay}/day</Text>
               </View>
             </View>
-          </View>
-        </Pressable>
-      );
-    },
-    [navigation],
-  );
-
+          </Pressable>
+        );
+      },
+      [navigation],
+    );
+  
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -172,12 +132,9 @@ const SearchCarCards: React.FC<{ navigation: any; route: any }> = ({
             placeholderTextColor="#999"
             style={styles.searchInput}
           />
-          <TouchableOpacity onPress={openFilterModal}>
-            <Icon name="options-outline" size={20} color="#999" />
-          </TouchableOpacity>
         </View>
 
-        {modalFilteredCars.length <= 0 ? (
+        {Cars?.data.length <= 0 ? (
           <View style={styles.noData}>
             <Icon name="car-sport" size={30} color="#000" />
             <Text style={{ width: 150, marginTop: 10 }}>No Cars Found</Text>
@@ -188,23 +145,13 @@ const SearchCarCards: React.FC<{ navigation: any; route: any }> = ({
           </View>
         ) : (
           <FlatList
-            data={modalFilteredCars}
+            data={filteredCars}
             keyExtractor={item => item._id.toString()}
             renderItem={item => renderCarCard(item)}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
           />
         )}
-
-        <BottomSheetFilterModal
-          key={`modal-${selectedBrand}-${priceRange[1]}`}
-          setPriceRange={setPriceRange}
-          selectedBrand={selectedBrand}
-          setSelectedBrand={setSelectedBrand}
-          priceRange={priceRange}
-          ref={ref}
-          onClose={onClose}
-        />
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
@@ -390,4 +337,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SearchCarCards;
+export default CarCardsByBrand;

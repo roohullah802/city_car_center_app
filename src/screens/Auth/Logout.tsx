@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -68,7 +68,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
       }
     } catch (error: any) {
       Toast.show({
-        type: 'success',
+        type: 'error',
         text1: error.response.data.message,
       });
       onClose();

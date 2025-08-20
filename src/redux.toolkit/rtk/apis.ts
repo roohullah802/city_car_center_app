@@ -1,22 +1,37 @@
 import { BASE_USER_URL } from '@env';
-import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 
 export const Apis = createApi({
-    reducerPath: "cars",
-    baseQuery: fetchBaseQuery({baseUrl: BASE_USER_URL}),
-    endpoints: (builder)=>({
-        getCars: builder.query({
-            query:()=> '/all/cars'
-        }),
-        getBrands: builder.query({
-            query:()=> '/all/brands'
-        }),
-        getCarDetails: builder.query({
-            query: (_id)=> `/car/details/${_id}`
-        })
+  reducerPath: 'cars',
+  baseQuery: fetchBaseQuery({ baseUrl: BASE_USER_URL }),
+  endpoints: builder => ({
+    getCars: builder.query({
+      query: () => '/all/cars',
+    }),
+    getBrands: builder.query({
+      query: () => '/all/brands',
+    }),
+    getCarDetails: builder.query({
+      query: _id => `/car/details/${_id}`,
+    }),
+    postReportIssue: builder.mutation({ 
+      query: (data) => ({
+        url: `/report/issue`,
+        method: 'POST',
+        body: data,
+      }),
+    }),
+    getAllFaqs: builder.query({
+      query:()=> '/all/faqs'
     })
-     
-})
 
-export const {useGetCarsQuery, useGetBrandsQuery, useGetCarDetailsQuery} = Apis
+
+
+
+
+  }),
+});
+
+export const { useGetCarsQuery, useGetBrandsQuery, useGetCarDetailsQuery, usePostReportIssueMutation, useGetAllFaqsQuery } =
+  Apis;

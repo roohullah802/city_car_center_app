@@ -1,64 +1,67 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { FONTS } from '../../fonts/fonts';
+import { useGetAllFaqsQuery } from '../../redux.toolkit/rtk/apis';
+import Icon from 'react-native-vector-icons/Ionicons';
+
 
 interface FAQItem {
   question: string;
   answer: string;
+  createdAt: Date;
+  updatedAt: Date;
+  _id: string;
 }
 
 const FAQScreen: React.FC = () => {
   
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
-
-  const faqData: FAQItem[] = useMemo(
-    () => [
-      {
-        question: 'Who is eligible to lease a car?',
-        answer:
-          'Anyone aged 21+ (depending on local laws) with valid driving documents, a steady income, and a good credit score may be eligible to lease.',
-      },
-      {
-        question: 'Can I lease a car with bad credit?',
-        answer: 'Leasing with bad credit may be more difficult, but some companies may offer options with additional terms.',
-      },
-      {
-        question: 'What is a car lease?',
-        answer: 'A car lease is a contract that allows you to use a car for a set period of time while making regular payments.',
-      },
-      {
-        question: 'Can I lease a car with bad credit?',
-        answer: 'Yes, but it might require a higher down payment or a co-signer depending on the lender.',
-      },
-      {
-        question: 'When will I be charged?',
-        answer: 'You’ll be charged based on your lease agreement terms — typically monthly on the billing date.',
-      },
-      {
-        question: 'How do I start a lease through the app?',
-        answer: 'Navigate to the leasing section in the app, choose a vehicle, complete your profile, and submit your application.',
-      },
-    ],
-    []
-  );
-
- 
+  const {data: Faqs, isLoading, isError, refetch} = useGetAllFaqsQuery([]); 
+  const faqData: FAQItem[] = Faqs?.data
+  
   const handleToggle = useCallback((index: number) => {
     setExpandedIndex(prev => (prev === index ? null : index));
-  }, []);
+    console.log(expandedIndex);
+    
+  }, [expandedIndex]);
+
+   if (isLoading) {
+      return (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#000" />
+          <Text style={styles.message}>Loading city car centers...</Text>
+        </View>
+      );
+    }
+  
+    if (isError) {
+      return (
+        <View style={styles.centered}>
+          <Icon name="alert-circle" size={40} color="red" />
+          <Text style={styles.errorTitle}>Something went wrong</Text>
+          <Text style={styles.message}>
+            We couldn’t load the car centers. Please try again.
+          </Text>
+          <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+            <Text style={styles.retryText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>
       <Text style={styles.header}>FAQs</Text>
       <Text style={styles.subHeader}>Frequently Asked Questions (FAQs)</Text>
 
-      {faqData.map((item, index) => (
+      {faqData.map((item: any, index: number) => (
         <View key={index} style={styles.card}>
           <TouchableOpacity
             onPress={() => handleToggle(index)}
@@ -126,6 +129,39 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 14,
     color: '#555',
+    fontFamily: FONTS.demiBold,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 10,
+    color: 'red',
+    fontFamily: FONTS.bold,
+  },
+  message: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 8,
+    fontFamily: FONTS.medium,
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: '#000',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+  },
+  retryText: {
+    color: '#fff',
+    fontSize: 14,
     fontFamily: FONTS.demiBold,
   },
 });

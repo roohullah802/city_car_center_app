@@ -21,6 +21,7 @@ import DateAndTimeScreen from '../screens/Others/DateAndTime';
 import LeaseDetailsScreen from '../screens/Lease/LeaseDetails';
 import PaymentDetails from '../screens/Payments/PaymentDetails';
 import VerificationScreen from '../screens/Auth/VerifyEmail';
+import CarCardsByBrand from '../screens/Others/CarCardsByBrand';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -54,6 +55,10 @@ const AuthStack: React.FC = () => {
 
        <Stack.Screen name="searchCarCards">
         {props => <SearchCarCards {...props} />}
+      </Stack.Screen>
+
+       <Stack.Screen name="carCardsByBrand">
+        {props => <CarCardsByBrand {...props} />}
       </Stack.Screen>
 
       <Stack.Screen name="passwordSecurity">

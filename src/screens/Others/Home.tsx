@@ -135,7 +135,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     [navigation],
   );
 
-
   if (isErrorCars || isErrorBrands) {
     return (
       <View style={styles.centered}>
@@ -241,8 +240,11 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         {isLoadingBrands ? (
           <View style={styles.centered}>
-            <ActivityIndicator size="large" color="#000" />
-            <Text style={styles.message}>Loading city car centers...</Text>
+            <ActivityIndicator
+              style={styles.indicator}
+              size="large"
+              color="#000"
+            />
           </View>
         ) : (
           <FlatList
@@ -267,8 +269,11 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         {isLoadingCars ? (
           <View style={styles.centered}>
-            <ActivityIndicator size="large" color="#000" />
-            <Text style={styles.message}>Loading city car centers...</Text>
+            <ActivityIndicator
+              style={styles.indicator}
+              size="large"
+              color="#000"
+            />
           </View>
         ) : (
           <FlatList
@@ -535,19 +540,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: '#fff',
   },
-  errorTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 10,
-    color: 'red',
-    fontFamily: FONTS.bold,
-  },
   message: {
     fontSize: 14,
     textAlign: 'center',
     color: '#666',
     marginTop: 8,
     fontFamily: FONTS.medium,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 10,
+    color: 'red',
+    fontFamily: FONTS.bold,
   },
   retryButton: {
     marginTop: 16,

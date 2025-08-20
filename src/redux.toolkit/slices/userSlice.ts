@@ -10,6 +10,7 @@ interface UserState {
     name: string;
     email: string;
     token: string;
+    id: string;
   } | null;
 }
 
@@ -25,7 +26,7 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    login(state, action: PayloadAction<{ name: string; email: string, token: string }>) {
+    login(state, action: PayloadAction<{ name: string; email: string, token: string, id: string }>) {
       state.isLoggedIn = true;
       state.userData = action.payload;
       state.token = action.payload.token

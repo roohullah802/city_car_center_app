@@ -68,7 +68,8 @@ const Login = ({ navigation }: any) => {
       dispatch(
         login({
           name: user?.data?.user?.firstName,
-          email: user?.data?.email,
+          id: user?.data?.user?.id,
+          email: user?.data?.user?.email,
           token: user?.data?.user?.token
         })
       );
