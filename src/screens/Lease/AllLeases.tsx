@@ -8,27 +8,33 @@ import {
   TouchableOpacity,
   FlatList,
   Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useCallback } from 'react';
 import { FONTS } from '../../fonts/fonts';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux.toolkit/store';
 import { useFocusEffect } from '@react-navigation/native';
+import { useGetAllLeasesQuery } from '../../redux.toolkit/rtk/leaseApis';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useCountdowns } from '../../timer/leaseTimer';
 
 const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const leases = [1, 2, 3, 4, 5];
-
   const { isLoggedIn } = useSelector((state: RootState) => state.user);
+  const {
+    data: Leases,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetAllLeasesQuery(null);
+  const LeasesCountDown = useCountdowns(Leases?.lease);
+  
 
-  const leasesCallBack = useCallback(() => {
-    return (
+  const leasesCallBack = useCallback(
+    ({ item }: any) => (
       <Pressable
         onPress={() => navigation.navigate('leaseDetails')}
-        style={({ pressed }) => [
-          {
-            opacity: pressed ? 0.9 : 1,
-          },
-        ]}
+        style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
       >
         <View style={styles.leaseCard}>
           <View style={styles.cardHeader}>
@@ -40,25 +46,30 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
               <Text style={styles.extendText}>Extend Lease</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.leaseModel}>Porsche 2019 - 911 Carrera S</Text>
+          <Text style={styles.leaseModel}>
+            {item?.carDetails[0]?.modelName}
+          </Text>
 
-          <View style={styles.timerContainer}>
-            {[
-              { value: '00', label: 'day' },
-              { value: '22', label: 'hr' },
-              { value: '33', label: 'min' },
-              { value: '44', label: 'sec' },
-            ].map((item, index) => (
-              <View key={index} style={styles.timerBlock}>
-                <Text style={styles.ti}>{item.value}</Text>
-                <Text style={styles.timerLabel}>{item.label}</Text>
-              </View>
-            ))}
-          </View>
+          {item.countdown && (
+            <View style={styles.timerContainer}>
+              {[
+                { value: item.countdown.days, label: 'day' },
+                { value: item.countdown.hours, label: 'hr' },
+                { value: item.countdown.minutes, label: 'min' },
+                { value: item.countdown.seconds, label: 'sec' },
+              ].map((t, index) => (
+                <View key={index} style={styles.timerBlock}>
+                  <Text style={styles.ti}>{t.value}</Text>
+                  <Text style={styles.timerLabel}>{t.label}</Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
       </Pressable>
-    );
-  }, [navigation]);
+    ),
+    [navigation],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -69,22 +80,46 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
     }, [navigation, isLoggedIn]),
   );
 
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#000" />
+        <Text style={styles.message}>Loading city car centers...</Text>
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.centered}>
+        <Icon name="alert-circle" size={40} color="red" />
+        <Text style={styles.errorTitle}>Something went wrong</Text>
+        <Text style={styles.message}>
+          We couldn’t load the car centers. Please try again.
+        </Text>
+        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+          <Text style={styles.retryText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       {Platform.OS === 'ios' && <View style={styles.statusBarBackground} />}
       <StatusBar backgroundColor="transparent" barStyle="dark-content" />
 
-      {leases.length > 0 ? (
+      {LeasesCountDown.length > 0 ? (
         <View style={styles.contentContainer}>
           <Text style={styles.topText}>Car lease</Text>
           <Text style={styles.topDescription}>
-            You have {leases.length} car{leases.length > 1 ? 's' : ''} at lease
-            so far
+            You have {Leases.length} car
+            {LeasesCountDown.length > 1 ? 's' : ''} at lease so far
           </Text>
 
           <FlatList
-            data={leases}
-            keyExtractor={(item, index) => index.toString()}
+            data={LeasesCountDown}
+            keyExtractor={(item, index) => item._id || index.toString()}
             renderItem={leasesCallBack}
             showsVerticalScrollIndicator={false}
           />
@@ -193,6 +228,39 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'gray',
     textAlign: 'center',
+    fontFamily: FONTS.demiBold,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 10,
+    color: 'red',
+    fontFamily: FONTS.bold,
+  },
+  message: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 8,
+    fontFamily: FONTS.medium,
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: '#000',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+  },
+  retryText: {
+    color: '#fff',
+    fontSize: 14,
     fontFamily: FONTS.demiBold,
   },
 });

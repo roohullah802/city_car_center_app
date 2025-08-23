@@ -63,16 +63,7 @@ const SignupScreen = ({ navigation }: any) => {
       });
 
       const result = response.data;
-      console.log(result);
-      console.log(userData);
-      
-      
-
       if (result.success) {
-        Toast.show({
-          type: 'success',
-          text1: result.message || 'Signup successful!',
-        });
         navigation.navigate('verifyEmail',{email: email});
       } else {
         Toast.show({

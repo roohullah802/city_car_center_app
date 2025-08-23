@@ -24,12 +24,11 @@ import {
   useGetBrandsQuery,
   useGetCarsQuery,
 } from '../../redux.toolkit/rtk/apis';
+import { useGetAllLeasesQuery } from '../../redux.toolkit/rtk/leaseApis';
+import { useCountdowns } from '../../timer/leaseTimer';
 
 const { width } = Dimensions.get('window');
 
-// const brands = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-const leaseData = [1, 2, 3, 4, 5];
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const route = useRoute();
@@ -51,7 +50,15 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     refetch: refetchBrands,
   } = useGetBrandsQuery([]);
 
-  const leaseDataCallBack = useCallback(() => {
+  const {data: Leases, isError: isErrorLease} = useGetAllLeasesQuery(null);
+  const LeaseWithTimer = useCountdowns(Leases?.lease);
+
+
+
+  const leaseDataCallBack = useCallback(({item}:any) => {
+    console.log(item);
+    
+    
     return (
       <Pressable
         onPress={() => {
@@ -73,14 +80,15 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               <Text style={styles.extendText}>Extend Lease</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.leaseModel}>Porsche 2019 - 911 Carrera S</Text>
+          <Text style={styles.leaseModel}>{item?.carDetails[0]?.modelName}</Text>
           {/* <Text style={styles.timer}>my timer</Text> */}
-          <View style={styles.timerContainer}>
+          {item.countdown && (
+            <View style={styles.timerContainer}>
             {[
-              { value: '00', label: 'days' },
-              { value: '22', label: 'Hours' },
-              { value: '33', label: 'Mins' },
-              { value: '44', label: 'Secs' },
+              { value: item?.countdown?.days, label: 'days' },
+              { value: item?.countdown?.hours, label: 'Hr' },
+              { value: item?.countdown?.minutes, label: 'Min' },
+              { value: item?.countdown?.seconds, label: 'Sec' },
             ].map((item, index) => (
               <View key={index} style={styles.timerBlock}>
                 <Text style={styles.ti}>{item.value}</Text>
@@ -88,6 +96,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               </View>
             ))}
           </View>
+          )}
         </View>
       </Pressable>
     );
@@ -95,14 +104,16 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const brandsCallBack = useCallback(({ item }: any) => {
     return (
-      <View style={styles.brandCard}>
-        <Image
-          style={styles.brandImage}
-          source={{ uri: item?.brandImage?.url }}
-        />
-      </View>
+      <Pressable onPress={()=> navigation.navigate('carCardsByBrand', { brand: item.brand })} style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}>
+        <View style={styles.brandCard}>
+          <Image
+            style={styles.brandImage}
+            source={{ uri: item?.brandImage?.url }}
+          />
+        </View>
+      </Pressable>
     );
-  }, []);
+  }, [navigation]);
 
   const carsCallBack = useCallback(
     (item: any) => {
@@ -135,7 +146,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     [navigation],
   );
 
-  if (isErrorCars || isErrorBrands) {
+  if (isErrorCars || isErrorBrands || isErrorLease) {
     return (
       <View style={styles.centered}>
         <Ionicons name="alert-circle" size={40} color="red" />
@@ -204,8 +215,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           </View>
 
           <FlatList
-            data={leaseData}
-            keyExtractor={item => item.toString()}
+            data={LeaseWithTimer}
+            keyExtractor={item => item?._id.toString()}
             renderItem={leaseDataCallBack}
             horizontal={true}
             ItemSeparatorComponent={() => <View style={{ width: 20 }} />}
@@ -400,16 +411,17 @@ const styles = StyleSheet.create({
   brandCard: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     borderWidth: 1,
     borderColor: '#e5e5e5ff',
     borderRadius: 10,
   },
   brandImage: {
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 60,
     resizeMode: 'contain',
+    borderRadius:10
   },
   carCard: {
     backgroundColor: '#f8f8f8',
@@ -458,7 +470,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   timerBlock: {
-    marginHorizontal: 15,
+    marginHorizontal: 20,
   },
   ti: {
     color: 'white',
@@ -471,6 +483,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginTop: 4,
     marginLeft: 5,
+    fontFamily:FONTS.demiBold
   },
   charAt: {
     color: '#fff',

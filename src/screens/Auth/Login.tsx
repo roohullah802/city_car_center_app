@@ -163,7 +163,7 @@ const Login = ({ navigation }: any) => {
 
           <TouchableOpacity
             style={{ alignSelf: 'flex-end', marginBottom: hp('2%') }}
-            onPress={() => navigation.navigate('forgotPassword')}
+            onPress={() => navigation.navigate('userEmail')}
           >
             <Text
               style={{

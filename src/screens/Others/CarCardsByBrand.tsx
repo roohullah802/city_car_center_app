@@ -25,7 +25,6 @@ interface ImageObject {
   public_id: string;
 }
 
-
 interface Car {
   modelName: string;
   price: number;
@@ -36,56 +35,63 @@ interface Car {
   _id: string;
 }
 
-
 const CarCardsByBrand: React.FC<{ navigation: any; route: any }> = ({
   navigation,
+  route,
 }) => {
   const [searchText, setSearchText] = useState<string>('');
+  const { brand } = route.params;
+  console.log(brand);
 
   const { data: Cars, isLoading, isError, refetch } = useGetCarsQuery([]);
   console.log(Cars);
 
+  const filteredCars = useMemo(() => {
+    return Cars?.data
+      .filter((item: any) =>
+        item.modelName.toLowerCase().includes(searchText?.toLowerCase()),
+      )
+      .filter((item: any) =>
+        item.brand.toLowerCase().includes(brand.toLowerCase()),
+      );
+  }, [Cars?.data, searchText, brand]);
 
-  const filteredCars = useMemo(()=>{
-    return Cars?.data.filter((item: any)=> item.modelName.toLowerCase().includes(searchText?.toLowerCase()))
-  },[Cars?.data, searchText]);
+  const renderCarCard = useCallback(
+    ({ item }: { item: Car }) => {
+      return (
+        <Pressable
+          style={({ pressed }) => [
+            {
+              opacity: pressed ? 0.9 : 1,
+            },
+          ]}
+          onPress={() => navigation.navigate('carDetails', { _id: item._id })}
+        >
+          <View style={styles.card}>
+            <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
 
-   const renderCarCard = useCallback(
-      ({ item }: { item: Car }) => {
-        return (
-          <Pressable
-            style={({ pressed }) => [
-              {
-                opacity: pressed ? 0.9 : 1,
-              },
-            ]}
-            onPress={() => navigation.navigate('carDetails', { _id: item._id })}
-          >
-            <View style={styles.card}>
-              <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
-  
-              <Image
-                source={{ uri: item?.images?.[0].url }}
-                style={styles.image}
-                resizeMode="cover"
-              />
-              <View style={styles.details}>
-                <Text style={styles.name}>{item.modelName}</Text>
-                <View style={styles.bottomRow}>
-                  <View style={styles.rating}>
-                    <Icon name="star" size={16} color="#fbbf24" />
-                    <Text style={styles.ratingText}>({item.totalReviews})</Text>
-                  </View>
-                  <Text style={styles.price}>${item.pricePerDay}/day</Text>
+            <Image
+              source={{ uri: item?.images?.[0].url }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+            <View style={styles.details}>
+              <Text style={styles.name}>{item.modelName}</Text>
+              <View style={styles.bottomRow}>
+                <View style={styles.rating}>
+                  <Icon name="star" size={16} color="#fbbf24" />
+                  <Text style={styles.ratingText}>({item.totalReviews})</Text>
                 </View>
+                <Text style={styles.price}>${item.pricePerDay}/day</Text>
               </View>
             </View>
-          </Pressable>
-        );
-      },
-      [navigation],
-    );
-  
+          </View>
+        </Pressable>
+      );
+    },
+    [navigation],
+  );
+
   if (isLoading) {
     return (
       <View style={styles.centered}>

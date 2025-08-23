@@ -16,30 +16,25 @@ import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux.toolkit/store';
 import { setLoading } from '../../redux.toolkit/slices/userSlice';
-import {
-  useResendOtpMutation,
-  useVerifyEmailMutation,
-} from '../../redux.toolkit/rtk/authApis';
+import { useMatchOtpMutation, useResnedCodeMutation } from '../../redux.toolkit/rtk/authApis';
 
 const { width } = Dimensions.get('window');
 
 const CODE_LENGTH = 6;
 
-const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
+const VerifyOtp: React.FC<{ navigation: any; route: any }> = ({
   route,
   navigation,
 }) => {
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const inputs = useRef<Array<TextInput | null>>([]);
   const dispatch = useDispatch<AppDispatch>();
-  const { isLoading: isLoadingState } = useSelector(
-    (state: RootState) => state.user,
-  );
+  const { isLoading:isLoadingState } = useSelector((state: RootState) => state.user);
   const [countDown, setCountDown] = useState<number>(0);
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const { email } = route?.params;
-  const [verifyEmail, { isLoading }] = useVerifyEmailMutation();
-  const [resendOtp] = useResendOtpMutation();
+  const [resndOtp, { isLoading }] = useResnedCodeMutation();
+  const [matchOtp] = useMatchOtpMutation()
 
   const handleChange = useCallback(
     (text: string, index: number) => {
@@ -76,53 +71,59 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
   }, []);
 
   const handleVerify = useCallback(async () => {
+    const enteredCode = Number(code.join(''))  
+    console.log(email);
+    
     try {
-      const enteredCode = Number(code.join(''));
       dispatch(setLoading(true));
-      const response = await verifyEmail({ email, code: enteredCode }).unwrap();
-      if (response?.success) {
-        navigation.navigate('Login');
+      const response = await matchOtp({email,code:enteredCode}).unwrap();
+      console.log(response);
+      
+      if (response.success) {
+        navigation.navigate('forgotPasswordChangePassword', {email})
       }
-    } catch (error) {
+    } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: 'Email verification failed.',
+        text1: 'match opt failed.',
       });
     } finally {
       dispatch(setLoading(false));
     }
-  }, [code, email, verifyEmail, dispatch, navigation]);
+  }, [dispatch, code, email, navigation, matchOtp]);
 
   const handleResendOTP = useCallback(async () => {
     try {
       dispatch(setLoading(true));
-      const response = await resendOtp({ email }).unwrap();
-      if (response?.success) {
+      const response = await resndOtp({ email }).unwrap();
+      console.log(response);
+      
+      if (response.success) {
         Toast.show({
           type: 'success',
-          text1: 'Otp sent to your email.',
+          text1: 'otp sent to your email.',
         });
         startCountDown();
       }
-    } catch (error) {
+    } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: 'resend otp failed.',
+        text1: error.response.data.message || 'Resend otp failed.',
       });
     } finally {
       dispatch(setLoading(false));
     }
-  }, [dispatch, email, resendOtp, startCountDown]);
+  }, [startCountDown, dispatch, email, resndOtp]);
 
   if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#000" />
-        <Text style={styles.message}>Loading city car centers...</Text>
-      </View>
-    );
-  }
-
+      return (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#000" />
+          <Text style={styles.message}>Loading city car centers...</Text>
+        </View>
+      );
+    }
+  
 
   return (
     <KeyboardAvoidingView
@@ -168,7 +169,7 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
       )}
 
       <TouchableOpacity
-        disabled={isLoading}
+        disabled={isLoadingState}
         style={styles.verifyButton}
         onPress={handleVerify}
       >
@@ -182,7 +183,7 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
   );
 };
 
-export default VerificationScreen;
+export default VerifyOtp;
 
 const inputSize = width / 8;
 
@@ -254,19 +255,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: FONTS.demiBold,
   },
-  centered: {
+   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
     backgroundColor: '#fff',
-  },
-  errorTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 10,
-    color: 'red',
-    fontFamily: FONTS.bold,
   },
   message: {
     fontSize: 14,
@@ -274,17 +268,5 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 8,
     fontFamily: FONTS.medium,
-  },
-  retryButton: {
-    marginTop: 16,
-    backgroundColor: '#000',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-  },
-  retryText: {
-    color: '#fff',
-    fontSize: 14,
-    fontFamily: FONTS.demiBold,
   },
 });
