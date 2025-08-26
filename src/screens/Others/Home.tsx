@@ -29,7 +29,6 @@ import { useCountdowns } from '../../timer/leaseTimer';
 
 const { width } = Dimensions.get('window');
 
-
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const route = useRoute();
   const isFocused = useIsFocused();
@@ -37,83 +36,83 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { isLoggedIn } = useSelector((state: RootState) => state.user);
   const user = useSelector((state: RootState) => state.user);
 
-  const {
-    data: Cars,
-    isLoading: isLoadingCars,
-    isError: isErrorCars,
-    refetch: refetchCars,
-  } = useGetCarsQuery([]);
-  const {
-    data: Brands,
-    isLoading: isLoadingBrands,
-    isError: isErrorBrands,
-    refetch: refetchBrands,
-  } = useGetBrandsQuery([]);
+  const { data: Cars, isLoading: isLoadingCars, isError: isErrorCars } = useGetCarsQuery([]);
+  const { data: Brands, isLoading: isLoadingBrands, isError: isErrorBrands } = useGetBrandsQuery([]);
 
-  const {data: Leases, isError: isErrorLease} = useGetAllLeasesQuery(null);
+  const { data: Leases, isError } = useGetAllLeasesQuery(null);
   const LeaseWithTimer = useCountdowns(Leases?.lease);
 
+  const leaseDataCallBack = useCallback(
+    ({ item }: any) => {
+      console.log(item);
 
-
-  const leaseDataCallBack = useCallback(({item}:any) => {
-    console.log(item);
-    
-    
-    return (
-      <Pressable
-        onPress={() => {
-          if (!isLoggedIn) {
-            navigation.navigate('Login');
-            return;
-          }
-          navigation.navigate('leaseDetails');
-        }}
-        style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
-      >
-        <View style={styles.leaseCard}>
-          <View style={styles.view}>
-            <Text style={styles.leaseTitle}>My Lease</Text>
-            <TouchableOpacity
-              style={styles.extendButton}
-              onPress={() => navigation.navigate('extendLease')}
-            >
-              <Text style={styles.extendText}>Extend Lease</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.leaseModel}>{item?.carDetails[0]?.modelName}</Text>
-          {/* <Text style={styles.timer}>my timer</Text> */}
-          {item.countdown && (
-            <View style={styles.timerContainer}>
-            {[
-              { value: item?.countdown?.days, label: 'days' },
-              { value: item?.countdown?.hours, label: 'Hr' },
-              { value: item?.countdown?.minutes, label: 'Min' },
-              { value: item?.countdown?.seconds, label: 'Sec' },
-            ].map((item, index) => (
-              <View key={index} style={styles.timerBlock}>
-                <Text style={styles.ti}>{item.value}</Text>
-                <Text style={styles.timerLabel}>{item.label}</Text>
+      return (
+        <Pressable
+          onPress={() => {
+            if (!isLoggedIn) {
+              navigation.navigate('Login');
+              return;
+            }
+            navigation.navigate('leaseDetails');
+          }}
+          style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
+        >
+          <View style={styles.leaseCard}>
+            <View style={styles.view}>
+              <Text style={styles.leaseTitle}>My Lease</Text>
+              <TouchableOpacity
+                style={styles.extendButton}
+                onPress={() => navigation.navigate('extendLease')}
+              >
+                <Text style={styles.extendText}>Extend Lease</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.leaseModel}>
+              {item?.carDetails[0]?.modelName}
+            </Text>
+            {/* <Text style={styles.timer}>my timer</Text> */}
+            {item.countdown && (
+              <View style={styles.timerContainer}>
+                {[
+                  { value: item?.countdown?.days, label: 'days' },
+                  { value: item?.countdown?.hours, label: 'Hr' },
+                  { value: item?.countdown?.minutes, label: 'Min' },
+                  { value: item?.countdown?.seconds, label: 'Sec' },
+                ].map((item, index) => (
+                  <View key={index} style={styles.timerBlock}>
+                    <Text style={styles.ti}>{item.value}</Text>
+                    <Text style={styles.timerLabel}>{item.label}</Text>
+                  </View>
+                ))}
               </View>
-            ))}
+            )}
           </View>
-          )}
-        </View>
-      </Pressable>
-    );
-  }, [navigation, isLoggedIn]);
+        </Pressable>
+      );
+    },
+    [navigation, isLoggedIn],
+  );
 
-  const brandsCallBack = useCallback(({ item }: any) => {
-    return (
-      <Pressable onPress={()=> navigation.navigate('carCardsByBrand', { brand: item.brand })} style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}>
-        <View style={styles.brandCard}>
-          <Image
-            style={styles.brandImage}
-            source={{ uri: item?.brandImage?.url }}
-          />
-        </View>
-      </Pressable>
-    );
-  }, [navigation]);
+  const brandsCallBack = useCallback(
+    ({ item }: any) => {
+      return (
+        <Pressable
+          onPress={() =>
+            navigation.navigate('carCardsByBrand', { brand: item.brand })
+          }
+          style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
+        >
+          <View style={styles.brandCard}>
+            <Image
+              style={styles.brandImage}
+              source={{ uri: item?.brandImage?.url }}
+            />
+          </View>
+        </Pressable>
+      );
+    },
+    [navigation],
+  );
 
   const carsCallBack = useCallback(
     (item: any) => {
@@ -145,27 +144,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     },
     [navigation],
   );
-
-  if (isErrorCars || isErrorBrands || isErrorLease) {
-    return (
-      <View style={styles.centered}>
-        <Ionicons name="alert-circle" size={40} color="red" />
-        <Text style={styles.errorTitle}>Something went wrong</Text>
-        <Text style={styles.message}>
-          We couldn’t load the car centers. Please try again.
-        </Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          onPress={async () => {
-            await refetchBrands();
-            await refetchCars();
-          }}
-        >
-          <Text style={styles.retryText}>Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   return (
     <ScrollView style={styles.container}>
@@ -209,20 +187,34 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               ) : (
                 ''
               )}
-              {/* {userData?.name ? (
-             ) : ("") } */}
             </TouchableOpacity>
           </View>
 
-          <FlatList
-            data={LeaseWithTimer}
-            keyExtractor={item => item?._id.toString()}
-            renderItem={leaseDataCallBack}
-            horizontal={true}
-            ItemSeparatorComponent={() => <View style={{ width: 20 }} />}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 10 }}
-          />
+          {LeaseWithTimer === undefined || LeaseWithTimer?.length === 0 || isError ? (
+            <View style={styles.leaseCard}>
+              <View style={styles.view}>
+                <Text style={styles.leaseTitle}>My Lease</Text>
+                <TouchableOpacity
+                  disabled
+                  style={styles.extendButton}
+                  onPress={() => navigation.navigate('extendLease')}
+                >
+                  <Text style={styles.extendText}>Extend Lease</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.leaseModel}>No active lease</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={LeaseWithTimer}
+              keyExtractor={item => item?._id.toString()}
+              renderItem={leaseDataCallBack}
+              horizontal={true}
+              ItemSeparatorComponent={() => <View style={{ width: 20 }} />}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 10 }}
+            />
+          )}
         </View>
       </SafeAreaView>
 
@@ -257,12 +249,18 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               color="#000"
             />
           </View>
+        ) : !Brands?.brands || Brands.brands.length === 0 || isErrorBrands ? (
+          <View style={styles.centered}>
+            <Text style={{ margin: 20, fontFamily: FONTS.medium }}>
+              No brands available
+            </Text>
+          </View>
         ) : (
           <FlatList
-            horizontal={true}
-            data={Brands?.brands}
+            horizontal
+            data={Brands.brands}
             keyExtractor={item => item.brand.toString()}
-            renderItem={item => brandsCallBack(item)}
+            renderItem={brandsCallBack}
             ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 10 }}
@@ -286,9 +284,15 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               color="#000"
             />
           </View>
+        ) : !Cars?.data || Cars?.data?.length === 0 || isErrorCars ? (
+          <View style={styles.centered}>
+            <Text style={{ fontFamily: FONTS.medium, margin: 20 }}>
+              No cars available
+            </Text>
+          </View>
         ) : (
           <FlatList
-            horizontal={true}
+            horizontal
             data={Cars?.data?.slice(0, 10)}
             keyExtractor={item => item._id.toString()}
             renderItem={({ item }) => carsCallBack(item)}
@@ -421,7 +425,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     resizeMode: 'contain',
-    borderRadius:10
+    borderRadius: 10,
   },
   carCard: {
     backgroundColor: '#f8f8f8',
@@ -483,7 +487,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginTop: 4,
     marginLeft: 5,
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   charAt: {
     color: '#fff',

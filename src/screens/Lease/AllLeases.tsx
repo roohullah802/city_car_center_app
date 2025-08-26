@@ -16,7 +16,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../redux.toolkit/store';
 import { useFocusEffect } from '@react-navigation/native';
 import { useGetAllLeasesQuery } from '../../redux.toolkit/rtk/leaseApis';
-import Icon from 'react-native-vector-icons/Ionicons';
 import { useCountdowns } from '../../timer/leaseTimer';
 
 const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
@@ -24,8 +23,6 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
   const {
     data: Leases,
     isLoading,
-    isError,
-    refetch,
   } = useGetAllLeasesQuery(null);
   const LeasesCountDown = useCountdowns(Leases?.lease);
   
@@ -89,20 +86,7 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
     );
   }
 
-  if (isError) {
-    return (
-      <View style={styles.centered}>
-        <Icon name="alert-circle" size={40} color="red" />
-        <Text style={styles.errorTitle}>Something went wrong</Text>
-        <Text style={styles.message}>
-          We couldn’t load the car centers. Please try again.
-        </Text>
-        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
-          <Text style={styles.retryText}>Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+
 
   return (
     <SafeAreaView style={styles.container}>

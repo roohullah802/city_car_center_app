@@ -43,10 +43,11 @@ const CarCardsByBrand: React.FC<{ navigation: any; route: any }> = ({
   const { brand } = route.params;
   console.log(brand);
 
-  const { data: Cars, isLoading, isError, refetch } = useGetCarsQuery([]);
+  const { data: Cars, isLoading} = useGetCarsQuery([]);
   console.log(Cars);
 
   const filteredCars = useMemo(() => {
+    if(!Cars?.data) return [];
     return Cars?.data
       .filter((item: any) =>
         item.modelName.toLowerCase().includes(searchText?.toLowerCase()),
@@ -101,20 +102,6 @@ const CarCardsByBrand: React.FC<{ navigation: any; route: any }> = ({
     );
   }
 
-  if (isError) {
-    return (
-      <View style={styles.centered}>
-        <Icon name="alert-circle" size={40} color="red" />
-        <Text style={styles.errorTitle}>Something went wrong</Text>
-        <Text style={styles.message}>
-          We couldn’t load the car centers. Please try again.
-        </Text>
-        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
-          <Text style={styles.retryText}>Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -140,14 +127,10 @@ const CarCardsByBrand: React.FC<{ navigation: any; route: any }> = ({
           />
         </View>
 
-        {Cars?.data.length <= 0 ? (
+        {!Cars?.data || Cars?.data.length <= 0 ? (
           <View style={styles.noData}>
             <Icon name="car-sport" size={30} color="#000" />
-            <Text style={{ width: 150, marginTop: 10 }}>No Cars Found</Text>
-            <Text style={styles.error}>
-              We currently have no Search Results for “{searchText}”. Please try
-              with different search text.
-            </Text>
+            <Text style={{ fontFamily:FONTS.demiBold }}>No Cars Found</Text>
           </View>
         ) : (
           <FlatList
@@ -251,12 +234,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.demiBold,
     marginTop: 40,
   },
-  error: {
-    fontSize: 12,
-    color: 'gray',
-    width: 300,
-    textAlign: 'center',
-  },
+
   indicator: {
     marginTop: 350,
   },

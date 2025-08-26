@@ -53,7 +53,7 @@ const SearchCarCards: React.FC<{ navigation: any; route: any }> = ({
 
 
   const ref = useRef<Modalize>(null);
-  const { data: Cars, isLoading, isError, refetch } = useGetCarsQuery([]);
+  const { data: Cars, isLoading } = useGetCarsQuery([]);
   
 
   const filteredCars = useMemo(() => {
@@ -135,20 +135,7 @@ const SearchCarCards: React.FC<{ navigation: any; route: any }> = ({
     );
   }
 
-  if (isError) {
-    return (
-      <View style={styles.centered}>
-        <Icon name="alert-circle" size={40} color="red" />
-        <Text style={styles.errorTitle}>Something went wrong</Text>
-        <Text style={styles.message}>
-          We couldn’t load the car centers. Please try again.
-        </Text>
-        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
-          <Text style={styles.retryText}>Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -177,14 +164,10 @@ const SearchCarCards: React.FC<{ navigation: any; route: any }> = ({
           </TouchableOpacity>
         </View>
 
-        {modalFilteredCars.length <= 0 ? (
+        {!modalFilteredCars || modalFilteredCars.length <= 0 ? (
           <View style={styles.noData}>
             <Icon name="car-sport" size={30} color="#000" />
-            <Text style={{ width: 150, marginTop: 10 }}>No Cars Found</Text>
-            <Text style={styles.error}>
-              We currently have no Search Results for “{searchText}”. Please try
-              with different search text.
-            </Text>
+            <Text style={{ fontFamily:FONTS.demiBold }}>No Cars Found</Text>
           </View>
         ) : (
           <FlatList
@@ -298,12 +281,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.demiBold,
     marginTop: 40,
   },
-  error: {
-    fontSize: 12,
-    color: 'gray',
-    width: 300,
-    textAlign: 'center',
-  },
+ 
   indicator: {
     marginTop: 350,
   },
