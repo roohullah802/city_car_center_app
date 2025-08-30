@@ -69,9 +69,10 @@ try {
 
   const renderCarImage = useCallback(
     ({ item }: { item: any }) => (
-      <View key={item?.public_id} style={styles.carWrapper}>
+      <View key={item} style={styles.carWrapper}>
         <Image
-          source={{ uri: item?.url }}
+        key={item}
+          source={{ uri: item }}
           style={styles.carImage}
           resizeMode="cover"
         />
@@ -152,7 +153,7 @@ try {
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
-          keyExtractor={item => item?.public_id}
+          keyExtractor={item => item}
           renderItem={item => renderCarImage(item)}
           onScroll={e => {
             const x = e.nativeEvent.contentOffset.x;

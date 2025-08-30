@@ -53,10 +53,6 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
       );
       const usr = response.data;
       if (usr.success) {
-        Toast.show({
-          type: 'success',
-          text1: usr.message,
-        });
         dispatch(logout());
         onClose();
         navigation.navigate("Login");

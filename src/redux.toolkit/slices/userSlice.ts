@@ -40,7 +40,8 @@ const userSlice = createSlice({
     },
     setProfile(state, action: PayloadAction<{profile: string}>){
       state.profile = action.payload.profile
-    }
+    },
+    
   },
 });
 

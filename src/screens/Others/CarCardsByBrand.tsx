@@ -41,10 +41,8 @@ const CarCardsByBrand: React.FC<{ navigation: any; route: any }> = ({
 }) => {
   const [searchText, setSearchText] = useState<string>('');
   const { brand } = route.params;
-  console.log(brand);
 
   const { data: Cars, isLoading} = useGetCarsQuery([]);
-  console.log(Cars);
 
   const filteredCars = useMemo(() => {
     if(!Cars?.data) return [];
@@ -72,7 +70,7 @@ const CarCardsByBrand: React.FC<{ navigation: any; route: any }> = ({
             <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
 
             <Image
-              source={{ uri: item?.images?.[0].url }}
+              source={{ uri: item?.images[0] as unknown as string }}
               style={styles.image}
               resizeMode="cover"
             />

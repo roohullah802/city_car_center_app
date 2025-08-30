@@ -9,10 +9,7 @@ import {
 
 interface Props {
   item: {
-    brandImage: {
-      url: string;
-      public_id: string;
-    };
+    brandImage: [string]
     brand: string;
   };
   size?: number;
@@ -26,6 +23,7 @@ const CARD_SIZE = (width - CARD_MARGIN * 2 * NUM_COLUMNS - 32) / NUM_COLUMNS;
 
 const BrandCard: React.FC<Props> = React.memo(
   ({ item, navigation, size = CARD_SIZE }) => {
+    
     return (
       <TouchableOpacity
         onPress={() =>
@@ -39,7 +37,7 @@ const BrandCard: React.FC<Props> = React.memo(
           ]}
         >
           <Image
-            source={{ uri: item.brandImage.url }}
+            source={{ uri: item?.brandImage[0] as unknown as string }}
             style={styles.image}
             resizeMode="contain"
           />

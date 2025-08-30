@@ -91,7 +91,7 @@ const SearchCarCards: React.FC<{ navigation: any; route: any }> = ({
   };
 
   const renderCarCard = useCallback(
-    ({ item }: { item: Car }) => {
+    ({ item }: { item: Car }) => {    
       return (
         <Pressable
           style={({ pressed }) => [
@@ -105,10 +105,11 @@ const SearchCarCards: React.FC<{ navigation: any; route: any }> = ({
             <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
 
             <Image
-              source={{ uri: item?.images?.[0].url }}
+            key={item?._id}
+              source={{ uri: item?.images[0] as unknown as string }}
               style={styles.image}
               resizeMode="cover"
-            />
+            />  
             <View style={styles.details}>
               <Text style={styles.name}>{item.modelName}</Text>
               <View style={styles.bottomRow}>

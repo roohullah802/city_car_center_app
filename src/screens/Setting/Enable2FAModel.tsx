@@ -65,6 +65,7 @@ const Enable2FAModal: React.FC<Enable2FAModalProps> = ({
             <TextInput
               style={styles.input}
               placeholder="Password"
+              placeholderTextColor={"gray"}
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: width * 0.042,
-    color: '#000',
+    color: '#000000ff',
   },
   buttonRow: {
     flexDirection: 'row',

@@ -48,10 +48,24 @@ export const Apis = createApi({
         body: {email, newPassword, reNewPassword}
       })
     }),
+    changeAppPassword: builder.mutation({
+      query: (data)=>({
+        url: '/update/app/password',
+        method:'POST',
+        body: data
+      })
+    }),
+    updateProfile: builder.mutation({
+      query: (data)=>({
+        url: '/update/profile',
+        method: 'POST',
+        body: data
+      })
+    })
     
 
 
   }),
 });
 
-export const { useCheckEmailMutation, useVerifyEmailMutation, useResendOtpMutation, useResnedCodeMutation, useMatchOtpMutation, useChangePasswordMutation } = Apis;
+export const { useCheckEmailMutation, useVerifyEmailMutation, useResendOtpMutation, useResnedCodeMutation, useMatchOtpMutation, useChangePasswordMutation, useChangeAppPasswordMutation, useUpdateProfileMutation } = Apis;

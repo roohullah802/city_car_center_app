@@ -36,6 +36,7 @@ const Login = ({ navigation }: any) => {
   const { isLoading, isLoggedIn } = useSelector(
     (state: RootState) => state.user,
   );
+  
 
   const handleLogin = async () => {
     try {
@@ -59,12 +60,7 @@ const Login = ({ navigation }: any) => {
       );
 
       if (user.data.success) {
-        Toast.show({
-          type: 'success',
-          text1: user.data.message,
-        });
-
-        navigation.navigate('Tabs', { screen: 'Lease' });
+        navigation.navigate('Tabs', { screen: 'Home' });
 
         dispatch(
           login({
@@ -193,7 +189,7 @@ const Login = ({ navigation }: any) => {
             )}
           </TouchableOpacity>
 
-          <View style={styles.dividerRow}>
+          {/* <View style={styles.dividerRow}>
             <View style={styles.divider} />
             <Text style={styles.orText}>Or continue with other</Text>
             <View style={styles.divider} />
@@ -212,7 +208,7 @@ const Login = ({ navigation }: any) => {
           <TouchableOpacity style={styles.socialBtn}>
             <Icon name="facebook" size={20} color="#3b5998" />
             <Text style={styles.socialText}>Login with Facebook</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TouchableOpacity
             style={styles.loginRow}
@@ -340,6 +336,6 @@ const styles = StyleSheet.create({
   loginLink: {
     fontSize: RFValue(13),
     fontWeight: 'bold',
-    color: '#000',
+    color: '#007BFF',
   },
 });

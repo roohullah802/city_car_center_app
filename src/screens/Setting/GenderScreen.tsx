@@ -18,8 +18,9 @@ const genderIcons: { [key in Gender]: string } = {
   Other: 'transgender-outline',
 };
 
-const GenderSelectionScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [selectedGender, setSelectedGender] = useState<Gender>('Male');
+const GenderSelectionScreen: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
+  const {gender, onSave} = route.params;
+  const [selectedGender, setSelectedGender] = useState<Gender>(gender);
 
   const renderGenderOption = (gender: Gender) => {
     const isSelected = selectedGender === gender;
@@ -44,6 +45,11 @@ const GenderSelectionScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
     );
   };
 
+  const handlePress = ()=>{
+    onSave(selectedGender)
+    navigation.goBack();
+  }
+
   return (
     <View style={styles.container}>
       {/* Back Button */}
@@ -65,10 +71,7 @@ const GenderSelectionScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
       {/* Save Button */}
       <TouchableOpacity
         style={styles.saveButton}
-        onPress={() => {
-          console.log('Selected gender:', selectedGender);
-          navigation.goBack();
-        }}
+        onPress={handlePress}
         activeOpacity={0.8}
       >
         <Text style={styles.saveButtonText}>Save change</Text>

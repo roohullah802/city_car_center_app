@@ -198,7 +198,7 @@ const SignupScreen = ({ navigation }: any) => {
             )}
           </TouchableOpacity>
 
-          <View style={styles.dividerRow}>
+          {/* <View style={styles.dividerRow}>
             <View style={styles.divider} />
             <Text style={styles.orText}>Or continue with other</Text>
             <View style={styles.divider} />
@@ -217,7 +217,7 @@ const SignupScreen = ({ navigation }: any) => {
           <TouchableOpacity style={styles.socialBtn}>
             <Icon name="facebook" size={20} color="#3b5998" />
             <Text style={styles.socialText}>Login with Facebook</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TouchableOpacity
             style={styles.loginRow}
@@ -347,6 +347,6 @@ const styles = StyleSheet.create({
   loginLink: {
     fontSize: RFValue(13),
     fontWeight: 'bold',
-    color: '#000',
+    color: '#007BFF',
   },
 });

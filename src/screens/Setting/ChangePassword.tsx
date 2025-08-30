@@ -9,9 +9,12 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { FONTS } from '../../fonts/fonts';
+import { useChangeAppPasswordMutation } from '../../redux.toolkit/rtk/authApis';
+import Toast from 'react-native-toast-message';
 
 const { width } = Dimensions.get('window');
 
@@ -23,6 +26,9 @@ const ChangePasswordScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+
+  const [changePassword, {isLoading}] = useChangeAppPasswordMutation();
 
   const toggleOld = useCallback(() => setShowOld(prev => !prev), []);
   const toggleNew = useCallback(() => setShowNew(prev => !prev), []);
@@ -37,9 +43,29 @@ const ChangePasswordScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     );
   }, [oldPassword, newPassword, confirmPassword]);
 
-  const handleChangePassword = useCallback(() => {
-    console.log('Password Changed!');
-  }, []);
+  const handleChangePassword = useCallback(async() => {
+    console.log(oldPassword, newPassword, confirmPassword);
+    
+   try {
+    const data = {oldPassword, newPassword, reNewPassword: confirmPassword};
+    const response = await changePassword(data).unwrap();
+    if (response?.success) {
+      Toast.show({
+        type:"success",
+        text1:response?.message
+      })
+      navigation.navigate('Tabs', {screen: 'Settings'})
+      return;
+    }
+    
+   } catch (error: any) {
+    Toast.show({
+      type:"error",
+      text1:"something error"
+  })
+    
+   }
+  }, [changePassword, confirmPassword, oldPassword, newPassword, navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -68,6 +94,7 @@ const ChangePasswordScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
             <TextInput
               style={styles.input}
               placeholder="Old Password"
+              placeholderTextColor={"gray"}
               secureTextEntry={!showOld}
               value={oldPassword}
               onChangeText={setOldPassword}
@@ -86,6 +113,7 @@ const ChangePasswordScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
             <TextInput
               style={styles.input}
               placeholder="New Password"
+              placeholderTextColor={"gray"}
               secureTextEntry={!showNew}
               value={newPassword}
               onChangeText={setNewPassword}
@@ -104,6 +132,7 @@ const ChangePasswordScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
             <TextInput
               style={styles.input}
               placeholder="Re-enter new Password"
+              placeholderTextColor={"gray"}
               secureTextEntry={!showConfirm}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
@@ -121,10 +150,15 @@ const ChangePasswordScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
         {/* Save Button */}
         <TouchableOpacity
           style={[styles.button, isSaveDisabled && { opacity: 0.5 }]}
-          disabled={isSaveDisabled}
+          disabled={isSaveDisabled || isLoading}
           onPress={handleChangePassword}
         >
-          <Text style={styles.buttonText}>Change password</Text>
+          {isLoading ? (
+            <ActivityIndicator size={"small"} color={"white"} />
+          ):(
+            <Text style={styles.buttonText}>Change password</Text>
+          )}
+          
         </TouchableOpacity>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -169,13 +203,13 @@ const styles = StyleSheet.create({
     height: width * 0.13,
     backgroundColor: '#F6F8F8',
     justifyContent: 'space-between',
-    marginBottom: width * 0.04, // replaced gap
+    marginBottom: width * 0.04,
   },
   input: {
     flex: 1,
-    fontSize: width * 0.042,
+    fontSize: width * 0.038,
     color: '#000',
-    fontFamily: FONTS.demiBold,
+    fontFamily: FONTS.medium,
   },
   button: {
     backgroundColor: '#000',

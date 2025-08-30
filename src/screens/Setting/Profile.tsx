@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,16 +8,39 @@ import {
   ScrollView,
   Dimensions,
   Platform,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
+import DocumentPicker from '@react-native-documents/picker';
 
 const { width } = Dimensions.get('window');
 
 const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const [fullName, setFullName] = useState<string>('');
+  const [gender, setGender] = useState<string>('');
+  const [age, setAge] = useState<number>(15);
+  const [file, setFile] = useState<any>(null);
+
+  console.log(fullName, gender, age);
+
   const imagePickerHandler = async () => {
     // Placeholder for future image picker logic
+  };
+
+  const pdfPickerHandler = async () => {
+    try {
+      const result = await DocumentPicker.pick({
+        allowMultiSelection: false,
+        presentationStyle: 'fullScreen',
+        type: ['application/pdf'],
+      });
+      // setFile(result[0])
+      console.log('picked file', result[0]);
+    } catch (err: any) {
+      console.log('error file picker');
+    }
   };
 
   return (
@@ -36,10 +59,13 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       {/* Avatar */}
       <View style={styles.avatarWrapper}>
         <Image
-          source={{ uri: 'https://i.imgur.com/4sX3gEo.png' }}
+          source={require('../../assests/download.png')}
           style={styles.avatar}
         />
-        <TouchableOpacity style={styles.cameraIcon} onPress={imagePickerHandler}>
+        <TouchableOpacity
+          style={styles.cameraIcon}
+          onPress={imagePickerHandler}
+        >
           <Icon name="camera" size={RFValue(14)} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -48,23 +74,38 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <View style={styles.section}>
         <LabelAndValue
           label="Your full name"
-          value="Faizan Farooq"
-          onPress={() => navigation.navigate('EditNameScreen')}
+          value="Full Name"
+          onPress={() =>
+            navigation.navigate('EditNameScreen', {
+              fullName,
+              onSave: (updatedValue: string) => setFullName(updatedValue),
+            })
+          }
         />
         <LabelAndValue
           label="Age"
-          value="21 Year old"
-          onPress={() => navigation.navigate('AgePickerScreen')}
+          value="Age"
+          onPress={() =>
+            navigation.navigate('AgePickerScreen', {
+              age,
+              onSave: (updatedValue: number) => setAge(updatedValue),
+            })
+          }
         />
         <LabelAndValue
           label="Gender"
           value="Male"
-          onPress={() => navigation.navigate('GenderScreen')}
+          onPress={() =>
+            navigation.navigate('GenderScreen', {
+              gender,
+              onSave: (updatedValue: string) => setGender(updatedValue),
+            })
+          }
         />
         <FileItem
           label="Driver license"
           fileName="MyDriverlicense.pdf"
-          onPress={imagePickerHandler}
+          onPress={pdfPickerHandler}
         />
       </View>
 
@@ -115,7 +156,12 @@ const FileItem = ({
       <Text style={styles.value} numberOfLines={1} ellipsizeMode="tail">
         {fileName}
       </Text>
-      <Icon name="chevron-forward" size={RFValue(18)} color="#000" style={{ marginLeft: 8 }} />
+      <Icon
+        name="chevron-forward"
+        size={RFValue(18)}
+        color="#000"
+        style={{ marginLeft: 8 }}
+      />
     </TouchableOpacity>
   </View>
 );

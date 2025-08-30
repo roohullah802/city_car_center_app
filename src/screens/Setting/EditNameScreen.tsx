@@ -1,6 +1,6 @@
 // src/screens/EditNameScreen.tsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -16,8 +16,18 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { FONTS } from '../../fonts/fonts';
 
 
-const EditNameScreen: React.FC<{navigation: any}> = ({navigation}) => {
+const EditNameScreen: React.FC<{navigation: any, route: any}> = ({navigation, route}) => {
   const insets = useSafeAreaInsets();
+  const {fullName, onSave} = route.params;
+  const [fName, setFullName] = useState<string>(fullName);
+  
+
+
+  const handleSave = ()=>{
+    onSave(fName);
+    navigation.goBack();
+  }
+
 
   return (
     <KeyboardAvoidingView
@@ -36,14 +46,15 @@ const EditNameScreen: React.FC<{navigation: any}> = ({navigation}) => {
 
       <View style={styles.inputBox}>
         <TextInput
-          value="Faizan Farooq"
+          value={fName}
+          onChangeText={(text)=> setFullName(text)}
           style={styles.textInput}
           placeholder="Full Name"
           placeholderTextColor="#999"
         />
       </View>
 
-      <TouchableOpacity style={styles.saveButton}>
+      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Save change</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>

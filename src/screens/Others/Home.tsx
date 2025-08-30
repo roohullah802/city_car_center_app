@@ -44,7 +44,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const leaseDataCallBack = useCallback(
     ({ item }: any) => {
-      console.log(item);
 
       return (
         <Pressable
@@ -105,7 +104,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           <View style={styles.brandCard}>
             <Image
               style={styles.brandImage}
-              source={{ uri: item?.brandImage?.url }}
+              source={{ uri: item?.brandImage[0] }}
             />
           </View>
         </Pressable>
@@ -116,6 +115,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const carsCallBack = useCallback(
     (item: any) => {
+      
       return (
         <Pressable
           onPress={() => navigation.navigate('carDetails', { _id: item?._id })}
@@ -124,7 +124,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           <View style={styles.carCard}>
             <View style={styles.carImageSetup}>
               <Image
-                source={{ uri: item?.images?.[0]?.url }}
+                source={{ uri: item?.images[0] }}
                 style={styles.carThumb}
               />
             </View>

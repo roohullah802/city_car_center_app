@@ -17,10 +17,12 @@ import { FONTS } from '../../fonts/fonts';
 const { width } = Dimensions.get('window');
 const ITEM_WIDTH = 220;
 
-const SinglePageProfile: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [selectedAge, setSelectedAge] = useState<number>(21);
+const SinglePageProfile: React.FC<{ navigation: any, route: any }> = ({ navigation, route }) => {
+  const {age, onSave} = route.params;
+  const [selectedAge, setSelectedAge] = useState<number>(age);
   const ages = Array.from({ length: 100 }, (_, i) => i + 1);
   const listRef = useRef<FlatList>(null);
+ 
 
   
   useEffect(() => {
@@ -37,10 +39,10 @@ const SinglePageProfile: React.FC<{ navigation: any }> = ({ navigation }) => {
     
     const index = Math.round(adjustOffset / ITEM_WIDTH);
   
-    const age = ages[index];
+    const agee = ages[index];
     
-    if (age !== undefined) {
-      setSelectedAge(age);
+    if (agee !== undefined) {
+      setSelectedAge(agee);
     }
   };
 
@@ -52,6 +54,11 @@ const SinglePageProfile: React.FC<{ navigation: any }> = ({ navigation }) => {
       </View>
     );
   };
+
+  const handleSave = ()=>{
+    onSave(selectedAge)
+    navigation.goBack()
+  }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -86,7 +93,7 @@ const SinglePageProfile: React.FC<{ navigation: any }> = ({ navigation }) => {
       {/* Save Button */}
       <TouchableOpacity
         style={styles.saveButton}
-        onPress={() => console.log('Selected Age:', selectedAge)}
+        onPress={handleSave}
       >
         <Text style={styles.saveText}>Save change</Text>
       </TouchableOpacity>
