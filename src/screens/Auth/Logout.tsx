@@ -13,12 +13,11 @@ import { FONTS } from '../../fonts/fonts';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux.toolkit/store';
 import Toast from 'react-native-toast-message';
-import { logout, setLoading } from '../../redux.toolkit/slices/userSlice';
-import axios from 'axios';
-import { BASE_AUTH_URL } from '@env';
+import { clearUserData, logout } from '../../redux.toolkit/slices/userSlice';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/types';
+import { useLogoutMutation } from '../../redux.toolkit/rtk/authApis';
 
 const { width } = Dimensions.get('window');
 
@@ -30,9 +29,12 @@ interface LogoutModalProps {
 const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const dispatch = useDispatch<AppDispatch>();
-  const { isLoggedIn, isLoading } = useSelector(
+  const { isLoggedIn } = useSelector(
     (state: RootState) => state.user,
   );
+  const [logoutUser, {isLoading}] = useLogoutMutation();
+  
+  
   
 
   const handleLogout = async () => {
@@ -40,36 +42,25 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
       if (!isLoggedIn) {
         Toast.show({
           type: 'success',
-          text1: 'Please login first',
+          text1: 'Logout failed!',
+          text2: 'please login first'
         });
         return;
       }
-
-      dispatch(setLoading(true));
-      const response = await axios.post(
-        BASE_AUTH_URL + '/logout',
-        null,
-        {withCredentials: true},
-      );
-      const usr = response.data;
-      if (usr.success) {
+      const response = await logoutUser({}).unwrap();
+      if (response.success) {
+        navigation.navigate('Login');
+        dispatch(clearUserData());
         dispatch(logout());
-        onClose();
-        navigation.navigate("Login");
-      } else {
-        Toast.show({
-          type: 'error',
-          text1: usr.message,
-        });
       }
+      
     } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: error.response.data.message,
+        text1: 'Error occured!',
+        text2:error.data.message
       });
       onClose();
-    } finally {
-      dispatch(setLoading(false));
     }
   };
 

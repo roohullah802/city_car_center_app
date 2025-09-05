@@ -26,6 +26,7 @@ const FAQScreen: React.FC = () => {
   const {data: Faqs, isLoading, isError, refetch} = useGetAllFaqsQuery([]); 
   const faqData: FAQItem[] = Faqs?.data
   
+  
   const handleToggle = useCallback((index: number) => {
     setExpandedIndex(prev => (prev === index ? null : index));
   }, []);

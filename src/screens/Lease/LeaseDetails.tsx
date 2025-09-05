@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -7,172 +7,198 @@ import {
   TouchableOpacity,
   View,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
+import { useGetLeaseDetailsQuery } from '../../redux.toolkit/rtk/leaseApis';
 
 type RateOption = {
   label: string;
   value: number;
 };
 
-const LeaseDetails: React.FC<{ navigation: any }> = ({ navigation }) => {
+const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
+  navigation,
+  route,
+}) => {
+  const { id } = route.params;
+  
   const [menuVisible, setMenuVisible] = useState(false);
+  const [days, setDays] = useState<number>(0);
+
+  const { data: LeaseDetals, isLoading } = useGetLeaseDetailsQuery(id, {
+    skip: !id,
+  });
+
+  const Lease = LeaseDetals?.data[0];
 
   const rateOptions: RateOption[] = useMemo(
     () => [
-      { label: 'Initial Miles:', value: 251618 },
-      { label: 'Miles Allowed:', value: 583618 },
+      { label: 'Initial Miles:', value: Lease ? Lease?.carDetails?.[0]?.initialMileage : 'N/A' },
+      { label: 'Miles Allowed:', value: Lease?  Lease?.carDetails?.[0]?.allowedMilleage : 'N/A' },
     ],
-    []
+    [Lease],
   );
 
-  const toggleMenu = () => setMenuVisible((prev) => !prev);
+  const toggleMenu = () => setMenuVisible(prev => !prev);
   const closeMenu = () => setMenuVisible(false);
+
+  useEffect(() => {
+    if (Lease?.startDate && Lease?.endDate) {
+      const start = new Date(Lease.startDate).getTime();
+      const end = new Date(Lease.endDate).getTime();
+      const diff = end - start;
+
+      const calculatedDays = Math.round(diff / (24 * 60 * 60 * 1000));
+      setDays(calculatedDays);
+    }
+  }, [Lease]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#000" />
+        <Text style={styles.message}>Loading city car centers...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <TouchableWithoutFeedback onPress={closeMenu}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-          >
-            {/* Header */}
-            <View style={styles.header}>
-              <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => navigation.goBack()}
-              >
-                <Icon name="chevron-back" size={24} color="#000" />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Icon name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+
+            <Text style={styles.headerTitle}>Lease Details</Text>
+
+            <View style={styles.menuWrapper}>
+              <TouchableOpacity onPress={toggleMenu}>
+                <Icon name="ellipsis-horizontal" size={24} color="#000" />
               </TouchableOpacity>
 
-              <Text style={styles.headerTitle}>Lease Details</Text>
-
-              <View style={styles.menuWrapper}>
-                <TouchableOpacity onPress={toggleMenu}>
-                  <Icon name="ellipsis-horizontal" size={24} color="#000" />
-                </TouchableOpacity>
-
-                {menuVisible && (
-                  <View style={styles.dropdownMenu}>
-                    <TouchableOpacity
-                      style={styles.dropdownItem}
-                      onPress={() => {
-                        setMenuVisible(false);
-                        navigation.navigate('paymentDetails');
-                      }}
-                    >
-                      <Text style={styles.dropdownText}>Payment Details</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-            </View>
-
-            {/* Lease Info */}
-            <Text style={styles.sectionTitle}>Lease Info:</Text>
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Status:</Text>
-              <Text style={[styles.priceValue, styles.statusActive]}>
-                Active
-              </Text>
-            </View>
-            <View style={styles.line} />
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Lease Type:</Text>
-              <Text style={styles.priceValue}>Unlimited Miles Lease</Text>
-            </View>
-            <View style={styles.line} />
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Daily Miles:</Text>
-              <Text style={styles.priceValue}>2000</Text>
-            </View>
-            <View style={styles.line} />
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Duration:</Text>
-              <Text style={styles.priceValue}>7 Days</Text>
-            </View>
-            <View style={styles.line} />
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Lease Start Date & Time:</Text>
-              <Text style={styles.priceValue}>
-                June 16, 2025 - 10:30PM
-              </Text>
-            </View>
-            <View style={styles.line} />
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Lease End Date & Time:</Text>
-              <Text style={styles.priceValue}>
-                June 22, 2025 - 10:30PM
-              </Text>
-            </View>
-
-            {/* Miles Info */}
-            <Text style={styles.sectionTitle}>Miles:</Text>
-            <View style={styles.rateOptions}>
-              {rateOptions.map((option, index) => (
-                <View key={index} style={styles.rateCard}>
-                  <Text style={styles.rateLabel}>{option.label}</Text>
-                  <Text style={styles.rateValue}>
-                    {option.value.toFixed(0)}
-                  </Text>
+              {menuVisible && (
+                <View style={styles.dropdownMenu}>
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      setMenuVisible(false);
+                      navigation.navigate('paymentDetails');
+                    }}
+                  >
+                    <Text style={styles.dropdownText}>Payment Details</Text>
+                  </TouchableOpacity>
                 </View>
-              ))}
+              )}
             </View>
+          </View>
 
-            {/* Car Info */}
-            <Text style={styles.sectionTitle}>Car Info:</Text>
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>ID:</Text>
-              <Text style={styles.priceValue}>242132</Text>
-            </View>
-            <View style={styles.line} />
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Car:</Text>
-              <Text style={styles.priceValue}>
-                Mercedes EQC 300kW AMG Line
-              </Text>
-            </View>
-            <View style={styles.line} />
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Plate:</Text>
-              <Text style={styles.priceValue}>3412XCV</Text>
-            </View>
-            <View style={styles.line} />
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Miles:</Text>
-              <Text style={styles.priceValue}>291437</Text>
-            </View>
+          {/* Lease Info */}
+          <Text style={styles.sectionTitle}>Lease Info:</Text>
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>Status:</Text>
+            <Text style={[styles.priceValue, styles.statusActive]}>Active</Text>
+          </View>
+          <View style={styles.line} />
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>Lease Type:</Text>
+            <Text style={styles.priceValue}>Limited Miles Lease</Text>
+          </View>
+          <View style={styles.line} />
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>Daily Miles:</Text>
+            <Text style={styles.priceValue}>
+              {Lease?.carDetails?.[0]?.allowedMilleage}
+            </Text>
+          </View>
+          <View style={styles.line} />
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>Duration:</Text>
+            <Text style={styles.priceValue}>
+              {isNaN(days) ? 'N/A' : `${days} days`}
+            </Text>
+          </View>
+          <View style={styles.line} />
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>Lease Start Date:</Text>
+            <Text style={styles.priceValue}>{new Date(Lease?.startDate).toDateString()}</Text>
+          </View>
+          <View style={styles.line} />
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>Lease End Date:</Text>
+            <Text style={styles.priceValue}>{new Date(Lease?.endDate).toDateString()}</Text>
+          </View>
 
-            {/* Contact Info */}
-            <Text style={styles.sectionTitle}>Contact Us:</Text>
-            <View style={styles.contactRow}>
-              <Icon name="call" size={22} color="#9b9b9bff" />
-              <Text style={styles.contactText}>+9234567673338</Text>
-            </View>
-            <View style={[styles.contactRow, styles.contactRowMargin]}>
-              <Icon name="mail" size={22} color="#9b9b9bff" />
-              <Text style={styles.contactText}>example@gmail.com</Text>
-            </View>
+          {/* Miles Info */}
+          <Text style={styles.sectionTitle}>Miles:</Text>
+          <View style={styles.rateOptions}>
+            {rateOptions.map((option, index) => (
+              <View key={index} style={styles.rateCard}>
+                <Text style={styles.rateLabel}>{option.label}</Text>
+                <Text style={styles.rateValue}>{option?.value}</Text>
+              </View>
+            ))}
+          </View>
 
-            {/* Extend Button */}
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate('extendLease')}
-            >
-              <Text style={styles.buttonText}>Extend Lease</Text>
-            </TouchableOpacity>
-          </ScrollView>
+          {/* Car Info */}
+          <Text style={styles.sectionTitle}>Car Info:</Text>
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>Brand:</Text>
+            <Text style={styles.priceValue}>{Lease?.carDetails?.[0]?.brand}</Text>
+          </View>
+          <View style={styles.line} />
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>Car:</Text>
+            <Text style={styles.priceValue}>{Lease?.carDetails?.[0]?.modelName}</Text>
+          </View>
+          <View style={styles.line} />
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>PricePerDay:</Text>
+            <Text style={styles.priceValue}>{Lease?.carDetails?.[0]?.pricePerDay}</Text>
+          </View>
+          <View style={styles.line} />
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>Miles:</Text>
+            <Text style={styles.priceValue}>{Lease?.carDetails?.[0]?.initialMileage}</Text>
+          </View>
+
+          {/* Contact Info */}
+          <Text style={styles.sectionTitle}>Contact Us:</Text>
+          <View style={styles.contactRow}>
+            <Icon name="call" size={22} color="#9b9b9bff" />
+            <Text style={styles.contactText}>+9234567673338</Text>
+          </View>
+          <View style={[styles.contactRow, styles.contactRowMargin]}>
+            <Icon name="mail" size={22} color="#9b9b9bff" />
+            <Text style={styles.contactText}>Citycarcenterarizona@gmail.com</Text>
+          </View>
+
+          {/* Extend Button */}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('extendLease')}
+          >
+            <Text style={styles.buttonText}>Extend Lease</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 };
 
 export default LeaseDetails;
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -181,8 +207,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   scrollContent: {
-  padding: 3,
-},
+    padding: 3,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -309,5 +335,18 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontFamily: FONTS.demiBold,
   },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+  },
+  message: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 8,
+    fontFamily: FONTS.medium,
+  },
 });
-

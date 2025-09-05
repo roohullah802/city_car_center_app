@@ -19,13 +19,11 @@ import {
 } from 'react-native-responsive-screen';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
-import { BASE_AUTH_URL } from '@env';
-import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux.toolkit/store';
-import { login, setLoading } from '../../redux.toolkit/slices/userSlice';
-import CookieManager from '@react-native-cookies/cookies';
+import { login } from '../../redux.toolkit/slices/userSlice';
+import { useLoginMutation } from '../../redux.toolkit/rtk/authApis';
 
 const Login = ({ navigation }: any) => {
   const [email, setEmail] = useState<string>('');
@@ -33,9 +31,10 @@ const Login = ({ navigation }: any) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const dispatch = useDispatch<AppDispatch>();
-  const { isLoading, isLoggedIn } = useSelector(
+  const {  isLoggedIn } = useSelector(
     (state: RootState) => state.user,
   );
+  const [userLogin, {isLoading}] = useLoginMutation();
   
 
   const handleLogin = async () => {
@@ -48,50 +47,28 @@ const Login = ({ navigation }: any) => {
         return;
       }
 
-      dispatch(setLoading(true));
 
-      const user = await axios.post(
-        `${BASE_AUTH_URL}/login`,
-        {
-          email: email.trim(),
-          password: password.trim(),
-        },
-        { withCredentials: true },
-      );
-
-      if (user.data.success) {
+      const response = await userLogin({email: email.trim(), password: password.trim()}).unwrap();
+      console.log(response);
+      
+      if (response.success) {
         navigation.navigate('Tabs', { screen: 'Home' });
-
-        dispatch(
+         dispatch(
           login({
-            name: user?.data?.user?.firstName,
-            id: user?.data?.user?.id,
-            email: user?.data?.user?.email,
-            token: user?.data?.user?.token,
+            name: response?.user?.firstName,
+            id: response?.user?.id,
+            email: response?.user?.email,
+            token: response?.user?.token,
           }),
         );
 
-        await CookieManager.set('http://127.0.0.1:5000', {
-          name: 'token',
-          value: user?.data?.user?.token,
-          domain: '127.0.0.1',
-          path: '/api/user/auth/login',
-          version: '1',
-          expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        });
-      } else {
-        Toast.show({
-          type: 'error',
-          text1: user.data.message,
-        });
       }
     } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: error?.response?.data?.message || 'Login failed',
+        text1: 'Login failed!',
+        text2: error.data.message
       });
-    } finally {
-      dispatch(setLoading(false));
     }
   };
 

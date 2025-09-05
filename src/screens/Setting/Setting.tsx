@@ -13,42 +13,60 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import LogoutModal from '../Auth/Logout';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../redux.toolkit/store';
+import {  useSelector } from 'react-redux';
+import {  RootState } from '../../redux.toolkit/store';
 
 const { width } = Dimensions.get('window');
 
 const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
-  const {isLoggedIn} = useSelector((state: RootState)=> state.user);
+  const { userData, isLoggedIn } = useSelector(
+    (state: RootState) => state.user,
+  );
+
+  
 
   const handleVisible = () => setIsVisible(prev => !prev);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Header */}
         <Text style={styles.header}>Settings</Text>
 
         {/* Profile Card */}
         <View style={styles.profileCard}>
           <Image
-            source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
+            source={require('../../assests/download.png')}
             style={styles.avatar}
             resizeMode="cover"
           />
           <View style={styles.profileDetails}>
-            <Text style={styles.name}>Faizan Farooq</Text>
-            <Text style={styles.email}>Faizann@example.com</Text>
+            <Text style={styles.name}>
+              {userData?.name
+                ? userData?.name.charAt(0).toUpperCase() +
+                  userData?.name.slice(1)
+                : 'Guest'}
+            </Text>
+            {userData?.email ? (
+              <Text style={styles.email}>{userData?.email}</Text>
+            ) : (
+              ''
+            )}
           </View>
-          <TouchableOpacity onPress={() => {
-            if (!isLoggedIn) {
-              navigation.navigate("Login")
-              return
-            }
-            navigation.navigate("Profile")
-          }}>
+          <TouchableOpacity
+            onPress={() => {
+              if (!isLoggedIn) {
+                navigation.navigate('Login');
+                return;
+              }
+              navigation.navigate('Profile');
+            }}
+          >
             <Text style={styles.editBtn}>Edit</Text>
           </TouchableOpacity>
         </View>
@@ -56,39 +74,65 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
         {/* Profile & Settings */}
         <Text style={styles.sectionTitle}>Profile & Settings</Text>
         <View style={styles.card}>
-          <SettingsRow icon="person-outline" label="My Profile" editable onPress={() => {
-            if (!isLoggedIn) {
-              navigation.navigate("Login")
-              return
-            }
-            navigation.navigate("Profile")
-          }} />
-          <SettingsRow icon="lock-closed-outline" label="Password & Security" editable onPress={() => {
-            if (!isLoggedIn) {
-              navigation.navigate("Login")
-              return;
-            }
-            navigation.navigate("passwordSecurity")
-          }} />
+          <SettingsRow
+            icon="person-outline"
+            label="My Profile"
+            editable
+            onPress={() => {
+              if (!isLoggedIn) {
+                navigation.navigate('Login');
+                return;
+              }
+              navigation.navigate('Profile');
+            }}
+          />
+          <SettingsRow
+            icon="lock-closed-outline"
+            label="Password & Security"
+            editable
+            onPress={() => {
+              if (!isLoggedIn) {
+                navigation.navigate('Login');
+                return;
+              }
+              navigation.navigate('passwordSecurity');
+            }}
+          />
         </View>
 
         {/* Helpful Desk */}
         <Text style={styles.sectionTitle}>Helpful Desk</Text>
         <View style={styles.card}>
-          <SettingsRow icon="help-circle-outline" label="FAQs" onPress={() => navigation.navigate("faqs")} />
-          <SettingsRow icon="document-text-outline" label="Terms & Privacy Policy" onPress={() => navigation.navigate("privacyPolicy")} />
-          <SettingsRow icon="chatbubble-ellipses-outline" label="Report Issue" onPress={() => navigation.navigate("report")} />
+          <SettingsRow
+            icon="help-circle-outline"
+            label="FAQs"
+            onPress={() => navigation.navigate('faqs')}
+          />
+          <SettingsRow
+            icon="document-text-outline"
+            label="Terms & Privacy Policy"
+            onPress={() => navigation.navigate('privacyPolicy')}
+          />
+          <SettingsRow
+            icon="chatbubble-ellipses-outline"
+            label="Report Issue"
+            onPress={() => navigation.navigate('report')}
+          />
         </View>
 
         {/* Logout */}
         <View style={styles.card}>
-          <SettingsRow icon="log-out-outline" label="Logout" onPress={()=>{
-            if (!isLoggedIn) {
-              navigation.navigate("Login")
-              return;
-            }
-            handleVisible()
-          }} />
+          <SettingsRow
+            icon="log-out-outline"
+            label="Logout"
+            onPress={() => {
+              if (!isLoggedIn) {
+                navigation.navigate('Login');
+                return;
+              }
+              handleVisible();
+            }}
+          />
         </View>
       </ScrollView>
 
@@ -104,7 +148,12 @@ type SettingsRowProps = {
   onPress: () => void;
 };
 
-const SettingsRow: React.FC<SettingsRowProps> = ({ icon, label, editable, onPress }) => (
+const SettingsRow: React.FC<SettingsRowProps> = ({
+  icon,
+  label,
+  editable,
+  onPress,
+}) => (
   <TouchableOpacity style={styles.row} onPress={onPress}>
     <View style={styles.rowLeft}>
       <Icon name={icon} size={22} color="#444" />

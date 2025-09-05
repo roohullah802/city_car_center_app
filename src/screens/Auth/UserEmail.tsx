@@ -15,9 +15,6 @@ import {
 import { useCheckEmailMutation } from '../../redux.toolkit/rtk/authApis';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { FONTS } from '../../fonts/fonts';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../redux.toolkit/store';
-import { setLoading } from '../../redux.toolkit/slices/userSlice';
 import Toast from 'react-native-toast-message';
 
 const { width, height } = Dimensions.get('window');
@@ -28,38 +25,36 @@ const ForgotPasswordScreen: React.FC<{ navigation: any }> = ({
   const [email, setEmail] = useState<string>('');
 
   const [checkEmail, { isLoading, isError }] = useCheckEmailMutation();
-  const { isLoading: isLoadingState } = useSelector(
-    (state: RootState) => state.user,
-  );
-  const dispatch = useDispatch();
 
   const handleContinue = async () => {
   if (!email.trim()) {
     Toast.show({
       type: 'error',
-      text1: 'Please enter your email address.',
+      text1: 'Error!',
+      text2: 'Please enter your email address.',
     });
     return;
   }
 
-  dispatch(setLoading(true));
   try {
     const response = await checkEmail({email}).unwrap(); 
-    if (response.success) {
+    console.log(response);
+    
+    if (response.success) { 
       navigation.navigate('verifyOtp', {email: email});
-    } else {
+    }else{
       Toast.show({
-        type: 'error',
-        text1: response.message || 'Something went wrong.',
-      });
+        type:"error",
+        text1:"Email checking failed!",
+        text2: response.message
+      })
     }
   } catch (error: any) {
     Toast.show({
       type: 'error',
-      text1: error?.data?.message || 'Email checking failed.',
+      text1: 'Email checking failed.',
+      text2: error.data.message
     });
-  } finally {
-    dispatch(setLoading(false));
   }
 };
 
@@ -119,7 +114,7 @@ const ForgotPasswordScreen: React.FC<{ navigation: any }> = ({
           </View>
 
           <TouchableOpacity style={styles.button} disabled={isLoading} onPress={handleContinue}>
-            {isLoadingState ? (
+            {isLoading ? (
               <ActivityIndicator size={'small'} color={'#fff'} />
             ) : (
               <Text style={styles.buttonText}>Continue</Text>

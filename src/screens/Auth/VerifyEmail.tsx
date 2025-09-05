@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  BackHandler,
 } from 'react-native';
 import { FONTS } from '../../fonts/fonts';
 import Toast from 'react-native-toast-message';
@@ -20,6 +21,7 @@ import {
   useResendOtpMutation,
   useVerifyEmailMutation,
 } from '../../redux.toolkit/rtk/authApis';
+import { useFocusEffect } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
@@ -41,6 +43,14 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
   const [verifyEmail, { isLoading }] = useVerifyEmailMutation();
   const [resendOtp] = useResendOtpMutation();
 
+ 
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => true; 
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
+
   const handleChange = useCallback(
     (text: string, index: number) => {
       if (/^\d$/.test(text)) {
@@ -49,7 +59,7 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
         newCode[index] = text;
         setCode(newCode);
 
-        // Move to next input
+       
         if (index < CODE_LENGTH - 1) {
           inputs.current[index + 1]?.focus();
         }
@@ -83,10 +93,11 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
       if (response?.success) {
         navigation.navigate('Login');
       }
-    } catch (error) {
+    } catch (error: any) {
       Toast.show({
         type: 'error',
         text1: 'Email verification failed.',
+        text2: error.data.message
       });
     } finally {
       dispatch(setLoading(false));
@@ -100,14 +111,16 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
       if (response?.success) {
         Toast.show({
           type: 'success',
-          text1: 'Otp sent to your email.',
+          text1: 'OTP send successfully.',
+          text2: response.message
         });
         startCountDown();
       }
-    } catch (error) {
+    } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: 'resend otp failed.',
+        text1: 'Resend OTP failed.',
+        text2: error.data.message
       });
     } finally {
       dispatch(setLoading(false));
@@ -122,7 +135,6 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
       </View>
     );
   }
-
 
   return (
     <KeyboardAvoidingView
@@ -139,7 +151,7 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
         {code.map((digit, index) => (
           <TextInput
             key={index}
-            ref={ref => (inputs.current[index] = ref)}
+            ref={ref => (inputs.current[index] = ref as any)}
             style={styles.inputBox}
             keyboardType="number-pad"
             maxLength={1}
@@ -183,6 +195,8 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
 };
 
 export default VerificationScreen;
+
+
 
 const inputSize = width / 8;
 

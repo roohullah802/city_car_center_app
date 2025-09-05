@@ -20,13 +20,8 @@ import {
 } from 'react-native-responsive-screen';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
-import axios from 'axios';
-import { BASE_AUTH_URL } from '@env';
 import Toast from 'react-native-toast-message';
-import { useDispatch, useSelector } from 'react-redux';
-
-import { setLoading } from '../../redux.toolkit/slices/userSlice';
-import { RootState, AppDispatch } from '../../redux.toolkit/store';
+import { useSignupMutation } from '../../redux.toolkit/rtk/authApis';
 
 const SignupScreen = ({ navigation }: any) => {
   const [firstName, setFirstName] = useState<string>('');
@@ -36,8 +31,7 @@ const SignupScreen = ({ navigation }: any) => {
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
-  const dispatch = useDispatch<AppDispatch>();
-  const { isLoading } = useSelector((state: RootState) => state.user);
+  const [signup, { isLoading }] = useSignupMutation();
 
   type UserData = {
     firstName: string;
@@ -49,7 +43,6 @@ const SignupScreen = ({ navigation }: any) => {
 
   const handleSignup = async () => {
     try {
-      dispatch(setLoading(true));
       const userData: UserData = {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -58,26 +51,16 @@ const SignupScreen = ({ navigation }: any) => {
         password: password.trim(),
       };
 
-      const response = await axios.post(`${BASE_AUTH_URL}/signup`, userData, {
-        withCredentials: true,
-      });
-
-      const result = response.data;
-      if (result.success) {
-        navigation.navigate('verifyEmail',{email: email});
-      } else {
-        Toast.show({
-          type: 'error',
-          text1: result.message || 'Signup failed.',
-        });
+      const response = await signup(userData).unwrap();
+      if (response.success) {
+        navigation.navigate('verifyEmail', { email });
       }
     } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: error?.response?.data?.message || 'Something went wrong',
+        text1:'Failed to register!',
+        text2: error.data.message
       });
-    } finally {
-      dispatch(setLoading(false));
     }
   };
 

@@ -19,18 +19,16 @@ import { useGetAllLeasesQuery } from '../../redux.toolkit/rtk/leaseApis';
 import { useCountdowns } from '../../timer/leaseTimer';
 
 const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { isLoggedIn } = useSelector((state: RootState) => state.user);
-  const {
-    data: Leases,
-    isLoading,
-  } = useGetAllLeasesQuery(null);
+  const { isLoggedIn, userData } = useSelector((state: RootState) => state.user);
+  const { data: Leases, isLoading } = useGetAllLeasesQuery(userData?.id);
   const LeasesCountDown = useCountdowns(Leases?.lease);
-  
+
+
 
   const leasesCallBack = useCallback(
     ({ item }: any) => (
       <Pressable
-        onPress={() => navigation.navigate('leaseDetails')}
+        onPress={() => navigation.navigate('leaseDetails', { id: item?._id })}
         style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
       >
         <View style={styles.leaseCard}>
@@ -86,19 +84,21 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
     );
   }
 
-
-
   return (
     <SafeAreaView style={styles.container}>
       {Platform.OS === 'ios' && <View style={styles.statusBarBackground} />}
       <StatusBar backgroundColor="transparent" barStyle="dark-content" />
 
-      {LeasesCountDown.length > 0 ? (
+      {LeasesCountDown?.length === 0 || !isLoggedIn ? (
+        <View style={styles.noLeaseContainer}>
+          <Text style={styles.noLeaseText}>No lease found!</Text>
+        </View>
+      ) : (
         <View style={styles.contentContainer}>
           <Text style={styles.topText}>Car lease</Text>
           <Text style={styles.topDescription}>
-            You have {Leases.length} car
-            {LeasesCountDown.length > 1 ? 's' : ''} at lease so far
+            You have {Leases?.length} car
+            {LeasesCountDown?.length > 1 ? 's' : ''} at lease so far
           </Text>
 
           <FlatList
@@ -107,10 +107,6 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
             renderItem={leasesCallBack}
             showsVerticalScrollIndicator={false}
           />
-        </View>
-      ) : (
-        <View style={styles.noLeaseContainer}>
-          <Text style={styles.noLeaseText}>No lease found!</Text>
         </View>
       )}
     </SafeAreaView>

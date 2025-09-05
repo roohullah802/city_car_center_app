@@ -1,52 +1,157 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { useStripe } from '@stripe/stripe-react-native';
+import { useCreatePaymentIntendMutation } from '../../redux.toolkit/rtk/payment';
+import Toast from 'react-native-toast-message';
+import {useCreateLeaseMutation} from '../../redux.toolkit/rtk/leaseApis'
 
+const DateAndTimeScreen: React.FC<{
+  navigation: any;
+  route: { params: { carId: string } };
+}> = ({ route }) => {
+  const { carId } = route.params;
+  
 
-const DateAndTimeScreen: React.FC<{navigation: any}> = () => {
-  const [pickUpDate, setPickUpDate] = useState(new Date(Date.now()));
+  // State
+  const [pickUpDate, setPickUpDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  // Stripe
+  const [createPaymentIntent] = useCreatePaymentIntendMutation();
+  const [createLease] = useCreateLeaseMutation();
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+
+  // Return date = pickUpDate + 6 days
   const returnDate = useMemo(() => {
     const result = new Date(pickUpDate);
-    result.setDate(pickUpDate.getDate() + 6);
+    if (isNaN(result.getTime())) return new Date();
+    result.setDate(result.getDate() + 7);
     return result;
   }, [pickUpDate]);
 
+  // Date picker handler
+  const onChangeDate = useCallback(
+  (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (Platform.OS !== 'ios') setShowDatePicker(false);
 
+    let currentDate: Date | undefined;
 
-  const onChangeDate = useCallback((event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
-      setPickUpDate(selectedDate);
+    // iOS: use selectedDate
+    if (Platform.OS === 'ios') {
+      currentDate = selectedDate;
+    } else {
+      // Android: use event.nativeEvent.timestamp
+      if (event.type === 'set' && event.nativeEvent.timestamp) {
+        currentDate = new Date(event.nativeEvent.timestamp);
+      }
     }
-  }, []);
 
-  const formattedDate = (date: Date): string => {
+    if (currentDate && !isNaN(currentDate.getTime())) {
+      setPickUpDate(currentDate);
+    }
+  },
+  []
+);
+
+
+
+  // Format date safely
+  const formattedDate = (date: Date) => {
+    if (!date || isNaN(date.getTime())) return '';
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
+  };
+
+  // Handle payment
+  const handlePress = async () => {
+    setLoading(true);
+    try {
+      // 1. Request PaymentIntent from backend
+      const validCarId = carId.replace(/"/g, '');
+      const response = await createPaymentIntent({
+        id: validCarId,
+        startDate: pickUpDate.toISOString(),
+        endDate: returnDate.toISOString(),
+      }).unwrap();
+      
+
+      const clientSecret = response?.clientSecret;
+      if (!clientSecret) throw new Error('No client secret returned');
+
+      // 2. Initialize payment sheet
+      const { error: initError } = await initPaymentSheet({
+        merchantDisplayName: 'City Car Center',
+        paymentIntentClientSecret: clientSecret,
+      });
+      if (initError) throw initError;
+
+      // 3. Present payment sheet
+      const { error: presentError } = await presentPaymentSheet();
+      if (presentError) throw presentError;
+    
+     const resp =  await createLease({id: validCarId, body:{
+        startDate: pickUpDate.toISOString(),
+        endDate: returnDate.toISOString(),
+      }})
+      if (resp?.data?.success) {
+        Toast.show({
+          type:"success",
+          text1:resp.data.message
+        })
+      }
+      
+      Alert.alert('Success', 'Payment completed 🎉');
+      console.log('Payment completed');
+   
+    } catch (error: any) {
+      
+      Toast.show({
+        type:"error",
+        text1: 'Error occured!',
+        text2:error.data.message
+      })
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Date and Time</Text>
 
-      <TouchableOpacity style={styles.dateBox} onPress={() => setShowDatePicker(true)}>
+      {/* Pick-up Date */}
+      <TouchableOpacity
+        style={styles.dateBox}
+        onPress={() => setShowDatePicker(true)}
+      >
         <Text style={styles.dateLabel}>Pick-up Date</Text>
         <Text style={styles.dateText}>{formattedDate(pickUpDate)}</Text>
       </TouchableOpacity>
 
+      {/* Return Date */}
       <View style={styles.dateBox}>
         <Text style={styles.dateLabel}>Return Date</Text>
         <Text style={styles.dateText}>{formattedDate(returnDate)}</Text>
       </View>
 
+      {/* Date Picker */}
       {showDatePicker && (
         <DateTimePicker
-          value={pickUpDate}
+          value={pickUpDate || new Date()}
           mode="date"
           display="default"
           minimumDate={new Date()}
@@ -54,8 +159,17 @@ const DateAndTimeScreen: React.FC<{navigation: any}> = () => {
         />
       )}
 
-      <TouchableOpacity style={styles.payButton}>
-        <Text style={styles.payText}>Pay now</Text>
+      {/* Payment Button */}
+      <TouchableOpacity
+        style={[styles.payButton, loading && { opacity: 0.7 }]}
+        onPress={handlePress}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.payText}>Continue</Text>
+        )}
       </TouchableOpacity>
     </ScrollView>
   );
@@ -68,41 +182,40 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#fff',
     minHeight: '100%',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
     marginBottom: 30,
-    color: '#002B3F'
+    color: '#002B3F',
   },
- 
   dateBox: {
     backgroundColor: '#f6f6f6',
     padding: 15,
     borderRadius: 10,
-    marginBottom: 20
+    marginBottom: 20,
   },
   dateLabel: {
     fontSize: 14,
     color: '#888',
-    marginBottom: 5
+    marginBottom: 5,
   },
   dateText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#222'
+    color: '#222',
   },
   payButton: {
     backgroundColor: 'black',
     padding: 16,
     borderRadius: 10,
     alignItems: 'center',
-    marginTop: 30
+    marginTop: 30,
   },
   payText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: 'bold'
-  }
+    fontWeight: 'bold',
+  },
 });

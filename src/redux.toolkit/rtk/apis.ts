@@ -1,10 +1,19 @@
-import { BASE_USER_URL } from '@env';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-
+import { RootState } from '../store';
 
 export const Apis = createApi({
   reducerPath: 'cars',
-  baseQuery: fetchBaseQuery({ baseUrl: BASE_USER_URL }),
+   baseQuery: fetchBaseQuery({ 
+      baseUrl: 'https://api.citycarcenters.com/api/user',
+      prepareHeaders: async (headers, {getState})=>{
+        const state = getState() as RootState;
+        const token = state.user.token;
+        if (token) {
+          headers.set('Authorization', `Bearer ${token}`);
+        }
+        return headers;
+      }
+     }),
   endpoints: builder => ({
     getCars: builder.query({
       query: () => '/all/cars',

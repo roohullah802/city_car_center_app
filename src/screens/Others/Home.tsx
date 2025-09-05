@@ -27,24 +27,39 @@ import {
 import { useGetAllLeasesQuery } from '../../redux.toolkit/rtk/leaseApis';
 import { useCountdowns } from '../../timer/leaseTimer';
 
+
 const { width } = Dimensions.get('window');
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const route = useRoute();
   const isFocused = useIsFocused();
 
-  const { isLoggedIn } = useSelector((state: RootState) => state.user);
+
+  const { isLoggedIn, userData } = useSelector((state: RootState) => state.user);
+  
   const user = useSelector((state: RootState) => state.user);
 
-  const { data: Cars, isLoading: isLoadingCars, isError: isErrorCars } = useGetCarsQuery([]);
-  const { data: Brands, isLoading: isLoadingBrands, isError: isErrorBrands } = useGetBrandsQuery([]);
+  const {
+    data: Cars,
+    isLoading: isLoadingCars,
+    isError: isErrorCars,
+  } = useGetCarsQuery([]);
+  const {
+    data: Brands,
+    isLoading: isLoadingBrands,
+    isError: isErrorBrands,
+  } = useGetBrandsQuery([]);
 
-  const { data: Leases, isError } = useGetAllLeasesQuery(null);
+  const { data: Leases, isError } = useGetAllLeasesQuery(userData?.id);
+  
   const LeaseWithTimer = useCountdowns(Leases?.lease);
+
+
+  
 
   const leaseDataCallBack = useCallback(
     ({ item }: any) => {
-
+      
       return (
         <Pressable
           onPress={() => {
@@ -52,7 +67,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               navigation.navigate('Login');
               return;
             }
-            navigation.navigate('leaseDetails');
+            navigation.navigate('leaseDetails', {id: item?._id});
           }}
           style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
         >
@@ -115,7 +130,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const carsCallBack = useCallback(
     (item: any) => {
-      
       return (
         <Pressable
           onPress={() => navigation.navigate('carDetails', { _id: item?._id })}
@@ -190,7 +204,9 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          {LeaseWithTimer === undefined || LeaseWithTimer?.length === 0 || isError ? (
+          {LeaseWithTimer === undefined ||
+          LeaseWithTimer?.length === 0 ||
+          isError || !isLoggedIn ? (
             <View style={styles.leaseCard}>
               <View style={styles.view}>
                 <Text style={styles.leaseTitle}>My Lease</Text>

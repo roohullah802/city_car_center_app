@@ -25,6 +25,7 @@ import CarCardsByBrand from '../screens/Others/CarCardsByBrand';
 import UserEmail from '../screens/Auth/UserEmail'
 import ForgotPasswordChange from '../screens/Auth/ChangePassword'
 import VerifyOtp from '../screens/Auth/VerifyOtp';
+import VerifyYourselfScreen from '../screens/Setting/pdf';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -113,6 +114,10 @@ const AuthStack: React.FC = () => {
 
       <Stack.Screen name="verifyOtp">
         {props => <VerifyOtp {...props} />}
+      </Stack.Screen>
+
+      <Stack.Screen name="pdfPicker">
+        {props => <VerifyYourselfScreen {...props} />}
       </Stack.Screen>
     </Stack.Navigator>
   );

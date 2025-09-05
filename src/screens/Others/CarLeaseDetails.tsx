@@ -28,7 +28,7 @@ type RateOption = {
 
 const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
   navigation,
-  route,
+  route
 }) => {
   const { _id } = route.params;
 
@@ -42,6 +42,10 @@ const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
   } = useGetCarDetailsQuery(_id, { skip: !_id });
   const dataa = Details?.data;
   const image = dataa?.images;
+  console.log(dataa);
+  
+  
+  
   
   const rateOptions: RateOption[] = useMemo(
     () => [
@@ -54,6 +58,8 @@ const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
 
  let images: any[] = [];
 
+ 
+
 try {
   if (Array.isArray(image)) {
     images = image; // From MongoDB
@@ -64,7 +70,11 @@ try {
   }
 } catch (error) {
   console.error('Failed to parse image data:', error);
+  
 }
+console.log(image);
+console.log(images);
+
   
 
   const renderCarImage = useCallback(
@@ -91,6 +101,7 @@ try {
   }
 
   if (isLoading) {
+    
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#000" />
@@ -248,7 +259,7 @@ try {
         {/* Lease Button */}
         <TouchableOpacity
           style={styles.leaseButton}
-          onPress={() => navigation.navigate('dateAndTime')}
+          onPress={() => navigation.navigate('dateAndTime', {carId: dataa?._id})}
         >
           <Text style={styles.leaseButtonText}>Lease this car</Text>
         </TouchableOpacity>

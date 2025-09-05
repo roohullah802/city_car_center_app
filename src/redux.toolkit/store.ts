@@ -4,6 +4,7 @@ import userReducer from './slices/userSlice';
 import {Apis as appApis} from './rtk/apis'
 import {Apis as authApis} from './rtk/authApis'
 import {Apis as leaseApis} from './rtk/leaseApis'
+import {Api as PaymentApi} from './rtk/payment'
 import {
   persistReducer,
   persistStore,
@@ -20,7 +21,8 @@ const rootReducer = combineReducers({
   user: userReducer,
   [appApis.reducerPath]: appApis.reducer,
   [authApis.reducerPath]: authApis.reducer,
-  [leaseApis.reducerPath]: leaseApis.reducer
+  [leaseApis.reducerPath]: leaseApis.reducer,
+  [PaymentApi.reducerPath]: PaymentApi.reducer
 });
 
 const persistConfig = {
@@ -39,7 +41,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(appApis.middleware, authApis.middleware, leaseApis.middleware),
+    }).concat(appApis.middleware, authApis.middleware, leaseApis.middleware, PaymentApi.middleware),
 });
 
 export const persistor = persistStore(store);

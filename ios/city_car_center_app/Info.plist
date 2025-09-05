@@ -98,6 +98,11 @@
 		<string>TTHoves-Regular.ttf</string>
 		<string>TTHoves-Thin.ttf</string>
 		<string>TTHoves-ThinItalic.ttf</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+<string>We need access to your photo library</string>
+<key>NSDocumentsFolderUsageDescription</key>
+<string>We need access to documents</string>
+
 	</array>
 </dict>
 </plist>

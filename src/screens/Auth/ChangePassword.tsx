@@ -13,9 +13,6 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { FONTS } from '../../fonts/fonts';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../redux.toolkit/store';
-import { setLoading } from '../../redux.toolkit/slices/userSlice';
 import { useChangePasswordMutation } from '../../redux.toolkit/rtk/authApis';
 import Toast from 'react-native-toast-message';
 
@@ -34,10 +31,7 @@ const ChangePasswordScreen: React.FC<{ navigation: any; route: any }> = ({
   const toggleNew = useCallback(() => setShowNew(prev => !prev), []);
   const toggleConfirm = useCallback(() => setShowConfirm(prev => !prev), []);
 
-  const { isLoading: isLoadingState } = useSelector(
-    (state: RootState) => state.user,
-  );
-  const dispatch = useDispatch();
+ 
   const [changePassword, { isLoading }] = useChangePasswordMutation();
 
   const isSaveDisabled = useMemo(() => {
@@ -46,8 +40,8 @@ const ChangePasswordScreen: React.FC<{ navigation: any; route: any }> = ({
   const { email } = route.params;
 
   const handleChangePassword = useCallback(async () => {
+    
     try {
-      dispatch(setLoading(true));
       const response = await changePassword({
         email,
         newPassword,
@@ -56,19 +50,19 @@ const ChangePasswordScreen: React.FC<{ navigation: any; route: any }> = ({
       if (response.success) {
         Toast.show({
           type: 'success',
-          text1: response.message,
+          text1: 'Password Changed Successfully',
+          text2: response.message
         });
         navigation.navigate('Login')
       }
-    } catch (error) {
+    } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: 'some error! while change password.',
+        text1: 'Error occured!',
+        text2: error.data.message
       });
-    } finally {
-      dispatch(setLoading(false));
     }
-  }, [changePassword, confirmPassword, dispatch, email, newPassword, navigation]);
+  }, [changePassword, confirmPassword, email, newPassword, navigation]);
 
   if (isLoading) {
     return (
@@ -141,10 +135,10 @@ const ChangePasswordScreen: React.FC<{ navigation: any; route: any }> = ({
         {/* Save Button */}
         <TouchableOpacity
           style={[styles.button, isSaveDisabled && { opacity: 0.5 }]}
-          disabled={isLoadingState}
+          disabled={isLoading}
           onPress={handleChangePassword}
         >
-          {isLoadingState ? (
+          {isLoading ? (
             <ActivityIndicator size={'small'} color={'#fff'} />
           ) : (
             <Text style={styles.buttonText}>Change password</Text>

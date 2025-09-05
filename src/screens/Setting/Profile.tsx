@@ -8,38 +8,82 @@ import {
   ScrollView,
   Dimensions,
   Platform,
-  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
-import DocumentPicker from '@react-native-documents/picker';
+import { useUpdateProfileMutation } from '../../redux.toolkit/rtk/authApis';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../redux.toolkit/store';
+import {
+  setDrivingLicense,
+  setUserData,
+} from '../../redux.toolkit/slices/userSlice';
+import Toast from 'react-native-toast-message';
 
 const { width } = Dimensions.get('window');
 
 const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [fullName, setFullName] = useState<string>('');
+  const { userData } = useSelector((state: RootState) => state.user);
+  const [fullName, setFullName] = useState<string>(userData?.name || '');
   const [gender, setGender] = useState<string>('');
   const [age, setAge] = useState<number>(15);
-  const [file, setFile] = useState<any>(null);
+  const [file, setFile] = useState<any>('');
+  const [profileChange, { isLoading }] = useUpdateProfileMutation();
 
-  console.log(fullName, gender, age);
+  const dispatch = useDispatch<AppDispatch>();
 
   const imagePickerHandler = async () => {
     // Placeholder for future image picker logic
   };
 
   const pdfPickerHandler = async () => {
+    navigation.navigate('pdfPicker', {
+      onSave: (updatedValue: any) => setFile(updatedValue),
+    });
+  };
+
+  const saveHandler = async () => {
+    console.log('hit');
+
     try {
-      const result = await DocumentPicker.pick({
-        allowMultiSelection: false,
-        presentationStyle: 'fullScreen',
-        type: ['application/pdf'],
+      const formData = new FormData();
+      formData.append('fullName', fullName);
+      formData.append('age', age);
+      formData.append('gender', gender);
+      if (file?.name) {
+        formData.append('file', {
+          uri: file?.uri || '',
+          type: file?.type || 'application/pdf',
+          name: file?.name || 'document.pdf',
+        } as any);
+      }
+      const response = await profileChange(formData).unwrap();
+      if (response?.success) {
+        Toast.show({
+          type: 'success',
+          text1: 'Update successfully',
+          text2: response?.message,
+        });
+        console.log(response);
+
+        navigation.goBack();
+        dispatch(
+          setDrivingLicense({ drivingLicence: response?.data?.drivingLicence }),
+        );
+        const splitName = fullName.split(' ')[0];
+        dispatch(setUserData({ name: splitName }));
+      }
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Update failed',
+        text2:
+          error?.data?.message ||
+          error?.message ||
+          'Something went wrong. Please try again.',
       });
-      // setFile(result[0])
-      console.log('picked file', result[0]);
-    } catch (err: any) {
-      console.log('error file picker');
     }
   };
 
@@ -104,14 +148,18 @@ const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         />
         <FileItem
           label="Driver license"
-          fileName="MyDriverlicense.pdf"
+          fileName={file?.name ? file?.name : 'upload.pdf'}
           onPress={pdfPickerHandler}
         />
       </View>
 
       {/* Save Button */}
-      <TouchableOpacity style={styles.saveButton}>
-        <Text style={styles.saveButtonText}>Save change</Text>
+      <TouchableOpacity disabled={isLoading} style={styles.saveButton} onPress={saveHandler}>
+        {isLoading ? (
+          <ActivityIndicator size={'small'} color={'#fff'} />
+        ) : (
+          <Text style={styles.saveButtonText}>Save change</Text>
+        )}
       </TouchableOpacity>
     </ScrollView>
   );
@@ -252,6 +300,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: FONTS.bold,
   },
+
 });
 
 export default ProfileScreen;

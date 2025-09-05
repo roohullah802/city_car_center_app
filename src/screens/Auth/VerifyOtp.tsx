@@ -13,10 +13,10 @@ import {
 } from 'react-native';
 import { FONTS } from '../../fonts/fonts';
 import Toast from 'react-native-toast-message';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../redux.toolkit/store';
-import { setLoading } from '../../redux.toolkit/slices/userSlice';
-import { useMatchOtpMutation, useResnedCodeMutation } from '../../redux.toolkit/rtk/authApis';
+import {
+  useMatchOtpMutation,
+  useResnedCodeMutation,
+} from '../../redux.toolkit/rtk/authApis';
 
 const { width } = Dimensions.get('window');
 
@@ -28,13 +28,11 @@ const VerifyOtp: React.FC<{ navigation: any; route: any }> = ({
 }) => {
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const inputs = useRef<Array<TextInput | null>>([]);
-  const dispatch = useDispatch<AppDispatch>();
-  const { isLoading:isLoadingState } = useSelector((state: RootState) => state.user);
   const [countDown, setCountDown] = useState<number>(0);
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const { email } = route?.params;
   const [resndOtp, { isLoading }] = useResnedCodeMutation();
-  const [matchOtp] = useMatchOtpMutation()
+  const [matchOtp] = useMatchOtpMutation();
 
   const handleChange = useCallback(
     (text: string, index: number) => {
@@ -71,59 +69,51 @@ const VerifyOtp: React.FC<{ navigation: any; route: any }> = ({
   }, []);
 
   const handleVerify = useCallback(async () => {
-    const enteredCode = Number(code.join(''))  
-    console.log(email);
-    
+    const enteredCode = Number(code.join(''));
+
     try {
-      dispatch(setLoading(true));
-      const response = await matchOtp({email,code:enteredCode}).unwrap();
-      console.log(response);
-      
+      const response = await matchOtp({ email, code: enteredCode }).unwrap();
+
       if (response.success) {
-        navigation.navigate('forgotPasswordChangePassword', {email})
+        navigation.navigate('forgotPasswordChangePassword', { email });
       }
     } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: 'match opt failed.',
+        text1: 'OTP match failed!',
+        text2: error.data.message
       });
-    } finally {
-      dispatch(setLoading(false));
     }
-  }, [dispatch, code, email, navigation, matchOtp]);
+  }, [code, email, navigation, matchOtp]);
 
   const handleResendOTP = useCallback(async () => {
     try {
-      dispatch(setLoading(true));
       const response = await resndOtp({ email }).unwrap();
-      console.log(response);
-      
       if (response.success) {
         Toast.show({
           type: 'success',
-          text1: 'otp sent to your email.',
+          text1: 'OTP send Successfully',
+          text2: response.message
         });
         startCountDown();
       }
     } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: error.response.data.message || 'Resend otp failed.',
+        text1: 'Resend OTP failed.',
+        text2: error.data.message
       });
-    } finally {
-      dispatch(setLoading(false));
     }
-  }, [startCountDown, dispatch, email, resndOtp]);
+  }, [startCountDown, email, resndOtp]);
 
   if (isLoading) {
-      return (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#000" />
-          <Text style={styles.message}>Loading city car centers...</Text>
-        </View>
-      );
-    }
-  
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#000" />
+        <Text style={styles.message}>Loading city car centers...</Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -140,7 +130,7 @@ const VerifyOtp: React.FC<{ navigation: any; route: any }> = ({
         {code.map((digit, index) => (
           <TextInput
             key={index}
-            ref={ref => (inputs.current[index] = ref)}
+            ref={ref => (inputs.current[index] = ref as any)}
             style={styles.inputBox}
             keyboardType="number-pad"
             maxLength={1}
@@ -160,7 +150,7 @@ const VerifyOtp: React.FC<{ navigation: any; route: any }> = ({
           </Text>
         </Text>
       ) : (
-        <TouchableOpacity disabled={isLoadingState} onPress={handleResendOTP}>
+        <TouchableOpacity disabled={isLoading} onPress={handleResendOTP}>
           <Text style={styles.resendText}>
             Didn't receive code?{' '}
             <Text style={styles.resendLink}>Send again</Text>
@@ -169,11 +159,11 @@ const VerifyOtp: React.FC<{ navigation: any; route: any }> = ({
       )}
 
       <TouchableOpacity
-        disabled={isLoadingState}
+        disabled={isLoading}
         style={styles.verifyButton}
         onPress={handleVerify}
       >
-        {isLoadingState ? (
+        {isLoading ? (
           <ActivityIndicator size={'small'} color={'#fff'} />
         ) : (
           <Text style={styles.verifyText}>Verify</Text>
@@ -255,7 +245,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: FONTS.demiBold,
   },
-   centered: {
+  centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',

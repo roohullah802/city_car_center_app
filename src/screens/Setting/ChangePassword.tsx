@@ -44,7 +44,6 @@ const ChangePasswordScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
   }, [oldPassword, newPassword, confirmPassword]);
 
   const handleChangePassword = useCallback(async() => {
-    console.log(oldPassword, newPassword, confirmPassword);
     
    try {
     const data = {oldPassword, newPassword, reNewPassword: confirmPassword};
@@ -52,16 +51,20 @@ const ChangePasswordScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     if (response?.success) {
       Toast.show({
         type:"success",
-        text1:response?.message
+        text1:'Pasword changed',
+        text2: response?.message 
       })
       navigation.navigate('Tabs', {screen: 'Settings'})
       return;
     }
     
+    
    } catch (error: any) {
+    
     Toast.show({
       type:"error",
-      text1:"something error"
+      text1:"Update failed",
+      text2: error?.data.message
   })
     
    }
