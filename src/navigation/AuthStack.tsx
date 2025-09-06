@@ -26,6 +26,7 @@ import UserEmail from '../screens/Auth/UserEmail'
 import ForgotPasswordChange from '../screens/Auth/ChangePassword'
 import VerifyOtp from '../screens/Auth/VerifyOtp';
 import VerifyYourselfScreen from '../screens/Setting/pdf';
+import PaymentSuccessScreen from '../screens/Payments/PaymentSuccess';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -118,6 +119,10 @@ const AuthStack: React.FC = () => {
 
       <Stack.Screen name="pdfPicker">
         {props => <VerifyYourselfScreen {...props} />}
+      </Stack.Screen>
+
+      <Stack.Screen name="paymentSuccess">
+        {props => <PaymentSuccessScreen {...props} />}
       </Stack.Screen>
     </Stack.Navigator>
   );

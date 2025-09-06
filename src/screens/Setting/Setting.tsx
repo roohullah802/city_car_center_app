@@ -53,7 +53,7 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
                 : 'Guest'}
             </Text>
             {userData?.email ? (
-              <Text style={styles.email}>{userData?.email}</Text>
+              <Text numberOfLines={1} ellipsizeMode='tail' style={styles.email}>{userData?.email}</Text>
             ) : (
               ''
             )}
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   email: {
-    fontSize: RFValue(12),
+    fontSize: RFValue(11),
     color: '#6B7280',
     fontFamily: FONTS.demiBold,
   },

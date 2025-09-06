@@ -33,6 +33,7 @@ const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
   });
 
   const Lease = LeaseDetals?.data[0];
+  
 
   const rateOptions: RateOption[] = useMemo(
     () => [
@@ -95,7 +96,7 @@ const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
                     style={styles.dropdownItem}
                     onPress={() => {
                       setMenuVisible(false);
-                      navigation.navigate('paymentDetails');
+                      navigation.navigate('paymentDetails', {id});
                     }}
                   >
                     <Text style={styles.dropdownText}>Payment Details</Text>

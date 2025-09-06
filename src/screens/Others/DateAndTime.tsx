@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
@@ -18,7 +17,7 @@ import {useCreateLeaseMutation} from '../../redux.toolkit/rtk/leaseApis'
 const DateAndTimeScreen: React.FC<{
   navigation: any;
   route: { params: { carId: string } };
-}> = ({ route }) => {
+}> = ({ route, navigation }) => {
   const { carId } = route.params;
   
 
@@ -91,6 +90,8 @@ const DateAndTimeScreen: React.FC<{
 
       const clientSecret = response?.clientSecret;
       if (!clientSecret) throw new Error('No client secret returned');
+      console.log(response);
+      
 
       // 2. Initialize payment sheet
       const { error: initError } = await initPaymentSheet({
@@ -108,15 +109,8 @@ const DateAndTimeScreen: React.FC<{
         endDate: returnDate.toISOString(),
       }})
       if (resp?.data?.success) {
-        Toast.show({
-          type:"success",
-          text1:resp.data.message
-        })
+        navigation.navigate('paymentSuccess', resp);
       }
-      
-      Alert.alert('Success', 'Payment completed 🎉');
-      console.log('Payment completed');
-   
     } catch (error: any) {
       
       Toast.show({

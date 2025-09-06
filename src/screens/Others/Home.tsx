@@ -35,6 +35,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const isFocused = useIsFocused();
 
 
+
   const { isLoggedIn, userData } = useSelector((state: RootState) => state.user);
   
   const user = useSelector((state: RootState) => state.user);
@@ -316,6 +317,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             contentContainerStyle={{ paddingHorizontal: 10 }}
           />
         )}
+
       </SafeAreaView>
     </ScrollView>
   );

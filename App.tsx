@@ -10,7 +10,7 @@ import { StripeProvider } from '@stripe/stripe-react-native';
 const App = () => {
   return (
     <Provider store={store}>
-      <PersistGate loading={<Text>Loading....</Text>} persistor={persistor}>
+      <PersistGate persistor={persistor}>
         <StripeProvider publishableKey='pk_test_51Re3kqIetrHxrdQ8Ruk2961CKj36v1PiQt3av9P6onflvM9yBrEj0WsaPdfDSyGbUAIAoW9XHAaWgRVAWhmzLEkH0076xhoXP4'>
           <RootNavigator />
         </StripeProvider>

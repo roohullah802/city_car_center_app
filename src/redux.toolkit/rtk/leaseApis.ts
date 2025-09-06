@@ -28,9 +28,17 @@ export const Apis = createApi({
         method: 'POST',
         body
       })
+    }),
+    getPaymentDetails: builder.query({
+      query: ()=> '/car/payment/history'
     })
+
+
+
+
+
 
   }),
 });
 
-export const { useGetAllLeasesQuery, useGetLeaseDetailsQuery, useCreateLeaseMutation } = Apis;
+export const { useGetAllLeasesQuery, useGetLeaseDetailsQuery, useCreateLeaseMutation, useGetPaymentDetailsQuery } = Apis;

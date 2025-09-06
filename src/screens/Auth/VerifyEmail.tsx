@@ -47,7 +47,7 @@ const VerificationScreen: React.FC<{ navigation: any; route: any }> = ({
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => true; 
-      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      BackHandler.addEventListener('hardwareBackPress', onBackPress)
     }, [])
   );
 

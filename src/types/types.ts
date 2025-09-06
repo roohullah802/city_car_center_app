@@ -27,4 +27,5 @@ export type RootStackParamList = {
   forgotPasswordChangePassword: undefined;
   verifyOtp: undefined;
   pdfPicker: undefined;
+  paymentSuccess: undefined;
 };
