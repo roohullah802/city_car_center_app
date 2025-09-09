@@ -1,606 +1,158 @@
-import React, { useCallback } from 'react';
+// HomeScreen.tsx
+import React from "react";
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  TextInput,
   Image,
+  TextInput,
   FlatList,
   TouchableOpacity,
-  StatusBar,
-  Dimensions,
-  SafeAreaView,
-  Platform,
-  Pressable,
-  ActivityIndicator,
-} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useIsFocused, useRoute } from '@react-navigation/native';
-import { FONTS } from '../../fonts/fonts';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../redux.toolkit/store';
-import {
-  useGetBrandsQuery,
-  useGetCarsQuery,
-} from '../../redux.toolkit/rtk/apis';
-import { useGetAllLeasesQuery } from '../../redux.toolkit/rtk/leaseApis';
-import { useCountdowns } from '../../timer/leaseTimer';
+} from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
+import FontAwesome from "react-native-vector-icons/Ionicons";
+import { FONTS } from "../../fonts/fonts";
 
+const categories = [
+  { id: "1", name: "Cadillac", logo: "car" },
+  { id: "2", name: "Tesla", logo: "rocket" },
+  { id: "3", name: "BMW", logo: "gear" },
+  { id: "4", name: "Mazda", logo: "circle-o" },
+];
 
-const { width } = Dimensions.get('window');
+const cars = [
+  { id: "1", name: "Tesla Model 3", price: "$45,590", rating: 4.5, image: "https://i.imgur.com/7QY0sWQ.png" },
+  { id: "2", name: "Tesla Model X", price: "$25,680", rating: 4.8, image: "https://i.imgur.com/V8jJ0QO.png" },
+  { id: "3", name: "White Sedan", price: "$20,000", rating: 4.2, image: "https://i.imgur.com/a7lX7zM.png" },
+  { id: "4", name: "Black SUV", price: "$30,000", rating: 4.6, image: "https://i.imgur.com/f5k8QGb.png" },
+];
 
-const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const route = useRoute();
-  const isFocused = useIsFocused();
-
-
-
-  const { isLoggedIn, userData } = useSelector((state: RootState) => state.user);
-  
-  const user = useSelector((state: RootState) => state.user);
-
-  const {
-    data: Cars,
-    isLoading: isLoadingCars,
-    isError: isErrorCars,
-  } = useGetCarsQuery([]);
-  const {
-    data: Brands,
-    isLoading: isLoadingBrands,
-    isError: isErrorBrands,
-  } = useGetBrandsQuery([]);
-
-  const { data: Leases, isError } = useGetAllLeasesQuery(userData?.id);
-  
-  const LeaseWithTimer = useCountdowns(Leases?.lease);
-
-
-  
-
-  const leaseDataCallBack = useCallback(
-    ({ item }: any) => {
-      
-      return (
-        <Pressable
-          onPress={() => {
-            if (!isLoggedIn) {
-              navigation.navigate('Login');
-              return;
-            }
-            navigation.navigate('leaseDetails', {id: item?._id});
-          }}
-          style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
-        >
-          <View style={styles.leaseCard}>
-            <View style={styles.view}>
-              <Text style={styles.leaseTitle}>My Lease</Text>
-              <TouchableOpacity
-                style={styles.extendButton}
-                onPress={() => navigation.navigate('extendLease')}
-              >
-                <Text style={styles.extendText}>Extend Lease</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.leaseModel}>
-              {item?.carDetails[0]?.modelName}
-            </Text>
-            {/* <Text style={styles.timer}>my timer</Text> */}
-            {item.countdown && (
-              <View style={styles.timerContainer}>
-                {[
-                  { value: item?.countdown?.days, label: 'days' },
-                  { value: item?.countdown?.hours, label: 'Hr' },
-                  { value: item?.countdown?.minutes, label: 'Min' },
-                  { value: item?.countdown?.seconds, label: 'Sec' },
-                ].map((item, index) => (
-                  <View key={index} style={styles.timerBlock}>
-                    <Text style={styles.ti}>{item.value}</Text>
-                    <Text style={styles.timerLabel}>{item.label}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        </Pressable>
-      );
-    },
-    [navigation, isLoggedIn],
-  );
-
-  const brandsCallBack = useCallback(
-    ({ item }: any) => {
-      return (
-        <Pressable
-          onPress={() =>
-            navigation.navigate('carCardsByBrand', { brand: item.brand })
-          }
-          style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
-        >
-          <View style={styles.brandCard}>
-            <Image
-              style={styles.brandImage}
-              source={{ uri: item?.brandImage[0] }}
-            />
-          </View>
-        </Pressable>
-      );
-    },
-    [navigation],
-  );
-
-  const carsCallBack = useCallback(
-    (item: any) => {
-      return (
-        <Pressable
-          onPress={() => navigation.navigate('carDetails', { _id: item?._id })}
-          style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
-        >
-          <View style={styles.carCard}>
-            <View style={styles.carImageSetup}>
-              <Image
-                source={{ uri: item?.images[0] }}
-                style={styles.carThumb}
-              />
-            </View>
-            <Text style={styles.carName}>
-              {item?.modelName?.charAt(0).toLocaleUpperCase() +
-                item?.modelName?.slice(1)}
-            </Text>
-            <View style={styles.ratingContainer}>
-              <Text style={styles.carRating}>
-                ⭐ {item?.reviews_data.length}
-              </Text>
-              <Text style={styles.carPrice}>{item?.price}/day</Text>
-            </View>
-          </View>
-        </Pressable>
-      );
-    },
-    [navigation],
-  );
-
+export default function HomeScreen() {
   return (
-    <ScrollView style={styles.container}>
-      {Platform.OS === 'ios' && route.name === 'Home' && (
-        <View style={{ height: 44, backgroundColor: 'black' }} />
-      )}
-      {isFocused && (
-        <StatusBar backgroundColor="black" barStyle="light-content" />
-      )}
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Image
+          source={{ uri: "https://i.pravatar.cc/100" }}
+          style={styles.avatar}
+        />
+        <View>
+          <Text style={styles.welcome}>Welcome 👋</Text>
+          <Text style={styles.username}>Shahinur Rahman</Text>
+        </View>
+        <Icon name="notifications-outline" size={24} color="#000" style={styles.bell} />
+      </View>
 
-      <StatusBar backgroundColor={'black'} barStyle="light-content" />
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <TextInput placeholder="Search your car" style={styles.searchInput} />
+        <TouchableOpacity style={styles.filterBtn}>
+          <Icon name="options-outline" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-      <SafeAreaView>
-        <View style={styles.topSection}>
-          <View style={styles.headerRow}>
-            <View>
-              <Text style={styles.locationText}>
-                {isLoggedIn && user?.userData?.name
-                  ? `HI, ${user?.userData?.name.toLocaleUpperCase()}`
-                  : 'Welcome to City Car Center'}
-              </Text>
+      {/* Categories */}
+      <FlatList
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        data={categories}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.category}>
+            <View style={styles.categoryIcon}>
+              <FontAwesome name={item.logo} size={24} color="#fff" />
             </View>
-            <TouchableOpacity
-              onPress={() => {
-                if (!isLoggedIn) {
-                  navigation.navigate('Login');
-                  return;
-                }
-                navigation.navigate('Profile');
-              }}
-            >
-              {user?.profile ? (
-                <Image
-                  source={{ uri: 'https://i.pravatar.cc/150?img=3' }}
-                  style={styles.avatar}
-                />
-              ) : user?.userData?.name ? (
-                <Text style={styles.charAt}>
-                  {user?.userData?.name.charAt(0).toLocaleUpperCase()}
-                </Text>
-              ) : (
-                ''
-              )}
+            <Text style={styles.categoryText}>{item.name}</Text>
+          </View>
+        )}
+        style={{ marginVertical: 15 }}
+      />
+
+      {/* Popular Cars */}
+      <View style={styles.popularHeader}>
+        <Text style={styles.popularTitle}>Popular Car</Text>
+        <Text style={styles.viewAll}>View All</Text>
+      </View>
+
+      <FlatList
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: "space-between" }}
+        data={cars}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.carCard}>
+            <TouchableOpacity style={styles.heartIcon}>
+              <Icon name="heart-outline" size={20} color="#000" />
             </TouchableOpacity>
-          </View>
-
-          {LeaseWithTimer === undefined ||
-          LeaseWithTimer?.length === 0 ||
-          isError || !isLoggedIn ? (
-            <View style={styles.leaseCard}>
-              <View style={styles.view}>
-                <Text style={styles.leaseTitle}>My Lease</Text>
-                <TouchableOpacity
-                  disabled
-                  style={styles.extendButton}
-                  onPress={() => navigation.navigate('extendLease')}
-                >
-                  <Text style={styles.extendText}>Extend Lease</Text>
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.leaseModel}>No active lease</Text>
+            <Image source={require('../../assests/images.jpeg')} style={styles.carImage} />
+            <Text style={styles.carName}>{item.name}</Text>
+            <Text style={styles.carPrice}>{item.price}</Text>
+            <View style={styles.ratingRow}>
+              <Icon name="star" size={14} color="orange" />
+              <Text style={styles.carRating}>{item.rating}</Text>
             </View>
-          ) : (
-            <FlatList
-              data={LeaseWithTimer}
-              keyExtractor={item => item?._id.toString()}
-              renderItem={leaseDataCallBack}
-              horizontal={true}
-              ItemSeparatorComponent={() => <View style={{ width: 20 }} />}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 10 }}
-            />
-          )}
-        </View>
-      </SafeAreaView>
-
-      <SafeAreaView style={styles.mainSection}>
-        <View style={styles.searchContainer}>
-          <Ionicons
-            name="search"
-            size={20}
-            color={'#888'}
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search vehicle..."
-            placeholderTextColor="#888"
-            onFocus={() => navigation.navigate('searchCarCards')}
-          />
-        </View>
-
-        <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>Top Brands</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('brandCards')}>
-            <Text style={styles.seeAll}>See All</Text>
-          </TouchableOpacity>
-        </View>
-
-        {isLoadingBrands ? (
-          <View style={styles.centered}>
-            <ActivityIndicator
-              style={styles.indicator}
-              size="large"
-              color="#000"
-            />
           </View>
-        ) : !Brands?.brands || Brands.brands.length === 0 || isErrorBrands ? (
-          <View style={styles.centered}>
-            <Text style={{ margin: 20, fontFamily: FONTS.medium }}>
-              No brands available
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            horizontal
-            data={Brands.brands}
-            keyExtractor={item => item.brand.toString()}
-            renderItem={brandsCallBack}
-            ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 10 }}
-          />
         )}
-
-        <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>Available For You</Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('searchCarCards')}
-          >
-            <Text style={styles.seeAll}>See All</Text>
-          </TouchableOpacity>
-        </View>
-
-        {isLoadingCars ? (
-          <View style={styles.centered}>
-            <ActivityIndicator
-              style={styles.indicator}
-              size="large"
-              color="#000"
-            />
-          </View>
-        ) : !Cars?.data || Cars?.data?.length === 0 || isErrorCars ? (
-          <View style={styles.centered}>
-            <Text style={{ fontFamily: FONTS.medium, margin: 20 }}>
-              No cars available
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            horizontal
-            data={Cars?.data?.slice(0, 10)}
-            keyExtractor={item => item._id.toString()}
-            renderItem={({ item }) => carsCallBack(item)}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 10 }}
-          />
-        )}
-
-      </SafeAreaView>
-    </ScrollView>
+      />
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  view: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  topSection: {
-    backgroundColor: '#000',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 40 : 30,
-    paddingBottom: 8,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  locationText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: FONTS.demiBold,
-  },
-  avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-  },
-  leaseCard: {
-    maxWidth: width * 0.95,
-    backgroundColor: '#25262A',
-    borderRadius: 15,
-    padding: 13,
-    marginTop: 20,
-    marginBottom: 60,
-  },
-  leaseTitle: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 12,
-    fontFamily: FONTS.demiBold,
-  },
-  leaseModel: {
-    color: '#ccc',
-    fontSize: 12,
-    marginTop: 15,
-    fontFamily: FONTS.demiBold,
-  },
-  extendButton: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#fff',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-  },
-  extendText: {
-    fontWeight: '600',
-    fontSize: 10,
-  },
-  mainSection: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    marginTop: -20,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 50,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    backgroundColor: 'white',
-    marginTop: -40,
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    color: '#000',
-    fontSize: 14,
-  },
-  sectionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-    marginTop: 30,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    fontFamily: FONTS.bold,
-  },
-  seeAll: {
-    fontSize: 14,
-    color: '#007bff',
-    fontFamily: FONTS.demiBold,
-  },
-  brandCard: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 80,
-    height: 80,
-    borderWidth: 1,
-    borderColor: '#e5e5e5ff',
-    borderRadius: 10,
-  },
-  brandImage: {
-    width: 60,
-    height: 60,
-    resizeMode: 'contain',
-    borderRadius: 10,
-  },
-  carCard: {
-    backgroundColor: '#f8f8f8',
-    borderRadius: 12,
-    padding: 10,
-    marginRight: 15,
-    width: width * 0.7,
-    marginBottom: 20,
-  },
-  carThumb: {
-    width: '100%',
-    aspectRatio: 16 / 9,
-    borderRadius: 8,
-    resizeMode: 'cover',
-  },
-  carImageSetup: {
-    width: '100%',
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  carName: {
-    fontSize: 13,
-    marginTop: 9,
-    fontFamily: FONTS.demiBold,
-    color: '#575757ff',
-  },
-  carPrice: {
-    fontSize: 13,
-    color: '#333',
-    marginTop: 4,
-    fontFamily: FONTS.demiBold,
-  },
-  carRating: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2,
-    fontFamily: FONTS.demiBold,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  timerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  timerBlock: {
-    marginHorizontal: 20,
-  },
-  ti: {
-    color: 'white',
-    fontSize: 30,
-    marginTop: 8,
-    fontFamily: 'BebasNeue Regular',
-  },
-  timerLabel: {
-    fontSize: 11,
-    color: '#fff',
-    marginTop: 4,
-    marginLeft: 5,
-    fontFamily: FONTS.demiBold,
-  },
-  charAt: {
-    color: '#fff',
-    width: 40,
-    height: 40,
-    fontSize: 20,
-    borderWidth: 1,
-    borderColor: 'white',
-    borderRadius: 50,
-    textAlign: 'center',
-  },
-  indicator: {
-    marginTop: 30,
-  },
-  containerError: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-  },
-  screenTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    marginVertical: 12,
-    color: '#111',
-    fontFamily: FONTS.bold,
-  },
-  listContainer: {
-    paddingBottom: 20,
-  },
-  cardError: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    marginBottom: 16,
-    overflow: 'hidden',
-    elevation: 3,
-  },
-  infoContainer: {
-    padding: 12,
-  },
-  titleError: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111',
-    fontFamily: FONTS.demiBold,
-  },
-  location: {
-    fontSize: 14,
-    color: '#555',
-    marginTop: 4,
-    fontFamily: FONTS.medium,
-  },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  ratingTextError: {
-    marginLeft: 6,
-    fontSize: 14,
-    color: '#333',
-    fontFamily: FONTS.demiBold,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
-  },
-  message: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 8,
-    fontFamily: FONTS.medium,
-  },
-  errorTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 10,
-    color: 'red',
-    fontFamily: FONTS.bold,
-  },
-  retryButton: {
-    marginTop: 16,
-    backgroundColor: '#000',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-  },
-  retryText: {
-    color: '#fff',
-    fontSize: 14,
-    fontFamily: FONTS.demiBold,
-  },
-});
+  container: { flex: 1, backgroundColor: "white", paddingHorizontal: 20 },
+  header: { flexDirection: "row", alignItems: "center", marginTop: 20 },
+  avatar: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
+  welcome: { fontSize: 14, color: "black", fontFamily:FONTS.demiBold },
+  username: { fontSize: 16, fontFamily:FONTS.bold,color:"black" },
+  bell: { marginLeft: "auto" },
 
-export default HomeScreen;
+  searchContainer: {
+    flexDirection: "row",
+    marginTop: 20,
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingHorizontal: 10,
+  },
+  searchInput: { flex: 1, padding: 10 },
+  filterBtn: {
+    backgroundColor: "#000",
+    padding: 10,
+    borderRadius: 10,
+  },
+
+  category: { alignItems: "center", marginHorizontal: 10 },
+  categoryIcon: {
+    backgroundColor: "#000",
+    padding: 15,
+    borderRadius: 50,
+  },
+  categoryText: { marginTop: 5, fontSize: 12 },
+
+  popularHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 10,
+  },
+  popularTitle: { fontWeight: "bold", fontSize: 16, color:"black", fontFamily:FONTS.bold },
+  viewAll: { color: "gray", fontFamily:FONTS.demiBold },
+
+  carCard: {
+    borderTopRightRadius: 10,
+    borderTopLeftRadius:10,
+    borderBottomLeftRadius:10,
+    borderBottomRightRadius:10,
+    marginBottom: 15,
+    flex: 0.48,
+    backgroundColor: "#e7eaee60",
+    paddingBottom:10
+  },
+  carImage: { width: "100%",height: 100, resizeMode: "cover", borderTopRightRadius:10, borderTopLeftRadius:10 },
+  carName: { fontWeight: "bold", marginTop: 5, color:"black", fontFamily:FONTS.bold, marginLeft: 8 },
+  carPrice: { color: "black", fontSize: 10, fontFamily:FONTS.demiBold, marginLeft: 8 },
+  ratingRow: { flexDirection: "row", alignItems: "center", marginTop: 3, fontFamily:FONTS.demiBold, marginLeft: 8 },
+  carRating: { marginLeft: 4, fontSize: 10, fontFamily:FONTS.medium },
+
+  heartIcon: { position: "absolute", top: 8, right: 8, zIndex: 1 },
+
+});

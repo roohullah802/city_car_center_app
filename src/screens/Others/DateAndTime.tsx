@@ -13,6 +13,8 @@ import { useStripe } from '@stripe/stripe-react-native';
 import { useCreatePaymentIntendMutation } from '../../redux.toolkit/rtk/payment';
 import Toast from 'react-native-toast-message';
 import {useCreateLeaseMutation} from '../../redux.toolkit/rtk/leaseApis'
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux.toolkit/store';
 
 const DateAndTimeScreen: React.FC<{
   navigation: any;
@@ -25,7 +27,7 @@ const DateAndTimeScreen: React.FC<{
   const [pickUpDate, setPickUpDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const {isLoggedIn} = useSelector((state: RootState)=> state.user)
   // Stripe
   const [createPaymentIntent] = useCreatePaymentIntendMutation();
   const [createLease] = useCreateLeaseMutation();
@@ -81,6 +83,13 @@ const DateAndTimeScreen: React.FC<{
     try {
       // 1. Request PaymentIntent from backend
       const validCarId = carId.replace(/"/g, '');
+      if (!isLoggedIn) {
+        Toast.show({
+          type:"error",
+          text1: 'Error!',
+          text2:'please login user first'
+        })
+      }
       const response = await createPaymentIntent({
         id: validCarId,
         startDate: pickUpDate.toISOString(),
