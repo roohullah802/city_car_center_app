@@ -9,117 +9,76 @@ import {
   ScrollView,
   Dimensions,
   ActivityIndicator,
-  View,
- } from  'react-native';
+} from 'react-native';
 import { FONTS } from '../../fonts/fonts';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { usePostReportIssueMutation } from '../../redux.toolkit/rtk/apis';
 import Toast from 'react-native-toast-message';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux.toolkit/store';
-import Icon from 'react-native-vector-icons/Ionicons';
 
 const { width } = Dimensions.get('window');
 
 const ReportIssueScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [description, setDescription] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const { userData, isLoggedIn } = useSelector(
-    (state: RootState) => state.user,
-  );
-  const [postReportIssue, { isLoading, isError, isSuccess }] =
-    usePostReportIssueMutation();
+  const [description, setDescription] = useState('');
+  const [email, setEmail] = useState('');
+  const { userData, isLoggedIn } = useSelector((state: RootState) => state.user);
+
+  const [postReportIssue, { isLoading }] = usePostReportIssueMutation();
+
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const isValid = useMemo(
-    () => description.trim().length > 0 && email.includes('@'),
-    [description, email],
+    () => description.trim().length > 0 && isValidEmail(email),
+    [description, email]
   );
 
   const handleSend = useCallback(async () => {
     if (!isLoggedIn) {
-      navigation.navigate('Login');
+      navigation.navigate('socialAuth');
       return;
     }
+
     if (!isValid) {
       Toast.show({
         type: 'error',
-        text1: 'Please enter valid email address.',
+        text1: 'Please enter a valid email and description.',
       });
       return;
     }
-    const userId = userData?.id;
-    const data = { userId, description, email };
-    await postReportIssue(data).unwrap();
-  }, [
-    isValid,
-    description,
-    email,
-    postReportIssue,
-    userData,
-    navigation,
-    isLoggedIn,
-  ]);
 
-  if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#000" />
-        <Text style={styles.message}>Loading city car centers...</Text>
-      </View>
-    );
-  }
+    try {
+      const userId = userData?.id;
+      const payload = { userId, description, email };
+      await postReportIssue(payload).unwrap();
 
-  if (isError) {
-    return (
-      <View style={styles.centered}>
-        <Icon name="alert-circle" size={40} color="red" />
-        <Text style={styles.errorTitle}>Something went wrong</Text>
-        <Text style={styles.message}>
-          We couldn’t load the car centers. Please try again.
-        </Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.retryText}>Go Back</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+      Toast.show({
+        type: 'success',
+        text1: 'Issue reported successfully!',
+        text2: 'Our team will review it shortly.',
+      });
 
-  if (isSuccess) {
-    return (
-      <View style={styles.centered}>
-        <Icon name="checkmark-circle-outline" size={40} color="green" />
-        <Text style={[styles.errorTitle, { color: 'green' }]}>
-          Issue Report Submitted
-        </Text>
-        <Text style={styles.message}>
-          Thank you for reporting the issue. Our team will review it shortly.
-        </Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.retryText}>Go Back</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+      setDescription('');
+      setEmail('');
+      navigation.goBack();
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to report issue',
+        text2: 'Please try again later.',
+      });
+    }
+  }, [description, email, postReportIssue, userData, isLoggedIn, isValid, navigation]);
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.header}>Report Issue</Text>
-        <Text style={styles.subHeader}>
-          Describe your problem in detail and send to us.
-        </Text>
+        <Text style={styles.subHeader}>Describe your problem in detail and send to us.</Text>
 
         <TextInput
           style={styles.textArea}
@@ -143,19 +102,22 @@ const ReportIssueScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         />
 
         <TouchableOpacity
-          style={[
-            styles.button,
-            { backgroundColor: isValid ? '#000' : '#ccc' },
-          ]}
+          style={[styles.button, { backgroundColor: isValid ? '#73C2FB' : '#ccc' }]}
           onPress={handleSend}
-          disabled={!isValid}
+          disabled={!isValid || isLoading}
         >
-          <Text style={styles.buttonText}>Send</Text>
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Send</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
+
+export default ReportIssueScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -172,10 +134,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: RFValue(8),
     fontFamily: FONTS.bold,
+    color: '#1F305E',
   },
   subHeader: {
     fontSize: RFValue(13),
-    color: '#666',
+    color: '#1F305E',
     marginBottom: RFValue(20),
     fontFamily: FONTS.medium,
   },
@@ -187,7 +150,7 @@ const styles = StyleSheet.create({
     padding: RFValue(14),
     fontSize: RFValue(13),
     marginBottom: RFValue(16),
-    fontFamily: FONTS.medium,
+    fontFamily: FONTS.regular,
     textAlignVertical: 'top',
   },
   input: {
@@ -198,7 +161,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFValue(14),
     fontSize: RFValue(13),
     marginBottom: RFValue(24),
-    fontFamily: FONTS.medium,
+    fontFamily: FONTS.regular,
   },
   button: {
     height: RFValue(50),
@@ -213,39 +176,4 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontFamily: FONTS.demiBold,
   },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
-  },
-  message: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 8,
-    fontFamily: FONTS.medium,
-  },
-  retryButton: {
-    marginTop: 16,
-    backgroundColor: '#000',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-  },
-  retryText: {
-    color: '#fff',
-    fontSize: 14,
-    fontFamily: FONTS.demiBold,
-  },
-  errorTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 10,
-    color: 'red',
-    fontFamily: FONTS.bold,
-  },
 });
-
-export default ReportIssueScreen;

@@ -21,7 +21,6 @@ const DateAndTimeScreen: React.FC<{
   route: { params: { carId: string } };
 }> = ({ route, navigation }) => {
   const { carId } = route.params;
-  
 
   // State
   const [pickUpDate, setPickUpDate] = useState<Date>(new Date());
@@ -191,7 +190,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     marginBottom: 30,
-    color: '#002B3F',
+    color: '#1F305E',
+    marginTop: 20
   },
   dateBox: {
     backgroundColor: '#f6f6f6',
@@ -207,10 +207,10 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#222',
+    color: '#1F305E',
   },
   payButton: {
-    backgroundColor: 'black',
+    backgroundColor: '#73C2FB',
     padding: 16,
     borderRadius: 10,
     alignItems: 'center',

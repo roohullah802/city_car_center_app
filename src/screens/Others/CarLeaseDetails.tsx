@@ -1,487 +1,284 @@
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
-  Dimensions,
-  FlatList,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
-  Image,
-  ActivityIndicator,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  FlatList,
+  Dimensions,
+  Animated,
 } from 'react-native';
-import React, { useCallback, useMemo, useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { RFValue } from 'react-native-responsive-fontsize';
-import { FONTS } from '../../fonts/fonts'; // Ensure this path is correct
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useGetCarDetailsQuery } from '../../redux.toolkit/rtk/apis';
+import { FONTS } from '../../fonts/fonts';
+import { RFValue } from 'react-native-responsive-fontsize';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-type RateOption = {
-  label: string;
-  value: number;
-  type: string;
-};
+const HEADER_HEIGHT_RATIO = 0.38; // 38% of screen height
 
-const CarLeaseDetails: React.FC<{ navigation: any; route: any }> = ({
-  navigation,
-  route
-}) => {
+const CarDetails: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
   const { _id } = route.params;
+  const { data: Cars, isLoading } = useGetCarDetailsQuery(_id);
+  const car = Cars?.data;
 
-  const [activeImage, setActiveImage] = useState<number>(0);
-  const {
-    data: Details,
-    isLoading,
-    isError,
-    isFetching,
-    refetch
-  } = useGetCarDetailsQuery(_id, { skip: !_id });
-  const dataa = Details?.data;
-  const image = dataa?.images;
-  console.log(dataa);
-  
-  
-  
-  
-  const rateOptions: RateOption[] = useMemo(
-    () => [
-      { label: 'Max Power', value: dataa?.maxPower, type: 'hp' },
-      { label: '0-60 mph', value: dataa?.mph, type: 'sec' },
-      { label: 'Top Speed', value: dataa?.topSpeed, type: 'mph' },
-    ],
-    [dataa?.maxPower, dataa?.mph, dataa?.topSpeed],
-  );
+  const [activeIndex, setActiveIndex] = useState(0);
+  const flatListRef = useRef<FlatList>(null);
 
- let images: any[] = [];
+  // Memoize parsed images
+  const images = useMemo(() => {
+    if (!car?.images) return [];
+    if (Array.isArray(car.images)) return car.images;
+    if (typeof car.images === 'string') {
+      try {
+        const parsed = JSON.parse(car.images);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  }, [car?.images]);
 
- 
+  // Viewable item callback
+  const onViewRef = useRef(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) setActiveIndex(viewableItems[0].index);
+  });
 
-try {
-  if (Array.isArray(image)) {
-    images = image; // From MongoDB
-  } else if (typeof image === 'string' && image !== 'undefined') {
-    images = JSON.parse(image); // From Redis
-  } else {
-    console.warn('Image data format not recognized:', image);
-  }
-} catch (error) {
-  console.error('Failed to parse image data:', error);
-  
-}
-console.log(image);
-console.log(images);
+  const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
+  const HEADER_HEIGHT = height * HEADER_HEIGHT_RATIO;
 
-  
-
-  const renderCarImage = useCallback(
-    ({ item }: { item: any }) => (
-      <View key={item} style={styles.carWrapper}>
-        <Image
-        key={item}
-          source={{ uri: item }}
-          style={styles.carImage}
-          resizeMode="cover"
-        />
-      </View>
+  // FlatList render item
+  const renderImage = useCallback(
+    ({ item }: { item: string }) => (
+      <Animated.Image
+        source={{ uri: item }}
+        style={[styles.carImage, { height: HEADER_HEIGHT }]}
+        resizeMode="cover"
+      />
     ),
-    [],
+    [HEADER_HEIGHT]
   );
-
-  if (isFetching) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#000" />
-        <Text style={styles.message}>Loading city car centers...</Text>
-      </View>
-    );
-  }
 
   if (isLoading) {
-    
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#000" />
-        <Text style={styles.message}>Loading city car centers...</Text>
-      </View>
-    );
-  }
-
-  if (isError) {
-    return (
-      <View style={styles.centered}>
-        <Icon name="alert-circle" size={40} color="red" />
-        <Text style={styles.errorTitle}>Something went wrong</Text>
-        <Text style={styles.message}>
-          We couldn’t load the car centers. Please try again.
-        </Text>
-        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
-          <Text style={styles.retryText}>Retry</Text>
-        </TouchableOpacity>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
-          <SafeAreaView style={styles.container}>
-        {/* Back Button */}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Icon name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-        {/* Title */}
-        <Text style={styles.titleText}>
-          {dataa?.modelName?.charAt(0).toLocaleUpperCase() +
-            dataa?.modelName?.slice(1)}
-        </Text>
+      {/* Header with Image Slider */}
+      <View style={[styles.header, { height: HEADER_HEIGHT }]}>
+        {images.length > 0 ? (
+          <FlatList
+            data={images}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={renderImage}
+            onViewableItemsChanged={onViewRef.current}
+            viewabilityConfig={viewConfigRef.current}
+            ref={flatListRef}
+          />
+        ) : (
+          <Text>No images</Text>
+        )}
 
-        {/* Status Boxes */}
-        <View style={styles.statusRow}>
-          {dataa?.available ? (
-            <View style={styles.statusBox}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusText}>Available</Text>
-            </View>
-          ) : (
-            ''
-          )}
-          <View style={styles.statusBox}>
-            <Text style={styles.statusText}>Fully featured</Text>
+        {/* Dots */}
+        {images.length > 1 && (
+          <View style={[styles.dotsContainer, { bottom: 40 }]}>
+            {images.map((_: any, index: any) => (
+              <View
+                key={index}
+                style={[
+                  styles.dot,
+                  {
+                    opacity: index === activeIndex ? 1 : 0.3,
+                    transform: [{ scale: index === activeIndex ? 1.2 : 1 }],
+                  },
+                ]}
+              />
+            ))}
+          </View>
+        )}
+
+        {/* Overlay Header Icons */}
+        <SafeAreaView style={styles.overlayHeader}>
+          <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={22} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconBtn}>
+            <Icon name="heart-outline" size={22} color="#fff" />
+          </TouchableOpacity>
+        </SafeAreaView>
+      </View>
+
+      {/* Scrollable Details Section */}
+      <ScrollView
+        style={styles.detailsSection}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+          <Text style={styles.carTitle} numberOfLines={1}>
+            {car?.modelName || 'N/A'}
+          </Text>
+          <View style={styles.ratingRow}>
+            <Icon name="star" size={15} color="#f5a623" />
+            <Text style={styles.rating}>({car?.totalReviews || 0})</Text>
           </View>
         </View>
 
-        {/* Image Carousel */}
-
-        <FlatList
-          data={images}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={item => item}
-          renderItem={item => renderCarImage(item)}
-          onScroll={e => {
-            const x = e.nativeEvent.contentOffset.x;
-            setActiveImage(Math.round(x / width));
-          }}
-        />
-
-        {/* Image Dots */}
-        <View style={styles.dotsContainer}>
-          {images.map((_: any, i: any) => (
-            <View
-              key={i}
-              style={[
-                styles.dot,
-                activeImage === i ? styles.activeDot : styles.inactiveDot,
-              ]}
-            />
-          ))}
-        </View>
-
-        {/* Rating */}
-        <Text style={styles.ratingText}>
-          ⭐ {dataa?.totalReviews} <Text style={styles.ratingSub}>Reviews</Text>
-        </Text>
-
-        {/* Car Info */}
-        <Text style={styles.sectionTitle}>Car Info</Text>
-        <View style={styles.infoGrid}>
-          <View style={styles.infoColumn}>
-            <View style={styles.infoItem}>
-              <Icon name="person" size={16} />
-              <Text style={styles.infoText}>
-                {dataa?.passengers} Passengers
-              </Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Icon name="snow" size={16} />
-              <Text style={styles.infoText}>
-                {dataa?.airCondition === 'true'
-                  ? 'Air Conditioning'
-                  : 'No air Condition'}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.infoColumn}>
-            <View style={styles.infoItem}>
-              <MaterialCommunityIcons name="car-door" size={16} />
-              <Text style={styles.infoText}>{dataa?.doors} Doors</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <MaterialCommunityIcons name="gas-station" size={16} />
-              <Text style={styles.infoText}>Fuel Info: {dataa?.fuelType}</Text>
-            </View>
-          </View>
-        </View>
-        <View style={styles.infoItem}>
-          <MaterialCommunityIcons name="car-shift-pattern" size={16} />
-          <Text style={styles.infoText}>{dataa?.transmission}</Text>
-        </View>
-
-        {/* Car Specs */}
-        <Text style={styles.sectionTitle}>Car Specs</Text>
-        <View style={styles.specRow}>
-          {rateOptions.map((option, idx) => (
-            <View key={idx} style={styles.specCard}>
-              <Text style={styles.specLabel}>{option.label}</Text>
-              <Text style={styles.specValue}>
-                {option.value}{' '}
-                <Text style={styles.specUnit}>{option.type}</Text>
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Price Info */}
-        <Text style={styles.sectionTitle}>Price & Lease Info</Text>
+        <Text style={styles.sectionTitle}>Car Info:</Text>
         <View style={styles.priceRow}>
-          <Text style={styles.priceLabel}>Weekly Rate:</Text>
-          <Text style={styles.priceValue}>${dataa?.weeklyRate}/week</Text>
+          <Text style={styles.priceLabel}>Brand:</Text>
+          <Text style={styles.priceValue}>{car?.brand}</Text>
         </View>
         <View style={styles.line} />
         <View style={styles.priceRow}>
-          <Text style={styles.priceLabel}>Tax:</Text>
-          <Text style={styles.priceValue}>${dataa?.tax} flat (7 days)</Text>
+          <Text style={styles.priceLabel}>Car:</Text>
+          <Text style={styles.priceValue}>{car?.modelName}</Text>
         </View>
         <View style={styles.line} />
         <View style={styles.priceRow}>
-          <Text style={styles.priceLabel}>Lease Duration:</Text>
-          <Text style={styles.priceValue}>7 Days (Default)</Text>
+          <Text style={styles.priceLabel}>PricePerDay:</Text>
+          <Text style={styles.priceValue}>{car?.pricePerDay}</Text>
+        </View>
+        <View style={styles.line} />
+
+        {/* Features */}
+        <Text style={{ fontFamily: FONTS.bold, color: '#1F305E',marginTop:10 }}>Features</Text>
+        <View style={styles.featuresRow}>
+          <View style={styles.featureCard}>
+            <View style={styles.featureIconWrapper}>
+              <MaterialIcon name="chair-rolling" size={25} color="#1F305E" />
+            </View>
+            <Text style={styles.featureLabel}>Total Capacity</Text>
+            <Text style={styles.featureValue}>{car?.passengers} seats</Text>
+          </View>
+          <View style={styles.featureCard}>
+            <View style={styles.featureIconWrapper}>
+              <MaterialIcon name="speedometer" size={25} color="#1F305E" />
+            </View>
+            <Text style={styles.featureLabel}>High Speed</Text>
+            <Text style={styles.featureValue}>{car?.topSpeed} KM/H</Text>
+          </View>
+          <View style={styles.featureCard}>
+            <View style={styles.featureIconWrapper}>
+              <MaterialIcon name="car-shift-pattern" size={25} color="#1F305E" />
+            </View>
+            <Text style={styles.featureLabel}>Car Type</Text>
+            <Text style={styles.featureValue}>{car?.transmission}</Text>
+          </View>
         </View>
 
-        {/* Lease Button */}
-        <TouchableOpacity
-          style={styles.leaseButton}
-          onPress={() => navigation.navigate('dateAndTime', {carId: dataa?._id})}
-        >
-          <Text style={styles.leaseButtonText}>Lease this car</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    </ScrollView>
+        {/* Price + Buy Button */}
+        <Text style={{color:"#1F305E", marginTop: 15, fontSize: 10}}>Price: </Text>
+        <View style={styles.footerRow}>
+          <Text style={styles.price}>${car?.pricePerDay}/day</Text>
+          <TouchableOpacity style={styles.buyBtn} onPress={()=> navigation.navigate('dateAndTime', {carId: car?._id})}>
+            <Text style={styles.buyText}>Buy Now</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
-export default CarLeaseDetails;
+export default CarDetails;
 
 const styles = StyleSheet.create({
-  scrollContent: {
-    paddingBottom: 40,
-    alignItems: 'center',
-  },
-  container: {
-    width: '100%',
-    maxWidth: 700,
-    paddingHorizontal: 16,
-  },
-  backButton: {
+  container: { flex: 1, backgroundColor: '#fff' },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  loadingText: { fontSize: 16, color: '#666' },
+
+  header: { width: '100%', backgroundColor: 'green', overflow: 'hidden' },
+  carImage: { width, objectFit: 'cover' },
+
+  overlayHeader: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 20,
-    left: 10,
-    zIndex: 2,
-  },
-  titleText: {
-    fontSize: RFValue(16),
-    fontFamily: FONTS.bold,
-    marginTop: 60,
-    marginBottom: 10,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 10,
-  },
-  statusBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    height: 22,
-    borderWidth: 1,
-    borderRadius: 6,
-    borderColor: '#000',
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'green',
-    marginRight: 5,
-  },
-  statusText: {
-    fontSize: RFValue(8),
-    fontFamily: FONTS.demiBold,
-  },
-  carWrapper: {
-    width: width * 0.9,
-    height: 200,
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginRight: 8,
-    marginBottom: 5,
-  },
-  carImage: {
-    width: '100%',
-    height: '100%',
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-    marginTop: -25,
-    backgroundColor: '#fff',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  dot: {
-    height: 4,
-    borderRadius: 3,
-    backgroundColor: '#000',
-    marginHorizontal: 2,
-  },
-  activeDot: {
-    width: 22,
-  },
-  inactiveDot: {
-    width: 5,
-  },
-  ratingText: {
-    fontSize: RFValue(10),
-    fontFamily: FONTS.demiBold,
-    marginTop: 10,
-  },
-  ratingSub: {
-    fontSize: RFValue(8),
-    color: 'gray',
-    fontFamily: FONTS.demiBold,
-  },
-  sectionTitle: {
-    fontFamily: FONTS.bold,
-    fontSize: RFValue(12),
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  infoGrid: {
+    top: 40,
+    left: 20,
+    right: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 20,
+    alignItems: 'center',
   },
-  infoColumn: {
-    gap: 10,
+  iconBtn: { backgroundColor: 'rgba(0,0,0,0.5)', padding: 8, borderRadius: 20 },
+
+  detailsSection: {
     flex: 1,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    padding: 20,
+    marginTop: -30, // overlap nicely with header
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10,
   },
-  infoItem: {
-    flexDirection: 'row',
+
+  carTitle: { fontSize: 22, fontWeight: '700', color: '#1F305E', fontFamily: FONTS.bold },
+  ratingRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 5 },
+  rating: { marginLeft: 5, fontSize: 14, color: '#1F305E', fontFamily: FONTS.demiBold },
+
+  description: { fontSize: 14, color: '#666', marginVertical: 15, lineHeight: 20, fontFamily: FONTS.bold },
+
+  featuresRow: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 },
+  featureCard: {
     alignItems: 'center',
+    flex: 1,
+    paddingVertical: 20,
+    margin: 5,
+    backgroundColor: '#eef5ff',
     gap: 5,
-    marginTop: 8,
-  },
-  infoText: {
-    fontSize: RFValue(10),
-    color: '#5e5e5e',
-    fontFamily: FONTS.demiBold,
-  },
-  specRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  specCard: {
-    width: '30%',
-    borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 10,
-    paddingVertical: 12,
+  },
+  featureIconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 50,
+    backgroundColor: '#FEFEFA',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  specLabel: {
-    fontSize: RFValue(8),
-    color: 'gray',
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  specValue: {
-    fontSize: RFValue(14),
-    fontFamily: FONTS.demiBold,
-    textAlign: 'center',
-  },
-  specUnit: {
-    fontSize: RFValue(8),
-    color: 'gray',
-    fontFamily: FONTS.demiBold,
+  featureValue: { fontSize: 13, fontWeight: '600', color: '#1F305E', fontFamily: FONTS.bold },
+  featureLabel: { fontSize: 10, color: '#666', marginTop: 3, fontFamily: FONTS.demiBold },
+
+  footerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: -10 },
+  price: { fontSize: 13, fontWeight: '700', color: '#1F305E', fontFamily: FONTS.bold },
+  buyBtn: { backgroundColor: '#73C2FB', paddingVertical: 12, paddingHorizontal: 80, borderRadius: 30 },
+  buyText: { color: '#fff', fontSize: 12, fontWeight: '600', fontFamily: FONTS.demiBold },
+
+  dotsContainer: { position: 'absolute', bottom: 20, alignSelf: 'center', flexDirection: 'row' },
+  dot: { width: 13, height: 3, borderRadius: 2, backgroundColor: '#fff', margin: 2 },
+
+  sectionTitle: {
+    fontFamily: FONTS.bold,
+    fontSize: RFValue(12),
+    marginTop: RFValue(10),
+    marginBottom: RFValue(10),
+    color:'#1F305E'
   },
   priceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
+    marginTop: RFValue(10),
   },
-  priceLabel: {
-    fontSize: RFValue(10),
-    fontFamily: FONTS.demiBold,
-    color: 'gray',
-  },
-  priceValue: {
-    fontSize: RFValue(10),
-    fontFamily: FONTS.demiBold,
-    color: 'gray',
-  },
-  line: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#ccc',
-    marginVertical: 8,
-  },
-  leaseButton: {
-    backgroundColor: '#000',
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginTop: 20,
-  },
-  leaseButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontSize: RFValue(14),
-    fontFamily: FONTS.demiBold,
-  },
-  indicator: {
-    marginTop: 300,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
-  },
-  errorTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 10,
-    color: 'red',
-    fontFamily: FONTS.bold,
-  },
-  message: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 8,
-    fontFamily: FONTS.medium,
-  },
-  retryButton: {
-    marginTop: 16,
-    backgroundColor: '#000',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-  },
-  retryText: {
-    color: '#fff',
-    fontSize: 14,
-    fontFamily: FONTS.demiBold,
-  },
+  priceLabel: { fontSize: RFValue(10), fontFamily: FONTS.demiBold, color: '#1F305E' },
+  priceValue: { fontSize: RFValue(10), fontFamily: FONTS.demiBold, color: '#1F305E' },
+
+  line: { borderBottomWidth: 0.5, borderBottomColor: '#ccc', marginVertical: RFValue(8) },
 });

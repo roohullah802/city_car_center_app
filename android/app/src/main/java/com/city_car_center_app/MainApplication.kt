@@ -1,8 +1,6 @@
 package com.city_car_center_app
 
 import android.app.Application
-import com.facebook.FacebookSdk
-import com.facebook.appevents.AppEventsLogger
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
@@ -18,8 +16,7 @@ class MainApplication : Application(), ReactApplication {
       object : DefaultReactNativeHost(this) {
         override fun getPackages(): List<ReactPackage> =
             PackageList(this).packages.apply {
-              // Packages that cannot be autolinked yet can be added manually here, for example:
-              // add(MyReactNativePackage())
+              // Add manually linked packages here if needed
             }
 
         override fun getJSMainModuleName(): String = "index"
@@ -35,10 +32,6 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
-
-    // ✅ Initialize Facebook SDK
-    FacebookSdk.sdkInitialize(applicationContext)
-    AppEventsLogger.activateApp(this)
 
     // Load React Native
     loadReactNative(this)

@@ -50,7 +50,7 @@ const TopBrandsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color="#000" />
+          <Icon name="arrow-back" size={24} color='#1F305E' />
         </TouchableOpacity>
         <Text style={styles.title}>Top Brands</Text>
       </View>
@@ -98,9 +98,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   title: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#0F1E2D',
+    color: '#1F305E',
     fontFamily: FONTS.bold,
   },
   searchBox: {
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   searchIcon: { marginRight: 8 },
   input: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 12,
     color: '#333',
     fontFamily: FONTS.demiBold,
   },

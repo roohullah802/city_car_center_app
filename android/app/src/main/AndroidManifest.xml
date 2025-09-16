@@ -6,6 +6,13 @@
     <uses-permission android:name="android.permission.READ_MEDIA_DOCUMENTS" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+
+
+
 
     <application
         android:name=".MainApplication"
@@ -17,7 +24,7 @@
         android:supportsRtl="true">
 
         <!-- ✅ Facebook SDK -->
-        <meta-data 
+        <!-- <meta-data 
             android:name="com.facebook.sdk.ApplicationId" 
             android:value="@string/facebook_app_id" />
 
@@ -29,7 +36,7 @@
         <provider 
             android:authorities="com.facebook.app.FacebookContentProvider{APP_ID}"
             android:name="com.facebook.FacebookContentProvider"
-            android:exported="true" />
+            android:exported="true" /> -->
 
         <!-- Main Activity -->
         <activity

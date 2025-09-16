@@ -7,7 +7,7 @@ export const Apis = createApi({
     baseUrl: 'https://api.citycarcenters.com/api/user',
     prepareHeaders: async (headers, { getState }) => {
       const state = getState() as RootState;
-      const token = state.user.token;
+      const token = state?.user?.token;
 
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);

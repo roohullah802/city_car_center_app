@@ -135,11 +135,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700',
-    fontFamily:FONTS.bold
+    fontFamily:FONTS.bold,
   },
   clearText: {
     width: 100,
-    color: '#007AFF',
+    color: '#73C2FB',
     fontSize: 14,
     fontFamily:FONTS.demiBold
   },
@@ -148,7 +148,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 8,
     marginTop: 10,
-    fontFamily:FONTS.demiBold
+    fontFamily:FONTS.demiBold,
+    color:'#1F305E'
   },
   brandContainer: {
     flexDirection: 'row',
@@ -193,7 +194,7 @@ const styles = StyleSheet.create({
     fontFamily:FONTS.demiBold
   },
   searchButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#73C2FB',
     paddingVertical: 14,
     borderRadius: 8,
     marginBottom: 30,

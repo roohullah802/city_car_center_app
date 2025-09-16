@@ -28,4 +28,5 @@ export type RootStackParamList = {
   verifyOtp: undefined;
   pdfPicker: undefined;
   paymentSuccess: undefined;
+  socialAuth: undefined;
 };

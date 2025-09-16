@@ -37,9 +37,6 @@ export const Apis = createApi({
     getPolicy: builder.query({
       query: ()=> '/all/policy'
     }),
-    
-
-
 
   }),
 });

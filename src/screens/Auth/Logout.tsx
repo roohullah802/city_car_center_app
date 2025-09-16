@@ -13,7 +13,7 @@ import { FONTS } from '../../fonts/fonts';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux.toolkit/store';
 import Toast from 'react-native-toast-message';
-import { clearUserData, logout } from '../../redux.toolkit/slices/userSlice';
+import { clearToken, clearUserData, setLoggedIn } from '../../redux.toolkit/slices/userSlice';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/types';
@@ -49,9 +49,10 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
       }
       const response = await logoutUser({}).unwrap();
       if (response.success) {
-        navigation.navigate('Login');
+        navigation.navigate('socialAuth');
         dispatch(clearUserData());
-        dispatch(logout());
+        dispatch(setLoggedIn(false));
+        dispatch(clearToken());
       }
       
     } catch (error: any) {
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: width * 0.05,
-    color: '#0F1E2D',
+    color: '#1F305E',
     marginBottom: width * 0.02,
     fontFamily: FONTS.bold,
   },
@@ -162,7 +163,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: width * 0.035,
     borderRadius: 8,
-    backgroundColor: '#000',
+    backgroundColor: '#73C2FB',
     alignItems: 'center',
   },
   enableText: {

@@ -80,7 +80,7 @@ const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
               style={styles.backButton}
               onPress={() => navigation.goBack()}
             >
-              <Icon name="chevron-back" size={24} color="#000" />
+              <Icon name="chevron-back" size={24} color='#1F305E' />
             </TouchableOpacity>
 
             <Text style={styles.headerTitle}>Lease Details</Text>
@@ -178,11 +178,11 @@ const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
           {/* Contact Info */}
           <Text style={styles.sectionTitle}>Contact Us:</Text>
           <View style={styles.contactRow}>
-            <Icon name="call" size={22} color="#9b9b9bff" />
+            <Icon name="call" size={22} color='#1F305E' />
             <Text style={styles.contactText}>+9234567673338</Text>
           </View>
           <View style={[styles.contactRow, styles.contactRowMargin]}>
-            <Icon name="mail" size={22} color="#9b9b9bff" />
+            <Icon name="mail" size={22} color='#1F305E' />
             <Text style={styles.contactText}>Citycarcenterarizona@gmail.com</Text>
           </View>
 
@@ -215,6 +215,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: RFValue(10),
+    marginTop:30
   },
   backButton: {
     paddingRight: RFValue(10),
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: RFValue(14),
     fontFamily: FONTS.bold,
-    color: '#000',
+    color: '#1F305E',
   },
   menuWrapper: {
     position: 'relative',
@@ -246,17 +247,19 @@ const styles = StyleSheet.create({
   dropdownItem: {
     paddingVertical: RFValue(10),
     paddingHorizontal: RFValue(12),
+    color:'#1F305E'
   },
   dropdownText: {
     fontFamily: FONTS.demiBold,
     fontSize: RFValue(11),
-    color: '#333',
+    color: '#1F305E',
   },
   sectionTitle: {
     fontFamily: FONTS.bold,
     fontSize: RFValue(12),
     marginTop: RFValue(20),
     marginBottom: RFValue(10),
+    color:'#1F305E'
   },
   priceRow: {
     flexDirection: 'row',
@@ -266,12 +269,12 @@ const styles = StyleSheet.create({
   priceLabel: {
     fontSize: RFValue(10),
     fontFamily: FONTS.demiBold,
-    color: 'gray',
+    color: '#1F305E',
   },
   priceValue: {
     fontSize: RFValue(10),
     fontFamily: FONTS.demiBold,
-    color: 'gray',
+    color: '#1F305E',
   },
   statusActive: {
     color: 'green',
@@ -289,7 +292,7 @@ const styles = StyleSheet.create({
   rateCard: {
     flex: 1,
     marginHorizontal: RFValue(5),
-    backgroundColor: '#dbdbdbff',
+    backgroundColor: '#eef5ff',
     borderRadius: RFValue(10),
     paddingVertical: RFValue(12),
     paddingHorizontal: RFValue(8),
@@ -298,7 +301,7 @@ const styles = StyleSheet.create({
   },
   rateLabel: {
     fontSize: RFValue(10),
-    color: '#9b9b9bff',
+    color: '#1F305E',
     textAlign: 'center',
     marginBottom: RFValue(4),
     fontFamily: FONTS.demiBold,
@@ -306,7 +309,7 @@ const styles = StyleSheet.create({
   rateValue: {
     fontSize: RFValue(14),
     fontWeight: '600',
-    color: '#171717ff',
+    color: '#1F305E',
     fontFamily: FONTS.demiBold,
   },
   contactRow: {
@@ -318,12 +321,12 @@ const styles = StyleSheet.create({
     marginTop: RFValue(10),
   },
   contactText: {
-    color: '#9b9b9bff',
+    color:'#1F305E',
     fontSize: RFValue(10),
     fontFamily: FONTS.demiBold,
   },
   button: {
-    backgroundColor: '#000',
+    backgroundColor: '#73C2FB',
     paddingVertical: RFValue(14),
     borderRadius: RFValue(10),
     alignItems: 'center',

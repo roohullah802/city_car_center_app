@@ -18,7 +18,7 @@ interface Props {
 
 const { width } = Dimensions.get('window');
 const NUM_COLUMNS = 4;
-const CARD_MARGIN = 4;
+const CARD_MARGIN = 12;
 const CARD_SIZE = (width - CARD_MARGIN * 2 * NUM_COLUMNS - 32) / NUM_COLUMNS;
 
 const BrandCard: React.FC<Props> = React.memo(
@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: '80%',
-    height: '80%',
+    width: '70%',
+    height: '70%',
     borderRadius: 15,
   },
 });

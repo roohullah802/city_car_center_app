@@ -48,7 +48,7 @@ const PaymentDetails: React.FC<{ navigation: any; route: any }> = ({
       <View style={styles.paymentItem}>
         <View style={styles.paymentRow}>
           <Text style={styles.paymentId}>
-            {item?.paymentId ? item?.paymentId : 'No ID'}
+            {!item?.paymentId ? item?.paymentId : 'No ID'}
           </Text>
           <Text style={styles.reason}>
             lease created from {formatDate(item.startDate)} to{' '}
@@ -91,7 +91,7 @@ const PaymentDetails: React.FC<{ navigation: any; route: any }> = ({
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="chevron-back" size={24} color="#000" />
+            <Icon name="chevron-back" size={24} color='#1F305E' />
           </TouchableOpacity>
           <Text style={styles.headerText}>Payment Details</Text>
         </View>
@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     justifyContent: 'space-between',
+    marginTop:30
   },
   backButton: {
     paddingRight: RFValue(10),
@@ -148,6 +149,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     marginRight: RFValue(30),
+    color:'#1F305E'
   },
   tableHeader: {
     flexDirection: 'row',
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
   tableHeaderText: {
     fontFamily: FONTS.demiBold,
     fontSize: RFValue(12),
-    color: '#8a8a8aff',
+    color: '#1F305E',
   },
   paymentItem: {
     marginBottom: RFValue(15),
@@ -172,12 +174,14 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.demiBold,
     fontSize: RFValue(10),
     width: width * 0.25,
+    color:'#1F305E'
   },
   reason: {
     fontFamily: FONTS.demiBold,
     fontSize: RFValue(10),
     width: width * 0.25,
     marginLeft: 20,
+    color:'#1F305E'
   },
   details: {
     width: width * 0.25,
@@ -186,6 +190,7 @@ const styles = StyleSheet.create({
   date: {
     fontFamily: FONTS.demiBold,
     fontSize: RFValue(9),
+    color:'#1F305E'
   },
   amount: {
     fontFamily: FONTS.demiBold,

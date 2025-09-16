@@ -11,7 +11,7 @@ const App = () => {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-        <StripeProvider publishableKey='pk_test_51Re3kqIetrHxrdQ8Ruk2961CKj36v1PiQt3av9P6onflvM9yBrEj0WsaPdfDSyGbUAIAoW9XHAaWgRVAWhmzLEkH0076xhoXP4'>
+        <StripeProvider publishableKey='pk_test_51Re3kqIetrHxrdQ8XgqDvBCouAnhMcfCAzG5TgdpnGGwK3ai63SS0OCzc8OUPEEi06be8mIibu02oS0Vd9SMG2T700AKNJbnZB'>
           <RootNavigator />
         </StripeProvider>
       </PersistGate>

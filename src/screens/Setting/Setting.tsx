@@ -40,11 +40,19 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         {/* Profile Card */}
         <View style={styles.profileCard}>
-          <Image
-            source={require('../../assests/download.png')}
+          {isLoggedIn ? (
+            <Image
+            source={{uri: userData?.profile}}
             style={styles.avatar}
             resizeMode="cover"
           />
+          ):(
+            <Image
+            source={require('../../assests/guest.png')}
+            style={styles.avatar}
+            resizeMode="cover"
+          />
+          )}
           <View style={styles.profileDetails}>
             <Text style={styles.name}>
               {userData?.name
@@ -58,47 +66,16 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
               ''
             )}
           </View>
-          <TouchableOpacity
-            onPress={() => {
-              if (!isLoggedIn) {
-                navigation.navigate('Login');
-                return;
-              }
-              navigation.navigate('Profile');
-            }}
-          >
-            <Text style={styles.editBtn}>Edit</Text>
+          {isLoggedIn ? (
+            ''
+          ):(
+            <TouchableOpacity style={{flexDirection:"row"}} onPress={()=> navigation.navigate('socialAuth')}>
+            <Text style={styles.login}>Login</Text>
+            <Icon name="log-in-outline" size={30} color={"#45B1E8"} />
           </TouchableOpacity>
+          )}
         </View>
 
-        {/* Profile & Settings */}
-        <Text style={styles.sectionTitle}>Profile & Settings</Text>
-        <View style={styles.card}>
-          <SettingsRow
-            icon="person-outline"
-            label="My Profile"
-            editable
-            onPress={() => {
-              if (!isLoggedIn) {
-                navigation.navigate('Login');
-                return;
-              }
-              navigation.navigate('Profile');
-            }}
-          />
-          <SettingsRow
-            icon="lock-closed-outline"
-            label="Password & Security"
-            editable
-            onPress={() => {
-              if (!isLoggedIn) {
-                navigation.navigate('Login');
-                return;
-              }
-              navigation.navigate('passwordSecurity');
-            }}
-          />
-        </View>
 
         {/* Helpful Desk */}
         <Text style={styles.sectionTitle}>Helpful Desk</Text>
@@ -127,7 +104,7 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
             label="Logout"
             onPress={() => {
               if (!isLoggedIn) {
-                navigation.navigate('Login');
+                navigation.navigate('socialAuth');
                 return;
               }
               handleVisible();
@@ -183,7 +160,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: RFValue(20),
     fontFamily: FONTS.bold,
-    color: '#111827',
+    color: '#1F305E',
     marginVertical: RFValue(16),
   },
   profileCard: {
@@ -210,16 +187,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: RFValue(14),
     fontFamily: FONTS.bold,
-    color: '#111827',
+    color: '#1F305E',
   },
   email: {
     fontSize: RFValue(11),
     color: '#6B7280',
-    fontFamily: FONTS.demiBold,
-  },
-  editBtn: {
-    fontSize: RFValue(12),
-    color: '#2563EB',
     fontFamily: FONTS.demiBold,
   },
   sectionTitle: {
@@ -255,14 +227,14 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: RFValue(13),
-    color: '#111827',
+    color: '#1F305E',
     marginLeft: RFValue(12),
     flexShrink: 1,
     fontFamily: FONTS.demiBold,
   },
-  editText: {
-    fontSize: RFValue(12),
-    color: '#2563EB',
-    fontFamily: FONTS.demiBold,
-  },
+
+  login:{
+    fontFamily:FONTS.bold,
+    color:"#45B1E8"
+  }
 });

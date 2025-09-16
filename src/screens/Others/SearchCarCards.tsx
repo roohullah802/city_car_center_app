@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -11,7 +6,6 @@ import {
   FlatList,
   Image,
   StyleSheet,
-  Dimensions,
   SafeAreaView,
   StatusBar,
   TouchableOpacity,
@@ -25,128 +19,133 @@ import BottomSheetFilterModal from './BottomSheetFilterModel';
 import { Modalize } from 'react-native-modalize';
 import { FONTS } from '../../fonts/fonts';
 import { useGetCarsQuery } from '../../redux.toolkit/rtk/apis';
-const { width } = Dimensions.get('window');
-
-interface ImageObject {
-  url: string;
-  public_id: string;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../redux.toolkit/store';
+import { addFavCar, removeFavCar } from '../../redux.toolkit/slices/userSlice';
 
 interface Car {
   modelName: string;
   price: number;
   pricePerDay: number;
-  images: ImageObject[];
-  brandImage: ImageObject;
+  images: string[];
+  brandImage: string;
   totalReviews: number;
+  brand: string;
   _id: string;
 }
 
-const SearchCarCards: React.FC<{ navigation: any; route: any }> = ({
-  navigation,
-}) => {
+const SearchCarCards: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
-  const [selectedBrand, setSelectedBrand] = React.useState<string | null>(null);
-  const [priceRange, setPriceRange] = React.useState<[number, number]>([
-    1, 1000,
-  ]);
-
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [priceRange, setPriceRange] = useState<[number, number]>([1, 1000]);
 
   const ref = useRef<Modalize>(null);
   const { data: Cars, isLoading } = useGetCarsQuery([]);
-  
+
+   const favouriteCars = useSelector(
+      (state: RootState) => state.user.favouriteCars,
+    );
+    const dispatch = useDispatch();
+
+
+   const handleFav = useCallback((item: any)=>{
+      const isFav = favouriteCars.some(c => c._id === item._id);
+      if (isFav) {
+        dispatch(removeFavCar(item._id))
+      }else{
+        dispatch(addFavCar(item));
+      }
+
+   },[favouriteCars, dispatch])
 
   const filteredCars = useMemo(() => {
     if (!Cars?.data) return [];
-    return Cars?.data
-      ?.filter((item: any) =>
-        item.modelName.toLowerCase().includes(searchText.toLowerCase()),
-      );
+    return Cars.data.filter((item: Car) =>
+      item.modelName.toLowerCase().includes(searchText.toLowerCase())
+    );
   }, [searchText, Cars?.data]);
 
   const modalFilteredCars = useMemo(() => {
     if (!filteredCars) return [];
-
-    if (selectedBrand === null || selectedBrand === '') {
-      return filteredCars.filter((item: any) => item?.brand);
-    }
-
     return filteredCars
-      .filter((item: any) =>
-        item.brand.toLowerCase().includes(selectedBrand?.toLowerCase()),
+      .filter((item: Car) =>
+        selectedBrand
+          ? item.brand.toLowerCase().includes(selectedBrand.toLowerCase())
+          : true
       )
       .filter(
-        (item: any) =>
+        (item: Car) =>
           item.pricePerDay >= priceRange[0] &&
-          item.pricePerDay <= priceRange[1],
+          item.pricePerDay <= priceRange[1]
       );
   }, [filteredCars, priceRange, selectedBrand]);
 
-  const onClose = () => {
-    ref.current?.close();
-  };
-
-  const openFilterModal = () => {
-    ref.current?.open();
-  };
+  const onClose = () => ref.current?.close();
+  const openFilterModal = () => ref.current?.open();
 
   const renderCarCard = useCallback(
-    ({ item }: { item: Car }) => {    
-      return (
-        <Pressable
-          style={({ pressed }) => [
-            {
-              opacity: pressed ? 0.9 : 1,
-            },
-          ]}
-          onPress={() => navigation.navigate('carDetails', { _id: item._id })}
-        >
-          <View style={styles.card}>
-            <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
+    ({ item }: { item: Car }) =>{ 
+      const isFav = favouriteCars.some(c => c._id === item._id);
+      return(
+      <Pressable
+        style={({ pressed }) => [
+          styles.cardWrapper,
+          pressed && styles.cardPressed,
+        ]}
+        onPress={() => navigation.navigate('carDetails', { _id: item._id })}
+      >
+        <View style={styles.card}>
+          <Image
+            source={{ uri: item.images[0] }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+          <View style={styles.details}>
+            <Text style={styles.name} numberOfLines={1}>{item.modelName}</Text>
+            <Text style={styles.price} numberOfLines={1}>Price: ${item.pricePerDay}/day</Text>
 
-            <Image
-            key={item?._id}
-              source={{ uri: item?.images[0] as unknown as string }}
-              style={styles.image}
-              resizeMode="cover"
-            />  
-            <View style={styles.details}>
-              <Text style={styles.name}>{item.modelName}</Text>
-              <View style={styles.bottomRow}>
-                <View style={styles.rating}>
-                  <Icon name="star" size={16} color="#fbbf24" />
-                  <Text style={styles.ratingText}>({item.totalReviews})</Text>
-                </View>
-                <Text style={styles.price}>${item.pricePerDay}/day</Text>
-              </View>
+            <View style={styles.rating}>
+              <Icon name="star" size={16} color="#fbbf24" />
+              <Text style={styles.ratingText}>
+                ({item.totalReviews} Reviews)
+              </Text>
+            </View>
+
+            <View style={styles.actionRow}>
+              <TouchableOpacity style={styles.rentBtn} onPress={()=> navigation.navigate('dateAndTime', {carId: item._id})}>
+                <Text style={styles.rentBtnText}>Rent Now</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.heartBtn} onPress={()=> handleFav(item)}>
+                <Icon name={isFav ? "heart":"heart-outline"} color='#73C2FB' size={18} />
+              </TouchableOpacity>
             </View>
           </View>
-        </Pressable>
-      );
-    },
-    [navigation],
+        </View>
+      </Pressable>
+    )},
+    [navigation, favouriteCars, handleFav]
   );
 
   if (isLoading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#000" />
-        <Text style={styles.message}>Loading city car centers...</Text>
+        <Text style={styles.message}>Loading city car center...</Text>
       </View>
     );
   }
-
-
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-back" size={24} color="#000" />
+          <Icon name="arrow-back" size={24} color='#1F305E' />
         </TouchableOpacity>
 
         <Text style={styles.title}>Available Cars</Text>
@@ -165,18 +164,18 @@ const SearchCarCards: React.FC<{ navigation: any; route: any }> = ({
           </TouchableOpacity>
         </View>
 
-        {!modalFilteredCars || modalFilteredCars.length <= 0 ? (
+        {modalFilteredCars.length <= 0 ? (
           <View style={styles.noData}>
             <Icon name="car-sport" size={30} color="#000" />
-            <Text style={{ fontFamily:FONTS.demiBold }}>No Cars Found</Text>
+            <Text style={styles.noDataText}>No Cars Found</Text>
           </View>
         ) : (
           <FlatList
             data={modalFilteredCars}
-            keyExtractor={item => item._id.toString()}
-            renderItem={item => renderCarCard(item)}
+            keyExtractor={(item) => item._id}
+            renderItem={renderCarCard}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 20 }}
+            contentContainerStyle={styles.listContainer}
           />
         )}
 
@@ -209,7 +208,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '600',
     marginVertical: 10,
-    color: '#111',
+    color: '#1F305E',
     fontFamily: FONTS.bold,
   },
   searchContainer: {
@@ -228,111 +227,93 @@ const styles = StyleSheet.create({
     color: '#333',
     fontFamily: FONTS.demiBold,
   },
+  cardWrapper: {
+    width: '100%',
+  },
+  cardPressed: {
+    opacity: 0.9,
+  },
   card: {
+    flexDirection: 'row',
     backgroundColor: '#f9f9f9',
     borderRadius: 12,
     marginBottom: 16,
-    padding: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
+    shadowColor: '#98817B',
+    shadowOpacity: 0.02,
     shadowRadius: 10,
     elevation: 2,
+    overflow: 'hidden',
+    height: 130,
+    width: '99%',
   },
   image: {
-    width: '100%',
-    height: width * 0.5,
-    borderRadius: 10,
+    width: '55%',
+    height: '100%',
   },
   details: {
-    marginTop: 8,
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#fff',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
   },
   name: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 6,
-    color: '#000',
-    fontFamily: FONTS.demiBold,
+    color: '#1F305E',
+    fontFamily: FONTS.bold,
   },
-  bottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  price: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#1F305E',
+    fontFamily: FONTS.bold,
   },
   rating: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   ratingText: {
-    width: 140,
+    fontSize: 7,
+    color: '#1F305E',
+    fontFamily: FONTS.demiBold,
     marginLeft: 4,
-    fontSize: 14,
-    color: '#555',
-    fontFamily: FONTS.demiBold,
   },
-  price: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#333',
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 10,
+  },
+  rentBtn: {
+    backgroundColor: '#73C2FB',
+    width: 90,
+    paddingVertical: 7,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rentBtnText: {
+    fontSize: 10,
     fontFamily: FONTS.demiBold,
+    color: 'white',
+  },
+  heartBtn: {
+    padding: 8,
+    backgroundColor: '#eef5ff',
+    borderRadius: 50,
   },
   noData: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    fontFamily: FONTS.demiBold,
     marginTop: 40,
   },
- 
-  indicator: {
-    marginTop: 350,
-  },
-  containerError: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-  },
-  screenTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    marginVertical: 12,
-    color: '#111',
-    fontFamily: FONTS.bold,
-  },
-  listContainer: {
-    paddingBottom: 20,
-  },
-  cardError: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    marginBottom: 16,
-    overflow: 'hidden',
-    elevation: 3,
-  },
-  infoContainer: {
-    padding: 12,
-  },
-  titleError: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111',
+  noDataText: {
     fontFamily: FONTS.demiBold,
-  },
-  location: {
-    fontSize: 14,
-    color: '#555',
-    marginTop: 4,
-    fontFamily: FONTS.medium,
-  },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  ratingTextError: {
-    marginLeft: 6,
+    marginTop: 10,
     fontSize: 14,
     color: '#333',
-    fontFamily: FONTS.demiBold,
   },
   centered: {
     flex: 1,
@@ -341,13 +322,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: '#fff',
   },
-  errorTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 10,
-    color: 'red',
-    fontFamily: FONTS.bold,
-  },
   message: {
     fontSize: 14,
     textAlign: 'center',
@@ -355,17 +329,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontFamily: FONTS.medium,
   },
-  retryButton: {
-    marginTop: 16,
-    backgroundColor: '#000',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-  },
-  retryText: {
-    color: '#fff',
-    fontSize: 14,
-    fontFamily: FONTS.demiBold,
+  listContainer: {
+    paddingBottom: 20,
   },
 });
 

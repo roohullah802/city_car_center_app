@@ -69,7 +69,7 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       if (!isLoggedIn) {
-        navigation.navigate('Login');
+        navigation.navigate('socialAuth');
         return;
       }
     }, [navigation, isLoggedIn]),
@@ -127,15 +127,16 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: 15,
-    paddingTop: 10,
+    paddingTop: 50,
   },
   topText: {
     fontSize: 24,
     marginBottom: 4,
     fontFamily: FONTS.bold,
+    color:'#1F305E'
   },
   topDescription: {
-    color: 'gray',
+    color: '#1F305E',
     fontSize: 14,
     marginBottom: 10,
     fontFamily: FONTS.demiBold,
@@ -173,6 +174,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 10,
     fontFamily: FONTS.demiBold,
+    color:'#1F305E'
   },
   timerContainer: {
     flexDirection: 'row',
