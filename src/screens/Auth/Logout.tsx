@@ -32,7 +32,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
   const { isLoggedIn } = useSelector(
     (state: RootState) => state.user,
   );
-  const [logoutUser, {isLoading}] = useLogoutMutation();
+  const [logoutUser, {isLoading, error}] = useLogoutMutation();
   
   
   
@@ -48,6 +48,8 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
         return;
       }
       const response = await logoutUser({}).unwrap();
+      console.log(error);
+      
       if (response.success) {
         navigation.navigate('socialAuth');
         dispatch(clearUserData());
@@ -56,6 +58,8 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
       }
       
     } catch (error: any) {
+      console.log(error);
+      
       Toast.show({
         type: 'error',
         text1: 'Error occured!',

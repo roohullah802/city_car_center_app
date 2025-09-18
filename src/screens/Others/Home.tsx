@@ -21,16 +21,16 @@ import {
 } from '../../redux.toolkit/rtk/apis';
 import { useGetCurrentLocation } from '../../folder/getAddress';
 import { addFavCar, removeFavCar } from '../../redux.toolkit/slices/userSlice';
-
 const { width } = Dimensions.get('window');
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [locationStatus, setLocationStatus] = useState<boolean>(false);
   const insets = useSafeAreaInsets();
 
-  const { isLoggedIn, userData } = useSelector(
+  const { isLoggedIn, isGuest, userData } = useSelector(
     (state: RootState) => state.user,
   );
+
   const { data: Cars, isLoading, isError } = useGetCarsQuery({});
   const {
     data: Brands,
@@ -114,7 +114,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               <TouchableOpacity onPress={() => handleFav(item)}>
                 <Icon
                   name={isFav ? 'heart' : 'heart-outline'}
-                  color='#73C2FB'
+                  color="#73C2FB"
                   size={26}
                 />
               </TouchableOpacity>
@@ -135,6 +135,14 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
     return null;
   };
+
+  useEffect(() => {
+    if (isLoggedIn || isGuest) {
+      navigation.navigate('Home');
+    } else {
+      navigation.navigate('socialAuth');
+    }
+  }, [isLoggedIn, isGuest, navigation]);
 
   return (
     <ScrollView

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -26,7 +26,7 @@ const DateAndTimeScreen: React.FC<{
   const [pickUpDate, setPickUpDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
-  const {isLoggedIn} = useSelector((state: RootState)=> state.user)
+  const {isLoggedIn, isGuest} = useSelector((state: RootState)=> state.user)
   // Stripe
   const [createPaymentIntent] = useCreatePaymentIntendMutation();
   const [createLease] = useCreateLeaseMutation();
@@ -130,6 +130,12 @@ const DateAndTimeScreen: React.FC<{
       setLoading(false);
     }
   };
+
+  useEffect(()=>{
+    if (!isLoggedIn) {
+      navigation.navigate('socialAuth')
+    }
+  },[navigation, isGuest, isLoggedIn])
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

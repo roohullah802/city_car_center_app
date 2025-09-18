@@ -50,7 +50,7 @@ const initialState: UserState = {
   isLoggedIn: false,
   isLoading: false,
   token: null,
-  favouriteCars: [], 
+  favouriteCars: [],
   isGuest: false,
   userData: null,
 };
@@ -75,7 +75,10 @@ const userSlice = createSlice({
       state.token = null;
     },
 
-    setDrivingLicense(state, action: PayloadAction<{ drivingLicence: string }>) {
+    setDrivingLicense(
+      state,
+      action: PayloadAction<{ drivingLicence: string }>,
+    ) {
       if (state.userData) {
         state.userData = {
           ...state.userData,
@@ -83,7 +86,7 @@ const userSlice = createSlice({
         };
       }
     },
-    continueAsGuest(state){
+    continueAsGuest(state) {
       state.userData = null;
       state.isGuest = true;
     },
@@ -120,14 +123,13 @@ const userSlice = createSlice({
     },
 
     addFavCar(state, action: PayloadAction<FavCar>) {
-  const car = action.payload;
-  if (!state.favouriteCars) state.favouriteCars = []; // ensure array
-  const existCar = state.favouriteCars.find(item => item._id === car._id);
-  if (!existCar) {
-    state.favouriteCars.push(car);
-  }
-},
-
+      const car = action.payload;
+      if (!state.favouriteCars) state.favouriteCars = []; // ensure array
+      const existCar = state.favouriteCars.find(item => item._id === car._id);
+      if (!existCar) {
+        state.favouriteCars.push(car);
+      }
+    },
   },
 });
 
@@ -142,7 +144,7 @@ export const {
   clearFavouriteCars,
   setToken,
   clearToken,
-  continueAsGuest
+  continueAsGuest,
 } = userSlice.actions;
 
 export default userSlice.reducer;

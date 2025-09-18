@@ -19,6 +19,7 @@ export async function googleLogin() {
   const idToken = signInResponse.data?.idToken;
   const profile = signInResponse.data?.user.photo;
   const res = await axios.post(`${API}/google`, { idToken });
+  console.log(res);
   return {profile, data: res?.data};
 }
 

@@ -14,6 +14,7 @@ import {
 import { appleLogin, googleLogin } from '../../socialAuth/socialAuth';
 import { useDispatch } from 'react-redux';
 import {
+  continueAsGuest,
   setLoggedIn,
   setToken,
   setUserData,
@@ -84,6 +85,7 @@ export default function SocialAuthScreen({ navigation }: any) {
           navigation.navigate('Tabs', { screen: 'Home' });
         }
       } catch (err: any) {
+        console.log(err);
         Toast.show({
           type: 'error',
           text1: 'Something went wrong!',
@@ -96,6 +98,7 @@ export default function SocialAuthScreen({ navigation }: any) {
   );
 
   const handleFaceIdLogin = async () => {
+    
     const rnBiometrics = new ReactNativeBiometrics();
     const { available, biometryType } = await rnBiometrics.isSensorAvailable();
 
@@ -153,6 +156,11 @@ export default function SocialAuthScreen({ navigation }: any) {
     }
   };
 
+  const handleGuest = useCallback(()=>{
+    navigation.navigate('Tabs', { screen: 'Home' });
+    dispatch(continueAsGuest());
+  },[navigation, dispatch])
+
   return (
     <SafeAreaView style={[styles.safe]}>
       <View style={[styles.container, { paddingHorizontal: outerPadding }]}>
@@ -206,7 +214,7 @@ export default function SocialAuthScreen({ navigation }: any) {
           <SocialButton
             label="Guest"
             icon={require('../../assests/guest.png')}
-            onPress={() => navigation.navigate('Tabs', { screen: 'Home' })}
+            onPress={handleGuest}
             height={buttonHeight}
             fontSize={buttonFont}
           />

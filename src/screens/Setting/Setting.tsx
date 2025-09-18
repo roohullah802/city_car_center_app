@@ -99,7 +99,8 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         {/* Logout */}
         <View style={styles.card}>
-          <SettingsRow
+          {isLoggedIn ? (
+            <SettingsRow
             icon="log-out-outline"
             label="Logout"
             onPress={() => {
@@ -110,6 +111,9 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
               handleVisible();
             }}
           />
+          ):(
+            null
+          )}
         </View>
       </ScrollView>
 
@@ -128,7 +132,6 @@ type SettingsRowProps = {
 const SettingsRow: React.FC<SettingsRowProps> = ({
   icon,
   label,
-  editable,
   onPress,
 }) => (
   <TouchableOpacity style={styles.row} onPress={onPress}>
@@ -138,11 +141,6 @@ const SettingsRow: React.FC<SettingsRowProps> = ({
         {label}
       </Text>
     </View>
-    {editable ? (
-      <Text style={styles.editText}>Edit</Text>
-    ) : (
-      <Icon name="chevron-forward" size={20} color="#ccc" />
-    )}
   </TouchableOpacity>
 );
 

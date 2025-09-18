@@ -67,7 +67,9 @@ const FavouriteCars: React.FC<{ navigation: any }> = ({ navigation }) => {
             style={({ pressed }) => [
               styles.cardWrapper,
               pressed && styles.cardPressed,
-            ]}>
+            ]}
+            onPress={()=> navigation.navigate('carDetails', {_id: item?._id})}
+            >
             <View style={styles.card}>
               <Image
                 source={{ uri: item?.images?.[0] }}
@@ -203,9 +205,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    height: 80,
+    height: 70,
     paddingHorizontal: 2,
-    paddingTop: Platform.OS === 'ios' ? 50 : 30,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
   },
   headerText: {
     fontSize: 18,
