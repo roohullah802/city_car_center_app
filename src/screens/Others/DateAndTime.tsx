@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -26,7 +26,7 @@ const DateAndTimeScreen: React.FC<{
   const [pickUpDate, setPickUpDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
-  const {isLoggedIn, isGuest} = useSelector((state: RootState)=> state.user)
+  const {isLoggedIn} = useSelector((state: RootState)=> state.user)
   // Stripe
   const [createPaymentIntent] = useCreatePaymentIntendMutation();
   const [createLease] = useCreateLeaseMutation();
@@ -94,6 +94,8 @@ const DateAndTimeScreen: React.FC<{
         startDate: pickUpDate.toISOString(),
         endDate: returnDate.toISOString(),
       }).unwrap();
+      console.log(response);
+      
       
 
       const clientSecret = response?.clientSecret;
@@ -115,9 +117,10 @@ const DateAndTimeScreen: React.FC<{
      const resp =  await createLease({id: validCarId, body:{
         startDate: pickUpDate.toISOString(),
         endDate: returnDate.toISOString(),
+        paymentId:response?.paymentId
       }})
       if (resp?.data?.success) {
-        navigation.navigate('paymentSuccess', resp);
+        navigation.navigate('paymentSuccess');
       }
     } catch (error: any) {
       
@@ -130,12 +133,6 @@ const DateAndTimeScreen: React.FC<{
       setLoading(false);
     }
   };
-
-  useEffect(()=>{
-    if (!isLoggedIn) {
-      navigation.navigate('socialAuth')
-    }
-  },[navigation, isGuest, isLoggedIn])
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

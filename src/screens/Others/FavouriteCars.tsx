@@ -199,13 +199,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 15,
+    backgroundColor:"white"
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    height: 70,
+    height: 60,
     paddingHorizontal: 2,
     paddingTop: Platform.OS === 'ios' ? 50 : 20,
   },

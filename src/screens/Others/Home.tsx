@@ -103,9 +103,13 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               <Text style={styles.carPrice}>${item.pricePerDay}/day</Text>
               <TouchableOpacity
                 style={styles.leaseButton}
-                onPress={() =>
-                  navigation.navigate('dateAndTime', { carId: item._id })
-                }
+                onPress={() => {
+                  if (!isLoggedIn) {
+                    navigation.navigate('socialAuth');
+                  } else {
+                    navigation.navigate('dateAndTime', { carId: item?._id });
+                  }
+                }}
               >
                 <Text style={styles.leaseButtonText}>Rent Now</Text>
               </TouchableOpacity>
@@ -123,7 +127,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </Pressable>
       );
     },
-    [navigation, handleFav, favouriteCars],
+    [navigation, handleFav, favouriteCars, isLoggedIn],
   );
 
   const renderEmptyList = (type: 'brands' | 'cars') => {

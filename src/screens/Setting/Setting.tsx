@@ -13,21 +13,24 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import LogoutModal from '../Auth/Logout';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
-import {  useSelector } from 'react-redux';
-import {  RootState } from '../../redux.toolkit/store';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux.toolkit/store';
 
 const { width } = Dimensions.get('window');
 
 const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   const { userData, isLoggedIn } = useSelector(
     (state: RootState) => state.user,
   );
 
-  
-
   const handleVisible = () => setIsVisible(prev => !prev);
+
+  const avatarSource =
+    isLoggedIn && userData?.profile
+      ? { uri: userData.profile }
+      : require('../../assests/guest.png');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -40,42 +43,37 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         {/* Profile Card */}
         <View style={styles.profileCard}>
-          {isLoggedIn ? (
-            <Image
-            source={{uri: userData?.profile}}
-            style={styles.avatar}
-            resizeMode="cover"
-          />
-          ):(
-            <Image
-            source={require('../../assests/guest.png')}
-            style={styles.avatar}
-            resizeMode="cover"
-          />
-          )}
+          <Image source={avatarSource} style={styles.avatar} resizeMode="cover" />
+
           <View style={styles.profileDetails}>
             <Text style={styles.name}>
               {userData?.name
-                ? userData?.name.charAt(0).toUpperCase() +
-                  userData?.name.slice(1)
+                ? userData.name.charAt(0).toUpperCase() + userData.name.slice(1)
                 : 'Guest'}
             </Text>
-            {userData?.email ? (
-              <Text numberOfLines={1} ellipsizeMode='tail' style={styles.email}>{userData?.email}</Text>
-            ) : (
-              ''
+            {userData?.email && (
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={styles.email}
+              >
+                {userData.email}
+              </Text>
             )}
           </View>
-          {isLoggedIn ? (
-            ''
-          ):(
-            <TouchableOpacity style={{flexDirection:"row"}} onPress={()=> navigation.navigate('socialAuth')}>
-            <Text style={styles.login}>Login</Text>
-            <Icon name="log-in-outline" size={30} color={"#45B1E8"} />
-          </TouchableOpacity>
+
+          {!isLoggedIn && (
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={() => navigation.navigate('socialAuth')}
+              activeOpacity={0.7}
+              accessibilityLabel="Login"
+            >
+              <Text style={styles.login}>Login</Text>
+              <Icon name="log-in-outline" size={26} color="#45B1E8" />
+            </TouchableOpacity>
           )}
         </View>
-
 
         {/* Helpful Desk */}
         <Text style={styles.sectionTitle}>Helpful Desk</Text>
@@ -98,25 +96,18 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
 
         {/* Logout */}
-        <View style={styles.card}>
-          {isLoggedIn ? (
+        {isLoggedIn && (
+          <View style={styles.card}>
             <SettingsRow
-            icon="log-out-outline"
-            label="Logout"
-            onPress={() => {
-              if (!isLoggedIn) {
-                navigation.navigate('socialAuth');
-                return;
-              }
-              handleVisible();
-            }}
-          />
-          ):(
-            null
-          )}
-        </View>
+              icon="log-out-outline"
+              label="Logout"
+              onPress={handleVisible}
+            />
+          </View>
+        )}
       </ScrollView>
 
+      {/* Logout Confirmation Modal */}
       <LogoutModal visible={isVisible} onClose={() => setIsVisible(false)} />
     </SafeAreaView>
   );
@@ -125,22 +116,23 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
 type SettingsRowProps = {
   icon: string;
   label: string;
-  editable?: boolean;
   onPress: () => void;
 };
 
-const SettingsRow: React.FC<SettingsRowProps> = ({
-  icon,
-  label,
-  onPress,
-}) => (
-  <TouchableOpacity style={styles.row} onPress={onPress}>
+const SettingsRow: React.FC<SettingsRowProps> = ({ icon, label, onPress }) => (
+  <TouchableOpacity
+    style={styles.row}
+    onPress={onPress}
+    activeOpacity={0.7}
+    accessibilityLabel={`Go to ${label}`}
+  >
     <View style={styles.rowLeft}>
       <Icon name={icon} size={22} color="#444" />
       <Text style={styles.rowLabel} numberOfLines={1} ellipsizeMode="tail">
         {label}
       </Text>
     </View>
+    <Icon name="chevron-forward" size={18} color="#999" />
   </TouchableOpacity>
 );
 
@@ -230,9 +222,13 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     fontFamily: FONTS.demiBold,
   },
-
-  login:{
-    fontFamily:FONTS.bold,
-    color:"#45B1E8"
-  }
+  loginButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  login: {
+    fontFamily: FONTS.bold,
+    color: '#45B1E8',
+    marginRight: RFValue(6),
+  },
 });
