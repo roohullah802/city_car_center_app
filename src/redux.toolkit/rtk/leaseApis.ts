@@ -22,13 +22,6 @@ export const Apis = createApi({
     getLeaseDetails: builder.query({
       query: (id)=> `/lease/details/${id}`
     }),
-    createLease: builder.mutation({
-      query: ({id, body})=>({
-        url:`/create-lease/${id}`,
-        method: 'POST',
-        body
-      })
-    }),
     getPaymentDetails: builder.query({
       query: ()=> '/car/payment/history'
     })
@@ -41,4 +34,4 @@ export const Apis = createApi({
   }),
 });
 
-export const { useGetAllLeasesQuery, useGetLeaseDetailsQuery, useCreateLeaseMutation, useGetPaymentDetailsQuery } = Apis;
+export const { useGetAllLeasesQuery, useGetLeaseDetailsQuery, useGetPaymentDetailsQuery } = Apis;

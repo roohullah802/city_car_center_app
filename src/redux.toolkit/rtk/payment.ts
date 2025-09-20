@@ -22,8 +22,15 @@ export const Api = createApi({
                 method: 'POST',
                 body: {startDate, endDate}
             })
+        }),
+        paymentIntentForExtendLease: builder.mutation({
+            query: ({id, additionalDays})=>({
+                url: `/create-payment-intent-for-extend-lease/${id}`,
+                method: 'POST',
+                body:{additionalDays}
+            })
         })
     })
 })
 
-export const {useCreatePaymentIntendMutation} = Api;
+export const {useCreatePaymentIntendMutation, usePaymentIntentForExtendLeaseMutation} = Api;

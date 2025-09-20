@@ -129,6 +129,7 @@ export default PaymentDetails;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor:"white"
   },
   content: {
     padding: RFValue(16),
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     justifyContent: 'space-between',
-    marginTop:30
+    marginTop:10
   },
   backButton: {
     paddingRight: RFValue(10),

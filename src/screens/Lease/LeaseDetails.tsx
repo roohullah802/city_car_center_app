@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: RFValue(10),
-    marginTop:30
+    marginTop:10
   },
   backButton: {
     paddingRight: RFValue(10),

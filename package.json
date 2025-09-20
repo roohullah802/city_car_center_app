@@ -30,6 +30,7 @@
     "axios": "^1.11.0",
     "react": "19.1.0",
     "react-native": "0.80.2",
+    "react-native-animatable": "^1.4.0",
     "react-native-biometrics": "^3.0.1",
     "react-native-bootsplash": "^6.3.10",
     "react-native-calendar-strip": "^2.2.6",
@@ -48,7 +49,8 @@
     "react-native-toast-message": "^2.3.3",
     "react-native-vector-icons": "^10.3.0",
     "react-redux": "^9.2.0",
-    "redux-persist": "^6.0.0"
+    "redux-persist": "^6.0.0",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

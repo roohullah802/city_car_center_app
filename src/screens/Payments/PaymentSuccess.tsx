@@ -7,70 +7,86 @@ import {
   Dimensions,
   ScrollView,
 } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import { FONTS } from '../../fonts/fonts';
 
 const { width, height } = Dimensions.get('window');
-
 
 const scaleFont = (size: number) => {
   const scale = width / 375;
   return Math.round(size * scale);
 };
 
-
 interface Props {
   navigation: any,
 }
 
 const PaymentSuccessScreen: React.FC<Props> = ({ navigation }) => {
-    
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.iconContainer}>
-        <Text style={styles.checkmark}>✓</Text>
-      </View>
+      {/* Animated Circle + Checkmark */}
+      <Animatable.View
+        animation="bounceIn"
+        duration={1200}
+        style={styles.iconContainer}
+      >
+        <Animatable.Text
+          animation="zoomIn"
+          delay={400}
+          style={styles.checkmark}
+        >
+          ✓
+        </Animatable.Text>
+      </Animatable.View>
+
       <Text style={styles.title}>Payment Successful!</Text>
       <Text style={styles.subtitle}>
         You’re all set — your lease has been processed and confirmed. Our team is getting everything ready for your scheduled pick-up.
       </Text>
-      <View style={styles.detailsContainer}>
-        {/* {leaseDetailsDisplay} */}
-      </View>
 
-      <TouchableOpacity style={styles.homeButton} onPress={()=> navigation.navigate('Tabs',{screen: 'Home'})} activeOpacity={0.7}>
+      <View style={styles.detailsContainer}></View>
+
+      <TouchableOpacity
+        style={styles.homeButton}
+        onPress={() => navigation.navigate('Tabs', { screen: 'Home' })}
+        activeOpacity={0.7}
+      >
         <Text style={styles.homeButtonText}>Go to home page</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.timerButton} onPress={()=> navigation.navigate('Tabs', {screen: 'Lease'})} activeOpacity={0.7}>
+      <TouchableOpacity
+        style={styles.timerButton}
+        onPress={() => navigation.navigate('Tabs', { screen: 'Lease' })}
+        activeOpacity={0.7}
+      >
         <Text style={styles.timerButtonText}>View Lease Timer</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 24,
+    paddingTop:50,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'flex-start',
     minHeight: height,
   },
   iconContainer: {
-    backgroundColor: '#000',
+    backgroundColor: '#50d05c',
     borderRadius: 50,
-    width: 56,
-    height: 56,
+    width: 100,
+    height: 100,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
   },
   checkmark: {
     color: 'white',
-    fontSize: scaleFont(32),
+    fontSize: scaleFont(48),
     fontWeight: 'bold',
   },
   title: {
@@ -79,7 +95,7 @@ const styles = StyleSheet.create({
     color: '#004466',
     marginBottom: 8,
     textAlign: 'center',
-    fontFamily: FONTS.bold
+    fontFamily: FONTS.bold,
   },
   subtitle: {
     fontSize: scaleFont(16),
@@ -87,33 +103,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     textAlign: 'center',
     paddingHorizontal: 10,
-    fontFamily: FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   detailsContainer: {
     width: '100%',
     marginBottom: 32,
   },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-  },
-  detailLabel: {
-    fontWeight: '600',
-    color: '#555',
-    fontSize: scaleFont(14),
-  },
-  detailValue: {
-    color: '#222',
-    fontSize: scaleFont(14),
-    flexShrink: 1,
-    textAlign: 'right',
-    maxWidth: '65%',
-  },
   homeButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#73C2FB',
     paddingVertical: 14,
     borderRadius: 8,
     width: '100%',
@@ -124,10 +121,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: scaleFont(16),
     textAlign: 'center',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
   timerButton: {
-    backgroundColor: '#004466',
+    backgroundColor: '#000',
     paddingVertical: 14,
     borderRadius: 8,
     width: '100%',
@@ -137,7 +134,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: scaleFont(16),
     textAlign: 'center',
-    fontFamily:FONTS.demiBold
+    fontFamily: FONTS.demiBold,
   },
 });
 

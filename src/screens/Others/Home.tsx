@@ -9,6 +9,7 @@ import {
   Dimensions,
   ScrollView,
   Pressable,
+  RefreshControl,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -21,22 +22,38 @@ import {
 } from '../../redux.toolkit/rtk/apis';
 import { useGetCurrentLocation } from '../../folder/getAddress';
 import { addFavCar, removeFavCar } from '../../redux.toolkit/slices/userSlice';
+import io from 'socket.io-client';
+
+const socket = io('https://api.citycarcenters.com');
+
 const { width } = Dimensions.get('window');
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [locationStatus, setLocationStatus] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [carListData, setCarListData] = useState<any[]>([]);
+  const [brandsListData, setBrandListData] = useState<any[]>([]);
+
   const insets = useSafeAreaInsets();
 
   const { isLoggedIn, isGuest, userData } = useSelector(
     (state: RootState) => state.user,
   );
 
-  const { data: Cars, isLoading, isError } = useGetCarsQuery({});
+  const {
+    data: Cars,
+    isLoading,
+    isError,
+    refetch: refetchCars,
+  } = useGetCarsQuery({});
+
   const {
     data: Brands,
     isLoading: isLoadingBrands,
     isError: isErrorBrands,
+    refetch: refetchBrands,
   } = useGetBrandsQuery({});
+
   const favouriteCars = useSelector(
     (state: RootState) => state.user.favouriteCars,
   );
@@ -45,6 +62,36 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const carList = useMemo(() => Cars?.data || [], [Cars?.data]);
   const brandList = useMemo(() => Brands?.brands || [], [Brands?.brands]);
   const location = useGetCurrentLocation();
+
+  useEffect(() => {
+    setCarListData(carList);
+  }, [carList]);
+
+   useEffect(() => {
+    setBrandListData(brandList);
+  }, [brandList]);
+
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('socket is connected', socket.id);
+    });
+
+    socket.on('carAdded', car => {
+      setCarListData(prev => {
+        if (!Array.isArray(carList)) return carList;
+        return [car, ...prev];
+      });
+    });
+
+    socket.on('brandAdded', brand => {
+      setBrandListData(brand);
+    });
+
+    return () => {
+      socket.off('carAdded');
+      socket.off('brandAdded');
+    };
+  }, [carList, brandList]);
 
   useEffect(() => {
     setLocationStatus(true);
@@ -140,6 +187,16 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     return null;
   };
 
+  // ✅ Handle refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([refetchCars(), refetchBrands()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetchCars, refetchBrands]);
+
   useEffect(() => {
     if (isLoggedIn || isGuest) {
       navigation.navigate('Home');
@@ -154,6 +211,9 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         styles.container,
         { paddingTop: insets.top + 30 },
       ]}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      } // ✅ Pull to refresh added
     >
       <View style={styles.header}>
         {isLoggedIn ? (
@@ -200,7 +260,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
 
         <FlatList
-          data={brandList}
+          data={brandsListData}
           renderItem={renderBrand}
           keyExtractor={item => item?.brand}
           horizontal
@@ -221,7 +281,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
 
         <FlatList
-          data={carList}
+          data={carListData}
           renderItem={renderCar}
           keyExtractor={item => item?._id}
           horizontal

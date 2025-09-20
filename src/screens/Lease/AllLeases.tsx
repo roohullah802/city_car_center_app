@@ -1,3 +1,4 @@
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Platform,
   SafeAreaView,
@@ -10,20 +11,72 @@ import {
   Pressable,
   ActivityIndicator,
 } from 'react-native';
-import React, { useCallback } from 'react';
 import { FONTS } from '../../fonts/fonts';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux.toolkit/store';
 import { useFocusEffect } from '@react-navigation/native';
 import { useGetAllLeasesQuery } from '../../redux.toolkit/rtk/leaseApis';
 import { useCountdowns } from '../../timer/leaseTimer';
+import io from 'socket.io-client';
+
+const socket = io('https://api.citycarcenters.com');
 
 const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { isLoggedIn, userData } = useSelector((state: RootState) => state.user);
-  const { data: Leases, isLoading } = useGetAllLeasesQuery(userData?.id);
+  const { isLoggedIn, userData } = useSelector(
+    (state: RootState) => state.user,
+  );
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [Leases, setLeases] = useState<any[]>([]);
+
+  const {
+    data: LeasesData,
+    isLoading,
+    refetch,
+  } = useGetAllLeasesQuery(userData?.id);
+
+  useEffect(()=>{
+    setLeases(LeasesData)
+  },[LeasesData])
+
   const LeasesCountDown = useCountdowns(Leases?.lease);
+  
 
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('socket connected', socket.id);
+    });
 
+    socket.on('leaseCreated', lease => {
+      setLeases(prev => {
+        if (!Array.isArray(prev)) return [lease];
+        return [lease, ...prev]
+      })
+    });
+
+    socket.on('leaseExtended', (updatedLease)=>{
+      console.log(updatedLease);
+      
+      setLeases(prev => {
+        if(!Array.isArray(prev)) return [updatedLease];
+        return prev.map((lease)=> lease._id === updatedLease?._id ? updatedLease: lease)
+      })
+    })
+
+    return () => {
+      socket.off('leaseCreated');
+    };
+  }, []);
+
+  // Pull to refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refetch().unwrap();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetch]);
 
   const leasesCallBack = useCallback(
     ({ item }: any) => (
@@ -36,7 +89,7 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Text style={styles.leaseTitle}>My Lease</Text>
             <TouchableOpacity
               style={styles.extendButton}
-              onPress={() => navigation.navigate('extendLease')}
+              onPress={() => navigation.navigate('extendLease', {id: item?._id})}
             >
               <Text style={styles.extendText}>Extend Lease</Text>
             </TouchableOpacity>
@@ -97,7 +150,7 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.contentContainer}>
           <Text style={styles.topText}>Car lease</Text>
           <Text style={styles.topDescription}>
-            You have {Leases?.length} car
+            You have {Leases?.lease?.length} car
             {LeasesCountDown?.length > 1 ? 's' : ''} at lease so far
           </Text>
 
@@ -106,6 +159,8 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
             keyExtractor={(item, index) => item._id || index.toString()}
             renderItem={leasesCallBack}
             showsVerticalScrollIndicator={false}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
           />
         </View>
       )}
@@ -119,6 +174,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    marginBottom: 70,
   },
   statusBarBackground: {
     height: Platform.OS === 'ios' ? 44 : 0,
@@ -127,13 +183,13 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: 15,
-    paddingTop: 50,
+    paddingTop: 30,
   },
   topText: {
     fontSize: 24,
     marginBottom: 4,
     fontFamily: FONTS.bold,
-    color:'#1F305E'
+    color: '#1F305E',
   },
   topDescription: {
     color: '#1F305E',
@@ -174,7 +230,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 10,
     fontFamily: FONTS.demiBold,
-    color:'#1F305E'
+    color: '#1F305E',
   },
   timerContainer: {
     flexDirection: 'row',

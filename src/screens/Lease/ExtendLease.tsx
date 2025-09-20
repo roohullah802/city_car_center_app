@@ -8,9 +8,15 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons'
+import Icon from 'react-native-vector-icons/Ionicons';
 import { FONTS } from '../../fonts/fonts';
+import { usePaymentIntentForExtendLeaseMutation } from '../../redux.toolkit/rtk/payment';
+import {
+  initPaymentSheet,
+  presentPaymentSheet,
+} from '@stripe/stripe-react-native';
 
 type RateOption = {
   label: string;
@@ -19,17 +25,32 @@ type RateOption = {
   type: 'daily' | 'weekly' | 'monthly';
 };
 
-const ExtendLeaseScreen: React.FC<{navigation: any}> = ({navigation}) => {
+const ExtendLeaseScreen: React.FC<{ navigation: any; route: any }> = ({
+  navigation,
+  route,
+}) => {
+  const { id } = route.params;
   const [selectedRate, setSelectedRate] = useState<RateOption | null>(null);
-  const [manualDays, setManualDays] = useState('10');
+  const [manualDays, setManualDays] = useState<string>('1');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const rateOptions: RateOption[] = useMemo(() => [
-    { label: 'Daily Rate', subLabel: '(+20%)', value: 44.40, type: 'daily' },
-    { label: 'Weekly Rate', subLabel: '', value: 295.00, type: 'weekly' },
-    { label: 'Monthly Rate', subLabel: '(-15%)', value: 880.60, type: 'monthly' },
-  ], []);
+  const [paymentIntentForExtendLease] =
+    usePaymentIntentForExtendLeaseMutation();
 
-  
+  const rateOptions: RateOption[] = useMemo(
+    () => [
+      { label: 'Daily Rate', subLabel: '(+20%)', value: 44.4, type: 'daily' },
+      { label: 'Weekly Rate', subLabel: '', value: 295.0, type: 'weekly' },
+      {
+        label: 'Monthly Rate',
+        subLabel: '(-15%)',
+        value: 880.6,
+        type: 'monthly',
+      },
+    ],
+    [],
+  );
+
   const handleSelectRate = useCallback((option: RateOption) => {
     setSelectedRate(option);
   }, []);
@@ -40,13 +61,33 @@ const ExtendLeaseScreen: React.FC<{navigation: any}> = ({navigation}) => {
     setSelectedRate(null);
   }, []);
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = useCallback(async () => {
     const days = Number(manualDays);
-    if (selectedRate) {
-      console.log('Selected rate:', selectedRate);
+    setIsLoading(true);
+    try {
+      const response = await paymentIntentForExtendLease({
+        id: id,
+        additionalDays: days,
+      }).unwrap();
+      
+
+      const clientSecret = response?.clientSecret;
+      if (!clientSecret) throw new Error('No client secret returned');
+
+      const { error: initError } = await initPaymentSheet({
+        merchantDisplayName: 'City Car Center',
+        paymentIntentClientSecret: clientSecret,
+      });
+      if (initError) throw initError;
+
+      const { error: presentError } = await presentPaymentSheet();
+      if (presentError) throw presentError;
+      navigation.navigate('paymentSuccess');
+    } catch (error) {
+    } finally {
+      setIsLoading(false);
     }
-    console.log('Manual days entered:', days);
-  }, [selectedRate, manualDays]);
+  }, [manualDays, id, paymentIntentForExtendLease, navigation]);
 
   return (
     <KeyboardAvoidingView
@@ -56,12 +97,12 @@ const ExtendLeaseScreen: React.FC<{navigation: any}> = ({navigation}) => {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerCon}>
           <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => navigation.goBack()}
-              >
-                <Icon name="arrow-back" size={24} color="#000" />
-              </TouchableOpacity>
-        <Text style={styles.header}>Extend Lease</Text>
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Icon name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.header}>Extend Lease</Text>
         </View>
         <Text style={styles.subHeader}>
           Choose how much days you want to extend the lease of the car
@@ -70,7 +111,7 @@ const ExtendLeaseScreen: React.FC<{navigation: any}> = ({navigation}) => {
         <Text style={styles.sectionTitle}>Default Days with Rate</Text>
 
         <View style={styles.rateOptions}>
-          {rateOptions.map((option) => {
+          {rateOptions.map(option => {
             const isSelected = selectedRate?.type === option.type;
             return (
               <TouchableOpacity
@@ -101,14 +142,21 @@ const ExtendLeaseScreen: React.FC<{navigation: any}> = ({navigation}) => {
           <Text style={styles.daySuffix}>- Days</Text>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleContinue}>
-          <Text style={styles.buttonText}>Continue</Text>
+        <TouchableOpacity
+          disabled={isLoading}
+          style={styles.button}
+          onPress={handleContinue}
+        >
+          {isLoading ? (
+            <ActivityIndicator size={'small'} color={'white'} />
+          ) : (
+            <Text style={styles.buttonText}>Continue</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -220,6 +268,5 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.demiBold,
   },
 });
-
 
 export default ExtendLeaseScreen;

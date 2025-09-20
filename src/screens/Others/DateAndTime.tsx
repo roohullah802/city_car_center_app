@@ -12,7 +12,6 @@ import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/dat
 import { useStripe } from '@stripe/stripe-react-native';
 import { useCreatePaymentIntendMutation } from '../../redux.toolkit/rtk/payment';
 import Toast from 'react-native-toast-message';
-import {useCreateLeaseMutation} from '../../redux.toolkit/rtk/leaseApis'
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux.toolkit/store';
 
@@ -29,7 +28,6 @@ const DateAndTimeScreen: React.FC<{
   const {isLoggedIn} = useSelector((state: RootState)=> state.user)
   // Stripe
   const [createPaymentIntent] = useCreatePaymentIntendMutation();
-  const [createLease] = useCreateLeaseMutation();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   // Return date = pickUpDate + 6 days
@@ -94,13 +92,9 @@ const DateAndTimeScreen: React.FC<{
         startDate: pickUpDate.toISOString(),
         endDate: returnDate.toISOString(),
       }).unwrap();
-      console.log(response);
       
-      
-
       const clientSecret = response?.clientSecret;
       if (!clientSecret) throw new Error('No client secret returned');
-      console.log(response);
       
 
       // 2. Initialize payment sheet
@@ -113,15 +107,7 @@ const DateAndTimeScreen: React.FC<{
       // 3. Present payment sheet
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) throw presentError;
-    
-     const resp =  await createLease({id: validCarId, body:{
-        startDate: pickUpDate.toISOString(),
-        endDate: returnDate.toISOString(),
-        paymentId:response?.paymentId
-      }})
-      if (resp?.data?.success) {
-        navigation.navigate('paymentSuccess');
-      }
+      navigation.navigate('paymentSuccess');
     } catch (error: any) {
       
       Toast.show({
