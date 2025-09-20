@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -13,10 +13,18 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
 import { useGetLeaseDetailsQuery } from '../../redux.toolkit/rtk/leaseApis';
+import io, { Socket } from 'socket.io-client';
+import { useFocusEffect } from '@react-navigation/native';
+
+const socket: Socket = io('https://api.citycarcenters.com', {
+  transports: ['websocket'],
+  reconnection: true,
+  reconnectionAttempts: 5,
+});
 
 type RateOption = {
   label: string;
-  value: number;
+  value: string | number;
 };
 
 const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
@@ -24,51 +32,80 @@ const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
   route,
 }) => {
   const { id } = route.params;
-  
+
   const [menuVisible, setMenuVisible] = useState(false);
+  const [lease, setLease] = useState<any>(null);
   const [days, setDays] = useState<number>(0);
 
-  const { data: LeaseDetals, isLoading } = useGetLeaseDetailsQuery(id, {
+  // Fetch initial lease details
+  const {
+    data: LeaseDetailsData,
+    isLoading,
+    refetch,
+  } = useGetLeaseDetailsQuery(id, {
     skip: !id,
   });
 
-  const Lease = LeaseDetals?.data[0];
-  
-
-  const rateOptions: RateOption[] = useMemo(
-    () => [
-      { label: 'Initial Miles:', value: Lease ? Lease?.carDetails?.[0]?.initialMileage : 'N/A' },
-      { label: 'Miles Allowed:', value: Lease?  Lease?.carDetails?.[0]?.allowedMilleage : 'N/A' },
-    ],
-    [Lease],
-  );
-
-  const toggleMenu = () => setMenuVisible(prev => !prev);
-  const closeMenu = () => setMenuVisible(false);
+  useEffect(() => {
+    if (LeaseDetailsData?.data?.[0]) {
+      setLease(LeaseDetailsData.data[0]);
+    }
+  }, [LeaseDetailsData]);
 
   useEffect(() => {
-    if (Lease?.startDate && Lease?.endDate) {
-      const start = new Date(Lease.startDate).getTime();
-      const end = new Date(Lease.endDate).getTime();
-      const diff = end - start;
+    const handleLeaseExtended = (updatedLease: any) => {
+      setLease(updatedLease);
+    };
 
+    socket.on('leaseExtended', handleLeaseExtended);
+
+    return () => {
+      socket.off('leaseExtended', handleLeaseExtended);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (lease?.startDate && lease?.endDate) {
+      const start = new Date(lease.startDate).getTime();
+      const end = new Date(lease.endDate).getTime();
+      const diff = end - start;
       const calculatedDays = Math.round(diff / (24 * 60 * 60 * 1000));
       setDays(calculatedDays);
     }
-  }, [Lease]);
+  }, [lease?.startDate, lease?.endDate]);
 
-  if (isLoading) {
+  const rateOptions: RateOption[] = useMemo(
+    () => [
+      {
+        label: 'Initial Miles:',
+        value: lease?.carDetails?.[0]?.initialMileage ?? 'N/A',
+      },
+      {
+        label: 'Miles Allowed:',
+        value: lease?.carDetails?.[0]?.allowedMilleage ?? 'N/A',
+      },
+    ],
+    [lease],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
+
+  if (isLoading || !lease) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#000" />
-        <Text style={styles.message}>Loading city car centers...</Text>
+        <ActivityIndicator size="large" color="#1F305E" />
+        <Text style={styles.message}>Loading lease details...</Text>
       </View>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableWithoutFeedback onPress={closeMenu}>
+      <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
@@ -80,13 +117,13 @@ const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
               style={styles.backButton}
               onPress={() => navigation.goBack()}
             >
-              <Icon name="chevron-back" size={24} color='#1F305E' />
+              <Icon name="chevron-back" size={24} color="#1F305E" />
             </TouchableOpacity>
 
             <Text style={styles.headerTitle}>Lease Details</Text>
 
             <View style={styles.menuWrapper}>
-              <TouchableOpacity onPress={toggleMenu}>
+              <TouchableOpacity onPress={() => setMenuVisible(p => !p)}>
                 <Icon name="ellipsis-horizontal" size={24} color="#000" />
               </TouchableOpacity>
 
@@ -96,7 +133,7 @@ const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
                     style={styles.dropdownItem}
                     onPress={() => {
                       setMenuVisible(false);
-                      navigation.navigate('paymentDetails', {id});
+                      navigation.navigate('paymentDetails', { id });
                     }}
                   >
                     <Text style={styles.dropdownText}>Payment Details</Text>
@@ -108,39 +145,25 @@ const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
 
           {/* Lease Info */}
           <Text style={styles.sectionTitle}>Lease Info:</Text>
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Status:</Text>
-            <Text style={[styles.priceValue, styles.statusActive]}>Active</Text>
-          </View>
-          <View style={styles.line} />
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Lease Type:</Text>
-            <Text style={styles.priceValue}>Limited Miles Lease</Text>
-          </View>
-          <View style={styles.line} />
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Daily Miles:</Text>
-            <Text style={styles.priceValue}>
-              {Lease?.carDetails?.[0]?.allowedMilleage}
-            </Text>
-          </View>
-          <View style={styles.line} />
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Duration:</Text>
-            <Text style={styles.priceValue}>
-              {isNaN(days) ? 'N/A' : `${days} days`}
-            </Text>
-          </View>
-          <View style={styles.line} />
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Lease Start Date:</Text>
-            <Text style={styles.priceValue}>{new Date(Lease?.startDate).toDateString()}</Text>
-          </View>
-          <View style={styles.line} />
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Lease End Date:</Text>
-            <Text style={styles.priceValue}>{new Date(Lease?.endDate).toDateString()}</Text>
-          </View>
+          <InfoRow
+            label="Status:"
+            value="Active"
+            valueStyle={styles.statusActive}
+          />
+          <InfoRow label="Lease Type:" value="Limited Miles Lease" />
+          <InfoRow
+            label="Daily Miles:"
+            value={lease?.carDetails?.[0]?.allowedMilleage}
+          />
+          <InfoRow label="Duration:" value={`${days || 'N/A'} days`} />
+          <InfoRow
+            label="Lease Start Date:"
+            value={new Date(lease?.startDate).toDateString()}
+          />
+          <InfoRow
+            label="Lease End Date:"
+            value={new Date(lease?.endDate).toDateString()}
+          />
 
           {/* Miles Info */}
           <Text style={styles.sectionTitle}>Miles:</Text>
@@ -148,48 +171,43 @@ const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
             {rateOptions.map((option, index) => (
               <View key={index} style={styles.rateCard}>
                 <Text style={styles.rateLabel}>{option.label}</Text>
-                <Text style={styles.rateValue}>{option?.value}</Text>
+                <Text style={styles.rateValue}>{option.value}</Text>
               </View>
             ))}
           </View>
 
           {/* Car Info */}
           <Text style={styles.sectionTitle}>Car Info:</Text>
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Brand:</Text>
-            <Text style={styles.priceValue}>{Lease?.carDetails?.[0]?.brand}</Text>
-          </View>
-          <View style={styles.line} />
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Car:</Text>
-            <Text style={styles.priceValue}>{Lease?.carDetails?.[0]?.modelName}</Text>
-          </View>
-          <View style={styles.line} />
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>PricePerDay:</Text>
-            <Text style={styles.priceValue}>{Lease?.carDetails?.[0]?.pricePerDay}</Text>
-          </View>
-          <View style={styles.line} />
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Miles:</Text>
-            <Text style={styles.priceValue}>{Lease?.carDetails?.[0]?.initialMileage}</Text>
-          </View>
+          <InfoRow label="Brand:" value={lease?.carDetails?.[0]?.brand} />
+          <InfoRow label="Car:" value={lease?.carDetails?.[0]?.modelName} />
+          <InfoRow
+            label="Price Per Day:"
+            value={lease?.carDetails?.[0]?.pricePerDay}
+          />
+          <InfoRow
+            label="Miles:"
+            value={lease?.carDetails?.[0]?.initialMileage}
+          />
 
           {/* Contact Info */}
           <Text style={styles.sectionTitle}>Contact Us:</Text>
           <View style={styles.contactRow}>
-            <Icon name="call" size={22} color='#1F305E' />
+            <Icon name="call" size={22} color="#1F305E" />
             <Text style={styles.contactText}>+9234567673338</Text>
           </View>
           <View style={[styles.contactRow, styles.contactRowMargin]}>
-            <Icon name="mail" size={22} color='#1F305E' />
-            <Text style={styles.contactText}>Citycarcenterarizona@gmail.com</Text>
+            <Icon name="mail" size={22} color="#1F305E" />
+            <Text style={styles.contactText}>
+              Citycarcenterarizona@gmail.com
+            </Text>
           </View>
 
           {/* Extend Button */}
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('extendLease')}
+            onPress={() =>
+              navigation.navigate('extendLease', { id: lease?._id })
+            }
           >
             <Text style={styles.buttonText}>Extend Lease</Text>
           </TouchableOpacity>
@@ -198,6 +216,25 @@ const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
     </SafeAreaView>
   );
 };
+
+// ✅ Reusable InfoRow component
+const InfoRow = ({
+  label,
+  value,
+  valueStyle,
+}: {
+  label: string;
+  value: any;
+  valueStyle?: any;
+}) => (
+  <>
+    <View style={styles.priceRow}>
+      <Text style={styles.priceLabel}>{label}</Text>
+      <Text style={[styles.priceValue, valueStyle]}>{value}</Text>
+    </View>
+    <View style={styles.line} />
+  </>
+);
 
 export default LeaseDetails;
 
@@ -215,7 +252,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: RFValue(10),
-    marginTop:10
+    marginTop: 10,
   },
   backButton: {
     paddingRight: RFValue(10),
@@ -247,7 +284,7 @@ const styles = StyleSheet.create({
   dropdownItem: {
     paddingVertical: RFValue(10),
     paddingHorizontal: RFValue(12),
-    color:'#1F305E'
+    color: '#1F305E',
   },
   dropdownText: {
     fontFamily: FONTS.demiBold,
@@ -259,7 +296,7 @@ const styles = StyleSheet.create({
     fontSize: RFValue(12),
     marginTop: RFValue(20),
     marginBottom: RFValue(10),
-    color:'#1F305E'
+    color: '#1F305E',
   },
   priceRow: {
     flexDirection: 'row',
@@ -321,7 +358,7 @@ const styles = StyleSheet.create({
     marginTop: RFValue(10),
   },
   contactText: {
-    color:'#1F305E',
+    color: '#1F305E',
     fontSize: RFValue(10),
     fontFamily: FONTS.demiBold,
   },

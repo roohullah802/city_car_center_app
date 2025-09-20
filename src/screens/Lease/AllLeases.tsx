@@ -35,38 +35,38 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
     refetch,
   } = useGetAllLeasesQuery(userData?.id);
 
-  useEffect(()=>{
-    setLeases(LeasesData)
-  },[LeasesData])
-
-  const LeasesCountDown = useCountdowns(Leases?.lease);
-  
+  useEffect(() => {
+    if (LeasesData?.lease) {
+      setLeases(LeasesData?.lease);
+    }
+  }, [LeasesData]);
 
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('socket connected', socket.id);
-    });
-
     socket.on('leaseCreated', lease => {
       setLeases(prev => {
         if (!Array.isArray(prev)) return [lease];
-        return [lease, ...prev]
-      })
+        return [lease, ...prev];
+      });
     });
 
-    socket.on('leaseExtended', (updatedLease)=>{
-      console.log(updatedLease);
-      
-      setLeases(prev => {
-        if(!Array.isArray(prev)) return [updatedLease];
-        return prev.map((lease)=> lease._id === updatedLease?._id ? updatedLease: lease)
-      })
-    })
+    socket.on('leaseExtended', updatedLease => {
+
+      setLeases(prev => prev.filter(l => l._id !== updatedLease._id));
+    });
 
     return () => {
       socket.off('leaseCreated');
+      socket.off('leaseExtended');
     };
   }, []);
+
+  const LeasesCountDown = useCountdowns(Leases);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
   // Pull to refresh handler
   const onRefresh = useCallback(async () => {
@@ -89,13 +89,15 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Text style={styles.leaseTitle}>My Lease</Text>
             <TouchableOpacity
               style={styles.extendButton}
-              onPress={() => navigation.navigate('extendLease', {id: item?._id})}
+              onPress={() =>
+                navigation.navigate('extendLease', { id: item?._id })
+              }
             >
               <Text style={styles.extendText}>Extend Lease</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.leaseModel}>
-            {item?.carDetails[0]?.modelName}
+            {item?.carDetails?.[0]?.modelName}
           </Text>
 
           {item.countdown && (
@@ -150,15 +152,16 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.contentContainer}>
           <Text style={styles.topText}>Car lease</Text>
           <Text style={styles.topDescription}>
-            You have {Leases?.lease?.length} car
+            You have {Leases?.length} car
             {LeasesCountDown?.length > 1 ? 's' : ''} at lease so far
           </Text>
 
           <FlatList
-            data={LeasesCountDown}
+            data={LeasesCountDown || []}
             keyExtractor={(item, index) => item._id || index.toString()}
             renderItem={leasesCallBack}
             showsVerticalScrollIndicator={false}
+            extraData={LeasesCountDown}
             refreshing={refreshing}
             onRefresh={onRefresh}
           />
