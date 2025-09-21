@@ -5,9 +5,6 @@ import Setting from '../screens/Setting/Setting';
 import Ionicons from 'react-native-vector-icons/AntDesign';
 import AllLeases from '../screens/Lease/AllLeases';
 import FavouriteCars from '../screens/Others/FavouriteCars';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux.toolkit/store';
-import SocialAuthScreen from '../screens/Auth/SocialAuth';
 
 const Tab = createBottomTabNavigator();
 
@@ -16,8 +13,6 @@ type Obj = {
 };
 
 const AppTabs: React.FC = () => {
-
-  const {userData, isGuest} = useSelector((state: RootState)=> state.user);
 
 
 
@@ -64,7 +59,7 @@ const AppTabs: React.FC = () => {
         };
       }}
     >
-      {userData || isGuest ? <Tab.Screen name='Home'>{props => <Home {...props} />}</Tab.Screen>: <Tab.Screen name='Home'>{props => <SocialAuthScreen {...props} />}</Tab.Screen>}
+      <Tab.Screen name='Home'>{props => <Home {...props} />}</Tab.Screen>
       <Tab.Screen name="Lease">{props =>  <AllLeases {...props} />}</Tab.Screen>
       <Tab.Screen name="Favourite">{props => <FavouriteCars {...props} />}</Tab.Screen>
       <Tab.Screen name="Setting">{props => <Setting {...props} />}</Tab.Screen>

@@ -138,7 +138,7 @@ export default function SocialAuthScreen({ navigation }: any) {
               profile: result.user.profile,
             }),
           );
-          navigation.navigate('Tabs', { screen: 'Home' });
+          navigation.navigate('Tabs');
         } else {
           await AsyncStorage.removeItem('token');
           await AsyncStorage.setItem('userBiometric', 'false');

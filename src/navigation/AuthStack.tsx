@@ -16,42 +16,41 @@ import CarCardsByBrand from '../screens/Others/CarCardsByBrand';
 import VerifyYourselfScreen from '../screens/Setting/pdf';
 import PaymentSuccessScreen from '../screens/Payments/PaymentSuccess';
 import SocialAuthScreen from '../screens/Auth/SocialAuth';
-
-
-
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux.toolkit/store';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AuthStack: React.FC = () => {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Tabs">{() => <AppTabs />}</Stack.Screen>
-      
+  const { userData, isGuest } = useSelector((state: RootState) => state.user);
 
-       <Stack.Screen name="brandCards">
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={userData || isGuest ? 'Tabs' : 'socialAuth'}>
+      <Stack.Screen name="Tabs" component={AppTabs} />
+
+      <Stack.Screen name="brandCards">
         {props => <TopBrandsScreen {...props} />}
       </Stack.Screen>
 
-       <Stack.Screen name="searchCarCards">
+      <Stack.Screen name="searchCarCards">
         {props => <SearchCarCards {...props} />}
       </Stack.Screen>
 
-       <Stack.Screen name="carCardsByBrand">
+      <Stack.Screen name="carCardsByBrand">
         {props => <CarCardsByBrand {...props} />}
       </Stack.Screen>
 
-
       <Stack.Screen name="faqs" component={Faqs} />
 
-       <Stack.Screen name="privacyPolicy" component={PrivatePolicy} />
+      <Stack.Screen name="privacyPolicy" component={PrivatePolicy} />
 
       <Stack.Screen name="report" component={Report} />
 
-       <Stack.Screen name="extendLease">
+      <Stack.Screen name="extendLease">
         {props => <ExtendLeaseScreen {...props} />}
       </Stack.Screen>
 
-       <Stack.Screen name="carDetails">
+      <Stack.Screen name="carDetails">
         {props => <CarLeaseCard {...props} />}
       </Stack.Screen>
 
@@ -67,7 +66,6 @@ const AuthStack: React.FC = () => {
         {props => <PaymentDetails {...props} />}
       </Stack.Screen>
 
-
       <Stack.Screen name="pdfPicker">
         {props => <VerifyYourselfScreen {...props} />}
       </Stack.Screen>
@@ -76,10 +74,9 @@ const AuthStack: React.FC = () => {
         {props => <PaymentSuccessScreen {...props} />}
       </Stack.Screen>
 
-       <Stack.Screen name="socialAuth">
+      <Stack.Screen name="socialAuth">
         {props => <SocialAuthScreen {...props} />}
       </Stack.Screen>
-    
     </Stack.Navigator>
   );
 };

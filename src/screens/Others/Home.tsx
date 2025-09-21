@@ -29,7 +29,8 @@ const socket = io('https://api.citycarcenters.com');
 const { width } = Dimensions.get('window');
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [locationStatus, setLocationStatus] = useState<boolean>(false);
+  const [location, setLocation] = useState<string>('N/A'); // default N/A
+  const [locationLoading, setLocationLoading] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState(false);
   const [carListData, setCarListData] = useState<any[]>([]);
   const [brandsListData, setBrandListData] = useState<any[]>([]);
@@ -58,16 +59,16 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     (state: RootState) => state.user.favouriteCars,
   );
   const dispatch = useDispatch();
+  const loc =  useGetCurrentLocation();
 
   const carList = useMemo(() => Cars?.data || [], [Cars?.data]);
   const brandList = useMemo(() => Brands?.brands || [], [Brands?.brands]);
-  const location = useGetCurrentLocation();
 
   useEffect(() => {
     setCarListData(carList);
   }, [carList]);
 
-   useEffect(() => {
+  useEffect(() => {
     setBrandListData(brandList);
   }, [brandList]);
 
@@ -94,11 +95,17 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   }, [carList, brandList]);
 
   useEffect(() => {
-    setLocationStatus(true);
-    setTimeout(() => {
-      setLocationStatus(false);
-    }, 5000);
-  }, []);
+    setLocationLoading(true);
+    try {
+      if (loc) setLocation(loc);
+      else setLocation('N/A');
+    } catch (err) {
+      console.error('Location fetch failed', err);
+      setLocation('N/A');
+    } finally {
+      setLocationLoading(false);
+    }
+  }, [loc]);
 
   const handleFav = useCallback(
     (item: any) => {
@@ -187,7 +194,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     return null;
   };
 
-  // ✅ Handle refresh
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -204,6 +211,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       navigation.navigate('socialAuth');
     }
   }, [isLoggedIn, isGuest, navigation]);
+  console.log(userData);
+  
 
   return (
     <ScrollView
@@ -213,14 +222,14 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       ]}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      } // ✅ Pull to refresh added
+      } 
     >
       <View style={styles.header}>
         {isLoggedIn ? (
           <View>
             <Text style={styles.locationLabel}>Location</Text>
             <Text style={styles.locationValue} numberOfLines={1}>
-              {locationStatus ? 'Loading...' : location}
+              {locationLoading ? location : location}
             </Text>
           </View>
         ) : (
@@ -367,9 +376,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 25,
+    marginTop: 20,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 16,
@@ -402,12 +411,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#eef5ff',
     borderRadius: 20,
     overflow: 'hidden',
-    marginBottom: 30,
+    marginBottom: 55,
     paddingBottom: 10,
   },
   carImage: {
     width: '100%',
-    height: 130,
+    height: 150,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
