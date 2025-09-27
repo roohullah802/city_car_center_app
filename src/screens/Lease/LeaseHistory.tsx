@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  searchInput: { flex: 1, fontSize: 15, paddingVertical: 6 },
+  searchInput: { flex: 1, fontSize: 12, paddingVertical: 6 },
   searchBtn: {
     marginLeft: 8,
     backgroundColor: '#0ea5e9',
@@ -236,11 +236,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
   },
-  searchBtnText: { color: '#fff', fontWeight: '600' },
+  searchBtnText: { color: '#fff', fontWeight: '600', fontFamily:FONTS.bold },
 
   listWrap: { flex: 1 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loadingText: { marginTop: 10, color: '#6b7280' },
+  loadingText: { marginTop: 10, color: '#6b7280', fontFamily:FONTS.demiBold },
 
   card: {
     backgroundColor: '#fff',

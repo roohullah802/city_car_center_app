@@ -16,7 +16,7 @@ const App = () => {
         
         {/* Wrap navigator in a white background View for iOS */}
         <View style={{ flex: 1, backgroundColor: '#fff' }}>
-          <StripeProvider publishableKey='pk_test_51Re3kqIetrHxrdQ8VFHpsds1idd8fNGSVQYhVgYRiZcRMpXIJHDH3QGWReIpnEcobuwlK0YXWoeOJhalC9kXFPJ900wV7gJMcy'>
+          <StripeProvider publishableKey='pk_test_51Re3kqIetrHxrdQ8rp3US8KmNt6zFPkzaUIGlVixbhUmRtSlsMsyySYiD4fQyGp3SeULX3u5jLccoRrZ7jJvp2uR00z6fyQVmj'>
             <RootNavigator />
           </StripeProvider>
         </View>
