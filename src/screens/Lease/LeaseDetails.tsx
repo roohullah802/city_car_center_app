@@ -147,8 +147,8 @@ const LeaseDetails: React.FC<{ navigation: any; route: any }> = ({
           <Text style={styles.sectionTitle}>Lease Info:</Text>
           <InfoRow
             label="Status:"
-            value="Active"
-            valueStyle={styles.statusActive}
+            value={lease.status}
+            valueStyle={[styles.statusActive, lease.status === 'active' ? {color: 'green'}: lease.status === 'expired' ? {color: 'red'}: {}]}
           />
           <InfoRow label="Lease Type:" value="Limited Miles Lease" />
           <InfoRow

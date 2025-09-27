@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,8 @@ import Toast from 'react-native-toast-message';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useValidateTokenMutation } from '../../redux.toolkit/rtk/authApis';
+import { Modalize } from 'react-native-modalize';
+import { FONTS } from '../../fonts/fonts';
 
 const guidelineBaseWidth = 414;
 const guidelineBaseHeight = 896;
@@ -39,6 +41,7 @@ export default function SocialAuthScreen({ navigation }: any) {
   const isTablet = Math.min(width, height) >= 600;
   const dispatch = useDispatch();
   const [validateToken] = useValidateTokenMutation();
+  const modelRef = useRef<Modalize>(null);
 
   const [showFaceId, setShowFaceId] = useState(false);
 
@@ -98,7 +101,6 @@ export default function SocialAuthScreen({ navigation }: any) {
   );
 
   const handleFaceIdLogin = async () => {
-    
     const rnBiometrics = new ReactNativeBiometrics();
     const { available, biometryType } = await rnBiometrics.isSensorAvailable();
 
@@ -126,7 +128,7 @@ export default function SocialAuthScreen({ navigation }: any) {
 
       try {
         const result = await validateToken(token).unwrap();
-        
+
         if (result?.user) {
           dispatch(setLoggedIn(true));
           dispatch(setToken(token));
@@ -147,7 +149,7 @@ export default function SocialAuthScreen({ navigation }: any) {
       } catch (err) {
         await AsyncStorage.removeItem('token');
         await AsyncStorage.setItem('userBiometric', 'false');
-        setShowFaceId(false)
+        setShowFaceId(false);
         Alert.alert(
           'Login Failed',
           'Invalid or expired session. Please login with google or apple',
@@ -156,10 +158,14 @@ export default function SocialAuthScreen({ navigation }: any) {
     }
   };
 
-  const handleGuest = useCallback(()=>{
+  const handleGuest = useCallback(() => {
     navigation.navigate('Tabs', { screen: 'Home' });
     dispatch(continueAsGuest());
-  },[navigation, dispatch])
+  }, [navigation, dispatch]);
+
+  const openModel = useCallback(() => {
+    modelRef.current?.open();
+  }, []);
 
   return (
     <SafeAreaView style={[styles.safe]}>
@@ -213,7 +219,7 @@ export default function SocialAuthScreen({ navigation }: any) {
 
           <SocialButton
             label="Guest"
-            icon={require('../../assests/guest.png')}
+            icon={require('../../assests/guest.jpg')}
             onPress={handleGuest}
             height={buttonHeight}
             fontSize={buttonFont}
@@ -223,13 +229,27 @@ export default function SocialAuthScreen({ navigation }: any) {
         {/* Why link */}
         <TouchableOpacity
           accessibilityRole="link"
-          onPress={() => {}}
+          onPress={openModel}
           style={styles.whyWrap}
           activeOpacity={0.7}
         >
           <Text style={[styles.whyText]}>Why do I have to sign in?</Text>
         </TouchableOpacity>
       </View>
+      <Modalize
+        ref={modelRef}
+        handleStyle={{ backgroundColor: '#73C2FB' }}
+        modalStyle={{ padding: 30 }}
+        modalHeight={300}
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.modalText}>
+            Signing in helps uniquely identify who you are. This ensures that
+            your data—like favorites, rental history, and payment info—is
+            securely tied to your account only.
+          </Text>
+        </View>
+      </Modalize>
     </SafeAreaView>
   );
 }
@@ -346,5 +366,18 @@ const styles = StyleSheet.create({
     color: '#9aa0a6',
     fontWeight: '600',
     fontSize: 12,
+  },
+  modalContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalText: {
+    fontSize: 18,
+    color: '#1F305E',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontFamily:FONTS.demiBold
   },
 });

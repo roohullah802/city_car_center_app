@@ -15,7 +15,7 @@ import { FONTS } from '../../fonts/fonts';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux.toolkit/store';
 import { useFocusEffect } from '@react-navigation/native';
-import { useGetAllLeasesQuery } from '../../redux.toolkit/rtk/leaseApis';
+import { useGetAllActiveLeasesQuery } from '../../redux.toolkit/rtk/leaseApis';
 import { useCountdowns } from '../../timer/leaseTimer';
 import io from 'socket.io-client';
 
@@ -33,7 +33,7 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
     data: LeasesData,
     isLoading,
     refetch,
-  } = useGetAllLeasesQuery(userData?.id);
+  } = useGetAllActiveLeasesQuery(userData?.id);
 
   useEffect(() => {
     if (LeasesData?.lease) {

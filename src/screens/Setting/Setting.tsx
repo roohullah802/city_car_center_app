@@ -30,7 +30,7 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
   const avatarSource =
     isLoggedIn && userData?.profile
       ? { uri: userData.profile }
-      : require('../../assests/guest.png');
+      : require('../../assests/guest.jpg');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -43,7 +43,11 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         {/* Profile Card */}
         <View style={styles.profileCard}>
-          <Image source={avatarSource} style={styles.avatar} resizeMode="cover" />
+          <Image
+            source={avatarSource}
+            style={styles.avatar}
+            resizeMode="cover"
+          />
 
           <View style={styles.profileDetails}>
             <Text style={styles.name}>
@@ -52,11 +56,7 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
                 : 'Guest'}
             </Text>
             {userData?.email && (
-              <Text
-                numberOfLines={1}
-                ellipsizeMode="tail"
-                style={styles.email}
-              >
+              <Text numberOfLines={1} ellipsizeMode="tail" style={styles.email}>
                 {userData.email}
               </Text>
             )}
@@ -73,6 +73,16 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
               <Icon name="log-in-outline" size={26} color="#45B1E8" />
             </TouchableOpacity>
           )}
+        </View>
+
+        {/* History */}
+        <Text style={styles.sectionTitle}>History</Text>
+        <View style={styles.card}>
+          <SettingsRow
+            icon="hourglass-outline"
+            label="Lease History"
+            onPress={() => navigation.navigate('leaseHistory')}
+          />
         </View>
 
         {/* Helpful Desk */}

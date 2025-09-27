@@ -16,22 +16,22 @@ export const Apis = createApi({
     },
   }),
   endpoints: builder => ({
-    getAllLeases: builder.query({
-      query: () => '/all/leases',
+    getAllActiveLeases: builder.query({
+      query: () => '/all/active/leases',
     }),
     getLeaseDetails: builder.query({
       query: (id)=> `/lease/details/${id}`
     }),
     getPaymentDetails: builder.query({
       query: ()=> '/car/payment/history'
-    })
-
-
-
+    }),
+    getAllLeases: builder.query({
+      query: () => '/leases',
+    }),
 
 
 
   }),
 });
 
-export const { useGetAllLeasesQuery, useGetLeaseDetailsQuery, useGetPaymentDetailsQuery } = Apis;
+export const { useGetAllActiveLeasesQuery, useGetLeaseDetailsQuery, useGetPaymentDetailsQuery, useGetAllLeasesQuery } = Apis;

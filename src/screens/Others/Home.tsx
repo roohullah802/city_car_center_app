@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -23,22 +23,25 @@ import {
 import { useGetCurrentLocation } from '../../folder/getAddress';
 import { addFavCar, removeFavCar } from '../../redux.toolkit/slices/userSlice';
 import io from 'socket.io-client';
+import { Modalize } from 'react-native-modalize';
 
 const socket = io('https://api.citycarcenters.com');
-
 const { width } = Dimensions.get('window');
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [location, setLocation] = useState<string>('N/A'); // default N/A
+  const capitalize = (str: string) => str.split(' ').map((itm)=> itm.charAt(0).toUpperCase() + itm.slice(1)).join(' ')
+  const [location, setLocation] = useState<string>('N/A');
   const [locationLoading, setLocationLoading] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState(false);
   const [carListData, setCarListData] = useState<any[]>([]);
   const [brandsListData, setBrandListData] = useState<any[]>([]);
 
   const insets = useSafeAreaInsets();
+  const dispatch = useDispatch();
+  const modalRef = useRef<Modalize>(null);
 
   const { isLoggedIn, isGuest, userData } = useSelector(
-    (state: RootState) => state.user,
+    (state: RootState) => state.user
   );
 
   const {
@@ -56,10 +59,9 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   } = useGetBrandsQuery({});
 
   const favouriteCars = useSelector(
-    (state: RootState) => state.user.favouriteCars,
+    (state: RootState) => state.user.favouriteCars
   );
-  const dispatch = useDispatch();
-  const loc =  useGetCurrentLocation();
+  const loc = useGetCurrentLocation();
 
   const carList = useMemo(() => Cars?.data || [], [Cars?.data]);
   const brandList = useMemo(() => Brands?.brands || [], [Brands?.brands]);
@@ -116,7 +118,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         dispatch(addFavCar(item));
       }
     },
-    [favouriteCars, dispatch],
+    [favouriteCars, dispatch]
   );
 
   const renderBrand = useCallback(
@@ -135,7 +137,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
       </Pressable>
     ),
-    [navigation],
+    [navigation]
   );
 
   const renderCar = useCallback(
@@ -152,7 +154,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               style={styles.carImage}
               resizeMode="cover"
             />
-            <Text style={styles.carName}>{item.modelName}</Text>
+            <Text style={styles.carName}>{capitalize(item.modelName)}</Text>
             <View style={styles.carFooter}>
               <Text style={styles.carPrice}>${item.pricePerDay}/day</Text>
               <TouchableOpacity
@@ -181,7 +183,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </Pressable>
       );
     },
-    [navigation, handleFav, favouriteCars, isLoggedIn],
+    [navigation, handleFav, favouriteCars, isLoggedIn]
   );
 
   const renderEmptyList = (type: 'brands' | 'cars') => {
@@ -193,7 +195,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
     return null;
   };
-
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -211,95 +212,123 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       navigation.navigate('socialAuth');
     }
   }, [isLoggedIn, isGuest, navigation]);
-  console.log(userData);
-  
+
+  const openProfileModal = () => {
+    modalRef.current?.open();
+  };
 
   return (
-    <ScrollView
-      contentContainerStyle={[
-        styles.container,
-        { paddingTop: insets.top + 30 },
-      ]}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      } 
-    >
-      <View style={styles.header}>
-        {isLoggedIn ? (
-          <View>
-            <Text style={styles.locationLabel}>Location</Text>
-            <Text style={styles.locationValue} numberOfLines={1}>
-              {locationLoading ? location : location}
-            </Text>
-          </View>
-        ) : (
-          <Text style={styles.guest}>Guest</Text>
-        )}
-
-        <Image
-          source={
-            userData?.profile
-              ? { uri: userData.profile }
-              : require('../../assests/guest.png')
-          }
-          style={styles.profileImage}
-        />
-      </View>
-
-      <Text style={styles.title}>
-        Find your ideal ride in just a few clicks{'\n'}
-        <Text style={styles.boldText}>quick, easy, and reliable</Text>
-      </Text>
-
-      <TouchableOpacity
-        onPress={() => navigation.navigate('searchCarCards')}
-        activeOpacity={0.5}
-        style={styles.searchBarContainer}
+    <>
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { paddingTop: insets.top + 30 },
+        ]}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
-        <Text style={[styles.searchInput, { color: '#E5E4E2' }]}>Search</Text>
-        <Icon name="search" size={18} color="#999" style={styles.searchIcon} />
-      </TouchableOpacity>
+        <View style={styles.header}>
+          {isLoggedIn ? (
+            <View>
+              <Text style={styles.locationLabel}>Location</Text>
+              <Text style={styles.locationValue} numberOfLines={1}>
+                {locationLoading ? location : location}
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.guest}>Guest</Text>
+          )}
 
-      <View>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Brands</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('brandCards')}>
-            <Text style={styles.seeAll}>See All</Text>
+          <TouchableOpacity onPress={openProfileModal}>
+            <Image
+              source={
+                userData?.profile
+                  ? { uri: userData.profile }
+                  : require('../../assests/guest.jpg')
+              }
+              style={[styles.profileImage, isGuest ? {width:60, height:60} : '']}
+            />
           </TouchableOpacity>
         </View>
 
-        <FlatList
-          data={brandsListData}
-          renderItem={renderBrand}
-          keyExtractor={item => item?.brand}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalList}
-          ListEmptyComponent={() => renderEmptyList('brands')}
-        />
-      </View>
+        <Text style={styles.title}>
+          Find your ideal ride in just a few clicks{'\n'}
+          <Text style={styles.boldText}>quick, easy, and reliable</Text>
+        </Text>
 
-      <View>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Available Near You</Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('searchCarCards')}
-          >
-            <Text style={styles.seeAll}>See All</Text>
-          </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('searchCarCards')}
+          activeOpacity={0.5}
+          style={styles.searchBarContainer}
+        >
+          <Text style={[styles.searchInput, { color: '#E5E4E2' }]}>Search</Text>
+          <Icon name="search" size={18} color="#999" style={styles.searchIcon} />
+        </TouchableOpacity>
+
+        <View>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Brands</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('brandCards')}>
+              <Text style={styles.seeAll}>See All</Text>
+            </TouchableOpacity>
+          </View>
+
+          <FlatList
+            data={brandsListData}
+            renderItem={renderBrand}
+            keyExtractor={item => item?.brand}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalList}
+            ListEmptyComponent={() => renderEmptyList('brands')}
+          />
         </View>
 
-        <FlatList
-          data={carListData}
-          renderItem={renderCar}
-          keyExtractor={item => item?._id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalList}
-          ListEmptyComponent={() => renderEmptyList('cars')}
-        />
-      </View>
-    </ScrollView>
+        <View>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Available Near You</Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('searchCarCards')}
+            >
+              <Text style={styles.seeAll}>See All</Text>
+            </TouchableOpacity>
+          </View>
+
+          <FlatList
+            data={carListData}
+            renderItem={renderCar}
+            keyExtractor={item => item?._id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalList}
+            ListEmptyComponent={() => renderEmptyList('cars')}
+          />
+        </View>
+      </ScrollView>
+
+      {/* MODALIZE: Profile Modal */}
+      <Modalize
+        ref={modalRef}
+        adjustToContentHeight
+        handleStyle={{ backgroundColor: '#73C2FB' }}
+        modalStyle={{ padding: 30 }}
+
+      >
+        <View style={styles.modalContent}>
+          <Image
+            source={
+              userData?.profile
+                ? { uri: userData.profile }
+                : require('../../assests/guest.jpg')
+            }
+            style={styles.modalProfileImage}
+          />
+          <Text style={styles.modalName}>{userData?.name || 'No Name'}</Text>
+          <Text style={styles.modalEmail}>{userData?.email || 'No Email'}</Text>
+        </View>
+      </Modalize>
+    </>
   );
 };
 
@@ -467,5 +496,27 @@ const styles = StyleSheet.create({
   },
   horizontalList: {
     paddingHorizontal: 16,
+  },
+  modalContent: {
+    alignItems: 'center',
+    paddingVertical: 20,
+    marginBottom:100
+  },
+  modalProfileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 15,
+  },
+  modalName: {
+    fontSize: 16,
+    fontFamily: FONTS.bold,
+    color: '#1F305E',
+    marginBottom: 5,
+  },
+  modalEmail: {
+    fontSize: 14,
+    color: 'gray',
+    fontFamily: FONTS.demiBold,
   },
 });

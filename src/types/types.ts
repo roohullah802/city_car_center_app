@@ -29,4 +29,6 @@ export type RootStackParamList = {
   pdfPicker: undefined;
   paymentSuccess: undefined;
   socialAuth: undefined;
+  carimages: undefined;
+  leaseHistory: undefined;
 };

@@ -18,6 +18,8 @@ import PaymentSuccessScreen from '../screens/Payments/PaymentSuccess';
 import SocialAuthScreen from '../screens/Auth/SocialAuth';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux.toolkit/store';
+import CarImages from '../screens/Others/CarImages';
+import LeaseHistoryScreen from '../screens/Lease/LeaseHistory';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -76,6 +78,14 @@ const AuthStack: React.FC = () => {
 
       <Stack.Screen name="socialAuth">
         {props => <SocialAuthScreen {...props} />}
+      </Stack.Screen>
+
+      <Stack.Screen name="carimages">
+        {props => <CarImages {...props} />}
+      </Stack.Screen>
+
+      <Stack.Screen name="leaseHistory">
+        {props => <LeaseHistoryScreen {...props} />}
       </Stack.Screen>
     </Stack.Navigator>
   );
