@@ -99,9 +99,9 @@ export default function LeaseHistoryScreen({ navigation }: any) {
                   style={styles.primaryBtn}
                   onPress={() =>
                     item.status === 'active'
-                      ? navigation.navigate('extendLease')
+                      ? navigation.navigate('extendLease', {id: item._id})
                       : item.status === 'expired'
-                      ? navigation.navigate('dateAndTime')
+                      ? navigation.navigate('dateAndTime', {carId: item.car})
                       : ''
                   }
                 >
