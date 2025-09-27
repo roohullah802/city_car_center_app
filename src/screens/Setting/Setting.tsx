@@ -76,14 +76,18 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
 
         {/* History */}
-        <Text style={styles.sectionTitle}>History</Text>
-        <View style={styles.card}>
-          <SettingsRow
-            icon="hourglass-outline"
-            label="Lease History"
-            onPress={() => navigation.navigate('leaseHistory')}
-          />
-        </View>
+        {isLoggedIn && (
+          <>
+            <Text style={styles.sectionTitle}>History</Text>
+            <View style={styles.card}>
+              <SettingsRow
+                icon="hourglass-outline"
+                label="Lease History"
+                onPress={() => navigation.navigate('leaseHistory')}
+              />
+            </View>
+          </>
+        )}
 
         {/* Helpful Desk */}
         <Text style={styles.sectionTitle}>Helpful Desk</Text>
