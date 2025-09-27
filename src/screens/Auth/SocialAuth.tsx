@@ -219,7 +219,7 @@ export default function SocialAuthScreen({ navigation }: any) {
 
           <SocialButton
             label="Guest"
-            icon={require('../../assests/guest.jpg')}
+            icon={require('../../assests/guest3.png')}
             onPress={handleGuest}
             height={buttonHeight}
             fontSize={buttonFont}

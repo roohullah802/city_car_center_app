@@ -41,8 +41,22 @@ export default function LeaseHistoryScreen({ navigation }: any) {
   const [query, setQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const { data: Leases } = useGetAllLeasesQuery(undefined);
-  const leases = Leases?.leases ?? [];
+  const { data: Leases, isLoading } = useGetAllLeasesQuery(undefined);
+  const leases = useMemo(()=> Leases?.leases || [],[Leases?.leases]);
+
+
+ 
+  const filteredLeases = useMemo(() => {
+    if (!query.trim()) return leases;
+    return leases.filter((lease: any) => {
+      const model = lease.carDetails?.[0]?.modelName?.toLowerCase() ?? '';
+      const brand = lease.carDetails?.[0]?.brand?.toLowerCase() ?? '';
+      return (
+        model.includes(query.toLowerCase()) ||
+        brand.includes(query.toLowerCase())
+      );
+    });
+  }, [leases, query]);
 
   const toggleExpand = useCallback((id: string) => {
     setExpandedId(cur => (cur === id ? null : id));
@@ -60,12 +74,12 @@ export default function LeaseHistoryScreen({ navigation }: any) {
         <View style={styles.cardHeader}>
           <View style={{ flex: 1 }}>
             <Text style={styles.unitText}>
-              {item.carDetails?.[0].modelName?.charAt(0).toUpperCase() +
-                item.carDetails?.[0].modelName?.slice(1)}
+              {item.carDetails?.[0]?.modelName?.charAt(0).toUpperCase() +
+                item.carDetails?.[0]?.modelName?.slice(1)}
             </Text>
             <Text style={styles.tenantText}>
-              {item.carDetails?.[0].brand?.charAt(0).toUpperCase() +
-                item.carDetails?.[0].brand?.slice(1)}
+              {item.carDetails?.[0]?.brand?.charAt(0).toUpperCase() +
+                item.carDetails?.[0]?.brand?.slice(1)}
             </Text>
           </View>
           <View style={styles.metaCol}>
@@ -99,9 +113,9 @@ export default function LeaseHistoryScreen({ navigation }: any) {
                   style={styles.primaryBtn}
                   onPress={() =>
                     item.status === 'active'
-                      ? navigation.navigate('extendLease', {id: item._id})
+                      ? navigation.navigate('extendLease', { id: item._id })
                       : item.status === 'expired'
-                      ? navigation.navigate('dateAndTime', {carId: item.car})
+                      ? navigation.navigate('dateAndTime', { carId: item.car })
                       : ''
                   }
                 >
@@ -146,7 +160,7 @@ export default function LeaseHistoryScreen({ navigation }: any) {
             <TextInput
               value={query}
               onChangeText={setQuery}
-              placeholder="Search leases by unit or tenant"
+              placeholder="Search leases by car model or brand"
               style={styles.searchInput}
               returnKeyType="search"
             />
@@ -157,16 +171,28 @@ export default function LeaseHistoryScreen({ navigation }: any) {
         </View>
 
         <View style={styles.listWrap}>
-          <FlatList
-            data={leases}
-            keyExtractor={item => item._id}
-            renderItem={renderLeaseCard}
-            numColumns={numColumns}
-            columnWrapperStyle={
-              isTablet ? { justifyContent: 'space-between' } : undefined
-            }
-            contentContainerStyle={{ paddingBottom: 40 }}
-          />
+          {isLoading ? (
+            <View style={styles.centered}>
+              <Text style={styles.loadingText}>Loading leases...</Text>
+            </View>
+          ) : filteredLeases.length === 0 ? (
+            <View style={styles.centered}>
+              <Text style={styles.loadingText}>
+                {query ? 'No leases found for your search.' : 'No leases available.'}
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={filteredLeases}
+              keyExtractor={item => item._id}
+              renderItem={renderLeaseCard}
+              numColumns={numColumns}
+              columnWrapperStyle={
+                isTablet ? { justifyContent: 'space-between' } : undefined
+              }
+              contentContainerStyle={{ paddingBottom: 40 }}
+            />
+          )}
         </View>
       </View>
     </SafeAreaView>

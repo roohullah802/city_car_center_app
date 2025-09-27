@@ -245,9 +245,9 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               source={
                 userData?.profile
                   ? { uri: userData.profile }
-                  : require('../../assests/guest.jpg')
+                  : require('../../assests/guest3.png')
               }
-              style={[styles.profileImage, isGuest ? {width:60, height:60} : '']}
+              style={[styles.profileImage]}
             />
           </TouchableOpacity>
         </View>
@@ -320,7 +320,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             source={
               userData?.profile
                 ? { uri: userData.profile }
-                : require('../../assests/guest.jpg')
+                : require('../../assests/guest3.png')
             }
             style={styles.modalProfileImage}
           />

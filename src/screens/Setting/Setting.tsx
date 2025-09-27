@@ -30,7 +30,7 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
   const avatarSource =
     isLoggedIn && userData?.profile
       ? { uri: userData.profile }
-      : require('../../assests/guest.jpg');
+      : require('../../assests/guest3.png');
 
   return (
     <SafeAreaView style={styles.container}>
