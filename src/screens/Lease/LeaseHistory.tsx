@@ -161,6 +161,7 @@ export default function LeaseHistoryScreen({ navigation }: any) {
               value={query}
               onChangeText={setQuery}
               placeholder="Search leases by car model or brand"
+              placeholderTextColor={'#6b7280'}
               style={styles.searchInput}
               returnKeyType="search"
             />

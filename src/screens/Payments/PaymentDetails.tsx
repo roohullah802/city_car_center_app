@@ -48,7 +48,7 @@ const PaymentDetails: React.FC<{ navigation: any; route: any }> = ({
       <View style={styles.paymentItem}>
         <View style={styles.paymentRow}>
           <Text style={styles.paymentId}>
-            {!item?.paymentId ? item?.paymentId : 'No ID'}
+            {item?.paymentId ? item?.paymentId[0] : 'No ID'}
           </Text>
           <Text style={styles.reason}>
             lease created from {formatDate(item.startDate)} to{' '}
@@ -57,24 +57,19 @@ const PaymentDetails: React.FC<{ navigation: any; route: any }> = ({
           <View style={styles.details}>
             <Text style={styles.date}>{formatDate(item.startDate)}</Text>
             <Text
-              style={[
-                styles.amount,
-                item.status === 'completed'
-                  ? styles.unSuccessText
-                  : styles.successText,
-              ]}
+              style={styles.amount}
             >
               ${item.totalAmount}
             </Text>
             <Text
               style={[
                 styles.status,
-                item.status === 'incomplete'
-                  ? styles.unsuccessStatus
-                  : styles.successStatus,
+                item.status === 'active'
+                  ? styles.successStatus
+                  : styles.unsuccessStatus,
               ]}
             >
-              {item.status}
+              {item.status === 'active' ? 'completed' : item.status === 'expired' ? 'completed' : ''}
             </Text>
           </View>
         </View>
@@ -196,6 +191,7 @@ const styles = StyleSheet.create({
   amount: {
     fontFamily: FONTS.demiBold,
     fontSize: RFValue(9),
+    color:'red'
   },
   status: {
     fontFamily: FONTS.demiBold,
