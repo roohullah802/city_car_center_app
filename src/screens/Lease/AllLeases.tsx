@@ -68,7 +68,7 @@ const AllLeases: React.FC<{ navigation: any }> = ({ navigation }) => {
     }, [refetch]),
   );
 
-  // Pull to refresh handler
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {

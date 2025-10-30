@@ -12,9 +12,9 @@ import {
 } from 'react-native';
 import {pick, types} from '@react-native-documents/picker'
 import { FONTS } from '../../fonts/fonts';
-import Toast from 'react-native-toast-message';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux.toolkit/store';
+import { showToast } from '../../folder/toastService';
 
 const { width } = Dimensions.get('window');
 
@@ -35,10 +35,7 @@ const VerifyYourselfScreen: React.FC<{navigation: any, route: any}> = ({navigati
       });
       setDrivingLicense(result[0]);
     } catch (err: any) {
-      Toast.show({
-        type:"error",
-        text1:"error file picker"
-      })
+      showToast('error file picker')
     }
   },[])
 

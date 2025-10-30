@@ -6,11 +6,10 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 const RootNavigator: React.FC = () => {
   return (
     <GestureHandlerRootView>
- <NavigationContainer>
+      <NavigationContainer>
         <AuthStack />
       </NavigationContainer>
     </GestureHandlerRootView>
-     
   );
 };
 

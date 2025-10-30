@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/types';
 import { useLogoutMutation } from '../../redux.toolkit/rtk/authApis';
+import { showToast } from '../../folder/toastService';
 
 const { width } = Dimensions.get('window');
 
@@ -50,6 +51,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
       const response = await logoutUser({}).unwrap();
       console.log(error);
       
+      
       if (response.success) {
         navigation.navigate('socialAuth');
         dispatch(clearUserData());
@@ -57,14 +59,8 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ visible, onClose }) => {
         dispatch(clearToken());
       }
       
-    } catch (error: any) {
-      console.log(error);
-      
-      Toast.show({
-        type: 'error',
-        text1: 'Error occured!',
-        text2:error.data.message
-      });
+    } catch (error: any) {   
+      showToast(error.data.message || error.message || 'Logout failed!')
       onClose();
     }
   };

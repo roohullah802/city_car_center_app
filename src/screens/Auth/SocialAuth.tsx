@@ -19,12 +19,12 @@ import {
   setToken,
   setUserData,
 } from '../../redux.toolkit/slices/userSlice';
-import Toast from 'react-native-toast-message';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useValidateTokenMutation } from '../../redux.toolkit/rtk/authApis';
 import { Modalize } from 'react-native-modalize';
 import { FONTS } from '../../fonts/fonts';
+import { showToast } from '../../folder/toastService';
 
 const guidelineBaseWidth = 414;
 const guidelineBaseHeight = 896;
@@ -89,12 +89,7 @@ export default function SocialAuthScreen({ navigation }: any) {
         }
       } catch (err: any) {
         console.log(err);
-        Toast.show({
-          type: 'error',
-          text1: 'Something went wrong!',
-          text2:
-            'Please check your internet connection or try another account.',
-        });
+        showToast('Please check your internet connection or try another account.')
       }
     },
     [navigation, dispatch],
@@ -144,16 +139,13 @@ export default function SocialAuthScreen({ navigation }: any) {
         } else {
           await AsyncStorage.removeItem('token');
           await AsyncStorage.setItem('userBiometric', 'false');
-          Alert.alert('Login Failed', 'User not found. Please login again.');
+          showToast('Login Failed User not found. Please login again.')
         }
       } catch (err) {
         await AsyncStorage.removeItem('token');
         await AsyncStorage.setItem('userBiometric', 'false');
         setShowFaceId(false);
-        Alert.alert(
-          'Login Failed',
-          'Invalid or expired session. Please login with google or apple',
-        );
+        showToast('Invalid or expired session. Please login with google or apple')
       }
     }
   };

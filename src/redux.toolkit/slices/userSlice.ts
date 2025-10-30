@@ -96,22 +96,16 @@ const userSlice = createSlice({
       state.isLoggedIn = false;
       state.isLoading = false;
       state.token = null;
-      state.favouriteCars = [];
       state.isGuest = false;
     },
 
     setLoggedIn(state, action: PayloadAction<boolean>) {
       state.isLoggedIn = action.payload;
     },
-
-    // addFavCar(state, action: PayloadAction<FavCar>) {
-    //   const car = action.payload;
-    //   const existCar = state.favouriteCars.find(item => item._id === car._id);
-    //   if (!existCar) {
-    //     state.favouriteCars.push(car);
-    //   }
-    // },
-
+    clearGuest(state){
+      state.isGuest = false
+      state.userData = null
+    },
     removeFavCar(state, action: PayloadAction<string>) {
       state.favouriteCars = state.favouriteCars.filter(
         item => item._id !== action.payload,
@@ -145,6 +139,7 @@ export const {
   setToken,
   clearToken,
   continueAsGuest,
+  clearGuest
 } = userSlice.actions;
 
 export default userSlice.reducer;

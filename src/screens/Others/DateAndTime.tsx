@@ -11,9 +11,9 @@ import {
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useStripe } from '@stripe/stripe-react-native';
 import { useCreatePaymentIntendMutation } from '../../redux.toolkit/rtk/payment';
-import Toast from 'react-native-toast-message';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux.toolkit/store';
+import { showToast } from '../../folder/toastService';
 
 const DateAndTimeScreen: React.FC<{
   navigation: any;
@@ -30,7 +30,7 @@ const DateAndTimeScreen: React.FC<{
   const [createPaymentIntent] = useCreatePaymentIntendMutation();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
-  // Return date = pickUpDate + 6 days
+
   const returnDate = useMemo(() => {
     const result = new Date(pickUpDate);
     if (isNaN(result.getTime())) return new Date();
@@ -38,18 +38,18 @@ const DateAndTimeScreen: React.FC<{
     return result;
   }, [pickUpDate]);
 
-  // Date picker handler
+
   const onChangeDate = useCallback(
   (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (Platform.OS !== 'ios') setShowDatePicker(false);
 
     let currentDate: Date | undefined;
 
-    // iOS: use selectedDate
+
     if (Platform.OS === 'ios') {
       currentDate = selectedDate;
     } else {
-      // Android: use event.nativeEvent.timestamp
+
       if (event.type === 'set' && event.nativeEvent.timestamp) {
         currentDate = new Date(event.nativeEvent.timestamp);
       }
@@ -64,7 +64,6 @@ const DateAndTimeScreen: React.FC<{
 
 
 
-  // Format date safely
   const formattedDate = (date: Date) => {
     if (!date || isNaN(date.getTime())) return '';
     return date.toLocaleDateString('en-US', {
@@ -74,18 +73,12 @@ const DateAndTimeScreen: React.FC<{
     });
   };
 
-  // Handle payment
   const handlePress = async () => {
     setLoading(true);
     try {
-      // 1. Request PaymentIntent from backend
       const validCarId = carId.replace(/"/g, '');
       if (!isLoggedIn) {
-        Toast.show({
-          type:"error",
-          text1: 'Error!',
-          text2:'please login user first'
-        })
+        showToast('please login user first')
       }
       const response = await createPaymentIntent({
         id: validCarId,
@@ -97,24 +90,17 @@ const DateAndTimeScreen: React.FC<{
       if (!clientSecret) throw new Error('No client secret returned');
       
 
-      // 2. Initialize payment sheet
       const { error: initError } = await initPaymentSheet({
         merchantDisplayName: 'City Car Center',
         paymentIntentClientSecret: clientSecret,
       });
       if (initError) throw initError;
 
-      // 3. Present payment sheet
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) throw presentError;
       navigation.navigate('paymentSuccess');
     } catch (error: any) {
-      
-      Toast.show({
-        type:"error",
-        text1: 'Error occured!',
-        text2:error.data.message
-      })
+      showToast(error.data.message || error.message || 'Error Occured!')
     } finally {
       setLoading(false);
     }

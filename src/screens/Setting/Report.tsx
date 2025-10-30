@@ -13,9 +13,9 @@ import {
 import { FONTS } from '../../fonts/fonts';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { usePostReportIssueMutation } from '../../redux.toolkit/rtk/apis';
-import Toast from 'react-native-toast-message';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux.toolkit/store';
+import { showToast } from '../../folder/toastService';
 
 const { width } = Dimensions.get('window');
 
@@ -41,10 +41,7 @@ const ReportIssueScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
 
     if (!isValid) {
-      Toast.show({
-        type: 'error',
-        text1: 'Please enter a valid email and description.',
-      });
+      showToast('Please enter a valid email and description.')
       return;
     }
 
@@ -52,22 +49,13 @@ const ReportIssueScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       const userId = userData?.id;
       const payload = { userId, description, email };
       await postReportIssue(payload).unwrap();
-
-      Toast.show({
-        type: 'success',
-        text1: 'Issue reported successfully!',
-        text2: 'Our team will review it shortly.',
-      });
+      showToast('Issue reported successfully! Our team will review it shortly.')
 
       setDescription('');
       setEmail('');
       navigation.goBack();
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Failed to report issue',
-        text2: 'Please try again later.',
-      });
+      showToast('Failed to report issue')
     }
   }, [description, email, postReportIssue, userData, isLoggedIn, isValid, navigation]);
 

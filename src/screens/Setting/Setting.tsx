@@ -13,8 +13,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import LogoutModal from '../Auth/Logout';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { FONTS } from '../../fonts/fonts';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux.toolkit/store';
+import { clearGuest } from '../../redux.toolkit/slices/userSlice';
 
 const { width } = Dimensions.get('window');
 
@@ -24,6 +25,7 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { userData, isLoggedIn } = useSelector(
     (state: RootState) => state.user,
   );
+  const dispatch = useDispatch();
 
   const handleVisible = () => setIsVisible(prev => !prev);
 
@@ -65,7 +67,10 @@ const Settings: React.FC<{ navigation: any }> = ({ navigation }) => {
           {!isLoggedIn && (
             <TouchableOpacity
               style={styles.loginButton}
-              onPress={() => navigation.navigate('socialAuth')}
+              onPress={() => {
+                navigation.navigate('socialAuth')
+                dispatch(clearGuest())
+              }}
               activeOpacity={0.7}
               accessibilityLabel="Login"
             >
